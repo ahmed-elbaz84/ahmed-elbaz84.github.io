@@ -243,7 +243,49 @@ function blank(){return {rate:47.6,cats:['أكل وشرب','مصاريف الب�
 if(!S||!S.periods) S=blank();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 ['cats','fixedCats','plans','periods','debts'].forEach(k=>{if(!S[k])S[k]=[]});
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(fromCloud){if(!fromCloud)S._ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(!fromCloud)SYNC.push()}
+
+/* ---------- sync between phone and laptop (Firebase, the owner's own project) ---------- */
+const FB_CONFIG=null; // filled with the owner's Firebase web config to turn sync on
+const FB_V='10.12.2';
+const SYNC={on:!!FB_CONFIG,ready:false,user:null,status:'',last:0,timer:null,pending:null,doc:null,unsub:null,
+  load(){if(!this.on)return;const urls=['app','auth','firestore'].map(n=>`https://www.gstatic.com/firebasejs/${FB_V}/firebase-${n}-compat.js`);
+    const next=()=>{const u=urls.shift();if(!u)return this.init();const sc=document.createElement('script');sc.src=u;sc.onload=next;sc.onerror=()=>{this.status='مفيش نت، هتتزامن لما النت يرجع';rerenderSettings()};document.head.appendChild(sc)};next()},
+  init(){firebase.initializeApp(FB_CONFIG);this.ready=true;
+    firebase.auth().onAuthStateChanged(u=>{this.user=u;if(this.unsub){this.unsub();this.unsub=null}
+      if(u){this.doc=firebase.firestore().collection('users').doc(u.uid).collection('app').doc('state');this.status='بيتزامن…';
+        this.unsub=this.doc.onSnapshot(sn=>this.onRemote(sn),e=>{this.status='مشكلة في المزامنة: '+e.code;rerenderSettings()})}
+      else this.status='';rerenderSettings()})},
+  onRemote(sn){const d=sn.exists?sn.data():null;const rts=d?d.ts:0,lts=S._ts||0;
+    if(!d||lts>rts){this.pushNow();return}
+    if(rts>lts){let nd;try{nd=JSON.parse(d.json)}catch(e){return}
+      if(sheetOpen()||typing()){this.pending=nd;return}this.apply(nd)}
+    this.last=Date.now();this.status='متزامن';rerenderSettings()},
+  apply(nd){S=nd;['cats','fixedCats','plans','periods','debts'].forEach(k=>{if(!S[k])S[k]=[]});
+    if(!S.periods.find(p=>p.id===curId))curId=(S.periods[S.periods.length-1]||{}).id;save(true);render();this.status='متزامن';this.last=Date.now()},
+  flush(){if(this.pending){const nd=this.pending;this.pending=null;this.apply(nd)}},
+  push(){if(!this.user)return;clearTimeout(this.timer);this.status='بيتزامن…';this.timer=setTimeout(()=>this.pushNow(),1200)},
+  pushNow(){if(!this.user||!this.doc)return;const ts=S._ts||Date.now();S._ts=ts;
+    this.doc.set({json:JSON.stringify(S),ts,device:navigator.userAgent.slice(0,80)}).then(()=>{this.last=Date.now();this.status='متزامن';rerenderSettings()}).catch(e=>{this.status='هتتزامن لما النت يرجع';rerenderSettings()})}
+};
+const sheetOpen=()=>!!document.querySelector('#overlay .sheet');
+const typing=()=>{const a=document.activeElement;return a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)};
+function rerenderSettings(){if(tab==='settings'&&!typing())render()}
+function syncCard(){
+  if(!SYNC.on) return `<div class="card" style="display:flex;flex-direction:column;gap:6px"><b>المزامنة بين الموبايل واللابتوب</b><p class="note" style="margin:0">لسه مش متفعلة. أول ما تتفعل هتسجّل دخول بإيميلك على الجهازين، وأي حاجة تكتبها هنا تظهر هناك.</p></div>`;
+  if(!SYNC.ready) return `<div class="card"><b>المزامنة</b><p class="note" style="margin:0">${SYNC.status||'بيحمّل…'}</p></div>`;
+  if(SYNC.user) return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><b>المزامنة شغالة ✓</b>
+    <p class="note" style="margin:0">داخل بـ ${esc(SYNC.user.email)} · ${esc(SYNC.status)}${SYNC.last?' · آخر مرة '+new Date(SYNC.last).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}):''}</p>
+    <p class="note" style="margin:0">ادخل بنفس الإيميل والباسورد على الجهاز التاني.</p>
+    <button class="btn ghost full" data-act="syncOut">خروج من المزامنة على الجهاز ده</button></div>`;
+  return `<div class="card" style="display:flex;flex-direction:column;gap:10px"><b>المزامنة بين الموبايل واللابتوب</b>
+    <p class="note" style="margin:0">ادخل بنفس الإيميل والباسورد على الموبايل واللابتوب، وأي حاجة تكتبها في واحد تظهر في التاني.</p>
+    <div class="field"><label for="syEmail">الإيميل</label><input id="syEmail" type="email" autocomplete="username" dir="ltr"></div>
+    <div class="field"><label for="syPass">الباسورد (6 حروف أو أرقام على الأقل)</label><input id="syPass" type="password" autocomplete="current-password" dir="ltr"></div>
+    <div class="btnrow"><button class="btn" data-act="syncIn">دخول</button><button class="btn ghost" data-act="syncNew">أول مرة؟ اعمل حساب</button></div>
+    <p class="note" style="margin:0">${esc(SYNC.status)}</p></div>`;
+}
+const AUTH_ERR={'auth/invalid-email':'الإيميل مكتوب غلط','auth/missing-password':'اكتب الباسورد','auth/weak-password':'الباسورد لازم 6 حروف أو أرقام على الأقل','auth/email-already-in-use':'الإيميل ده عامل حساب قبل كده، دوس «دخول»','auth/invalid-credential':'الإيميل أو الباسورد غلط','auth/wrong-password':'الباسورد غلط','auth/user-not-found':'مفيش حساب بالإيميل ده، دوس «أول مرة؟»','auth/network-request-failed':'مفيش نت','auth/too-many-requests':'محاولات كتير، استنى شوية وجرّب تاني'};
 
 let curId=(S.periods[S.periods.length-1]||{}).id, tab='home', filter='الكل';
 const UNLOCKED=new Set();
@@ -523,6 +565,10 @@ function settings(){
     <div class="btnrow"><div class="field" style="flex:2"><input id="newFixedCat" placeholder="نوع جديد، مثلاً: تأمين"></div><button class="btn" data-act="addCat" data-list="fixedCats" style="flex:1">أضف</button></div>
   </section>
   <section>
+    <h2>المزامنة</h2>
+    ${syncCard()}
+  </section>
+  <section>
     <h2>البيانات</h2>
     <div class="card" style="display:flex;flex-direction:column;gap:8px">
       <p class="note" style="margin:0">أرقامك متسجلة على الجهاز ده بس. اعمل نسخة احتياطية كل فترة واحفظها عندك، وتقدر ترجّعها على أي جهاز.</p>
@@ -634,7 +680,7 @@ function openSheet(kind,o){
   }
   $('#overlay').innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" dir="rtl"><div><div class="grab"></div>${html}</div></div>`;
 }
-function closeSheet(){$('#overlay').innerHTML=''}
+function closeSheet(){$('#overlay').innerHTML='';setTimeout(()=>SYNC.flush(),50)}
 function toast(t){const el=document.createElement('div');el.className='toast';el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),2400)}
 const numv=id=>parseFloat(String(($(id)||{}).value||'').replace(/,/g,''))||0;
 
@@ -766,6 +812,10 @@ document.addEventListener('click',e=>{
   if(a==='addCat'){const list=t.dataset.list;const inp=$(list==='cats'?'#newCat':'#newFixedCat');const v=inp.value.trim();if(!v)return;if(!S[list].includes(v))S[list].push(v);save();render();toast('اتضاف النوع');return}
   if(a==='fresh'){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='متأكد؟ اضغط تاني وهيتمسح كل اللي فات';t.classList.add('danger');return}
     S={rate:S.rate,cats:S.cats,fixedCats:S.fixedCats,plans:[],debts:[],periods:[]};curId=null;save();tab='home';render();openSheet('newPeriod');return}
+  if(a==='syncIn'||a==='syncNew'){const em=$('#syEmail').value.trim(),pw=$('#syPass').value;
+    const fn=a==='syncIn'?firebase.auth().signInWithEmailAndPassword(em,pw):firebase.auth().createUserWithEmailAndPassword(em,pw);
+    SYNC.status='لحظة…';fn.then(()=>toast('دخلت، والمزامنة شغالة')).catch(e=>{SYNC.status=AUTH_ERR[e.code]||('حصلت مشكلة: '+e.code);render()});return}
+  if(a==='syncOut'){firebase.auth().signOut().then(()=>toast('خرجت من المزامنة على الجهاز ده'));return}
   if(a==='backup'){const blob=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const u=URL.createObjectURL(blob);const l=document.createElement('a');l.href=u;l.download='masrofat-elbeit-backup-'+TODAY+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('اتنزلت النسخة الاحتياطية');return}
   if(a==='restore'){$('#restoreFile').click();return}
   if(a==='reset'){if(S.periods.length&&!t.dataset.sure){t.dataset.sure='1';t.textContent='متأكد؟ أرقامك هتتمسح. اضغط تاني';return}S=sample();curId=S.periods[S.periods.length-1].id;save();tab='home';render();toast('رجعت الأرقام المثال');return}
@@ -783,6 +833,8 @@ document.addEventListener('input',e=>{const id=e.target.id;
   if(id==='salAmt'||id==='salRate')updSal();
   if(id==='pAmt'||id==='pCount'){const n=Math.round(numv('#pCount')),st=$('#pStart').value||TODAY.slice(0,7);$('#pSum').innerHTML=`<span>الإجمالي${n?' · آخر شهر '+keyLabel(shift(st,n-1)):''}</span><b class="num">${fmt(numv('#pAmt')*n)} ج.م</b>`}
 });
+document.addEventListener('focusout',()=>setTimeout(()=>{if(!typing()&&!sheetOpen())SYNC.flush()},300));
+SYNC.load();
 $('#fab').onclick=()=>openSheet(tab==='fixed'?'fixed':'daily');
 $('#mPrev').onclick=()=>{const p=prevP(P());if(p){curId=p.id;render()}};
 $('#mNext').onclick=()=>{const p=nextP(P());if(p){curId=p.id;render()}};
