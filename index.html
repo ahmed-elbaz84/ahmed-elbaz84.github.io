@@ -282,7 +282,7 @@ const SYNC={on:!!FB_CONFIG,ready:false,user:null,status:'',last:0,timer:null,pen
 };
 const sheetOpen=()=>!!document.querySelector('#overlay .sheet');
 const typing=()=>{const a=document.activeElement;return a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)};
-function rerenderSettings(){if(tab==='settings'&&!typing())render()}
+function rerenderSettings(){if((tab==='settings'||!P())&&!typing())render()}
 function syncCard(){
   if(!SYNC.on) return `<div class="card" style="display:flex;flex-direction:column;gap:6px"><b>المزامنة بين الموبايل واللابتوب</b><p class="note" style="margin:0">لسه مش متفعلة. أول ما تتفعل هتسجّل دخول بإيميلك على الجهازين، وأي حاجة تكتبها هنا تظهر هناك.</p></div>`;
   if(!SYNC.ready) return `<div class="card"><b>المزامنة</b><p class="note" style="margin:0">${SYNC.status||'بيحمّل…'}</p></div>`;
@@ -290,13 +290,19 @@ function syncCard(){
     <p class="note" style="margin:0">داخل بـ ${esc(SYNC.user.email)} · ${esc(SYNC.status)}${SYNC.last?' · آخر مرة '+new Date(SYNC.last).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}):''}</p>
     <p class="note" style="margin:0">ادخل بنفس الإيميل والباسورد على الجهاز التاني.</p>
     <button class="btn ghost full" data-act="syncOut">خروج من المزامنة على الجهاز ده</button></div>`;
-  return `<div class="card" style="display:flex;flex-direction:column;gap:10px"><b>المزامنة بين الموبايل واللابتوب</b>
-    <p class="note" style="margin:0">ادخل بنفس الإيميل والباسورد على الموبايل واللابتوب، وأي حاجة تكتبها في واحد تظهر في التاني.</p>
-    <div class="field"><label for="syEmail">الإيميل</label><input id="syEmail" type="email" autocomplete="username" dir="ltr"></div>
-    <div class="field"><label for="syPass">الباسورد (6 حروف أو أرقام على الأقل)</label><input id="syPass" type="password" autocomplete="current-password" dir="ltr"></div>
-    <div class="btnrow"><button class="btn" data-act="syncIn">دخول</button><button class="btn ghost" data-act="syncNew">أول مرة؟ اعمل حساب</button></div>
+  return authForm('المزامنة بين الموبايل واللابتوب','ادخل بنفس الإيميل والباسورد على الموبايل واللابتوب، وأي حاجة تكتبها في واحد تظهر في التاني.');
+}
+function authForm(title,intro,skip){
+  return `<div class="card" style="display:flex;flex-direction:column;gap:10px;text-align:right"><b>${title}</b>
+    <p class="note" style="margin:0">${intro}</p>
+    <div class="field"><label for="syEmail">الإيميل بتاعك</label><input id="syEmail" type="email" autocomplete="username" dir="ltr" placeholder="name@gmail.com"></div>
+    <div class="field"><label for="syPass">باسورد تختاره (6 حروف أو أرقام على الأقل)</label><input id="syPass" type="password" autocomplete="current-password" dir="ltr"></div>
+    <div class="btnrow"><button class="btn" data-act="syncNew">اعمل حساب جديد</button><button class="btn ghost" data-act="syncIn">عندي حساب، ادخل</button></div>
+    <button class="chip" data-act="syncForgot" style="align-self:flex-start">نسيت الباسورد</button>
+    ${skip?`<button class="chip" data-act="accSkip" style="align-self:flex-start">كمّل من غير حساب (الأرقام تفضل على الموبايل ده بس)</button>`:''}
     <p class="note" style="margin:0">${esc(SYNC.status)}</p></div>`;
 }
+let ACC_SKIP=false; try{ACC_SKIP=localStorage.getItem('masrofat_acc_skip')==='1'}catch(e){}
 const AUTH_ERR={'auth/invalid-email':'الإيميل مكتوب غلط','auth/missing-password':'اكتب الباسورد','auth/weak-password':'الباسورد لازم 6 حروف أو أرقام على الأقل','auth/email-already-in-use':'الإيميل ده عامل حساب قبل كده، دوس «دخول»','auth/invalid-credential':'الإيميل أو الباسورد غلط','auth/wrong-password':'الباسورد غلط','auth/user-not-found':'مفيش حساب بالإيميل ده، دوس «أول مرة؟»','auth/network-request-failed':'مفيش نت','auth/too-many-requests':'محاولات كتير، استنى شوية وجرّب تاني'};
 
 let curId=(S.periods[S.periods.length-1]||{}).id, tab='home', filter='الكل';
@@ -397,6 +403,10 @@ function installSteps(){
 
 /* ---------- views ---------- */
 function onboarding(){
+  if(SYNC.on&&!SYNC.user&&!ACC_SKIP){
+    if(!SYNC.ready) return `<div class="onb card"><h2>أهلاً بيك في «مصروفات البيت»</h2><p class="note" style="margin:0">${esc(SYNC.status)||'لحظة…'}</p><button class="chip" data-act="accSkip">كمّل من غير حساب</button></div>`;
+    return `<div class="onb"><h2>أهلاً بيك في «مصروفات البيت»</h2>${authForm('احفظ أرقامك على إيميلك','اعمل حساب بإيميلك وباسورد تختاره. أرقامك هتبقى خاصة بيك انت بس، ولو غيّرت الموبايل أو فتحت من جهاز تاني، تدخل بنفس الإيميل والباسورد وتلاقي أرقامك.',true)}</div>`;
+  }
   return `<div class="onb card">
     <h2>ابدأ حسابك من النهارده</h2>
     <p class="note" style="margin:0">سجّل المرتب ويوم ما نزل، واليوم ده هيبقى بداية الشهر. لما المرتب الجاي ينزل، الشهر ده بيتقفل لوحده وتقدر ترجعله في أي وقت.</p>
@@ -866,6 +876,9 @@ document.addEventListener('click',e=>{
   if(a==='syncIn'||a==='syncNew'){const em=$('#syEmail').value.trim(),pw=$('#syPass').value;
     const fn=a==='syncIn'?firebase.auth().signInWithEmailAndPassword(em,pw):firebase.auth().createUserWithEmailAndPassword(em,pw);
     SYNC.status='لحظة…';fn.then(()=>toast('دخلت، والمزامنة شغالة')).catch(e=>{SYNC.status=AUTH_ERR[e.code]||('حصلت مشكلة: '+e.code);render()});return}
+  if(a==='syncForgot'){const em=$('#syEmail').value.trim();if(!em){toast('اكتب إيميلك الأول');return}
+    firebase.auth().sendPasswordResetEmail(em).then(()=>toast('بعتنالك رسالة على الإيميل تغيّر منها الباسورد')).catch(e=>{SYNC.status=AUTH_ERR[e.code]||('حصلت مشكلة: '+e.code);render()});return}
+  if(a==='accSkip'){ACC_SKIP=true;try{localStorage.setItem('masrofat_acc_skip','1')}catch(e){}render();return}
   if(a==='syncOut'){firebase.auth().signOut().then(()=>toast('خرجت من المزامنة على الجهاز ده'));return}
   if(a==='install'){if(INSTALL_EVT){INSTALL_EVT.prompt();INSTALL_EVT.userChoice.finally(()=>{INSTALL_EVT=null;render()});return}openSheet('install');return}
   if(a==='installNow'){if(INSTALL_EVT){INSTALL_EVT.prompt();INSTALL_EVT.userChoice.finally(()=>{INSTALL_EVT=null;closeSheet();render()})}return}
