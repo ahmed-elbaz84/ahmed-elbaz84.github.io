@@ -260,25 +260,55 @@ function save(fromCloud){if(!fromCloud)S._ts=Date.now();try{localStorage.setItem
 /* ---------- sync between phone and laptop (Firebase, the owner's own project) ---------- */
 const FB_CONFIG=null; // filled with the owner's Firebase web config to turn sync on
 const FB_V='10.12.2';
-const SYNC={on:!!FB_CONFIG,ready:false,user:null,status:'',last:0,timer:null,pending:null,doc:null,unsub:null,
+/* End-to-end encryption: data is locked with a key made from the user's own password on the device.
+   Only scrambled text reaches Firebase, so the project owner cannot read anyone's numbers. */
+const CRYPT={
+  b64:buf=>btoa(String.fromCharCode(...new Uint8Array(buf))),
+  unb64:s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),
+  async derive(pw,uid){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode('masrofat:'+uid),iterations:210000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},true,['encrypt','decrypt'])},
+  async saveKey(uid,key){const raw=await crypto.subtle.exportKey('raw',key);try{localStorage.setItem('masrofat_key_'+uid,this.b64(raw))}catch(e){}},
+  async loadKey(uid){let r=null;try{r=localStorage.getItem('masrofat_key_'+uid)}catch(e){}if(!r)return null;
+    return crypto.subtle.importKey('raw',this.unb64(r),{name:'AES-GCM'},false,['encrypt','decrypt'])},
+  forget(uid){try{localStorage.removeItem('masrofat_key_'+uid)}catch(e){}},
+  async enc(key,text){const iv=crypto.getRandomValues(new Uint8Array(12));const c=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(text));return {iv:this.b64(iv),enc:this.b64(c)}},
+  async dec(key,d){const t=await crypto.subtle.decrypt({name:'AES-GCM',iv:this.unb64(d.iv)},key,this.unb64(d.enc));return new TextDecoder().decode(t)}
+};
+let PENDING_PW=null;
+const SYNC={on:!!FB_CONFIG,ready:false,user:null,key:null,status:'',last:0,timer:null,pending:null,doc:null,unsub:null,locked:false,
   load(){if(!this.on)return;const urls=['app','auth','firestore'].map(n=>`https://www.gstatic.com/firebasejs/${FB_V}/firebase-${n}-compat.js`);
     const next=()=>{const u=urls.shift();if(!u)return this.init();const sc=document.createElement('script');sc.src=u;sc.onload=next;sc.onerror=()=>{this.status='مفيش نت، هتتزامن لما النت يرجع';rerenderSettings()};document.head.appendChild(sc)};next()},
   init(){firebase.initializeApp(FB_CONFIG);this.ready=true;
-    firebase.auth().onAuthStateChanged(u=>{this.user=u;if(this.unsub){this.unsub();this.unsub=null}
-      if(u){this.doc=firebase.firestore().collection('users').doc(u.uid).collection('app').doc('state');this.status='بيتزامن…';
-        this.unsub=this.doc.onSnapshot(sn=>this.onRemote(sn),e=>{this.status='مشكلة في المزامنة: '+e.code;rerenderSettings()})}
-      else this.status='';rerenderSettings()})},
-  onRemote(sn){const d=sn.exists?sn.data():null;const rts=d?d.ts:0,lts=S._ts||0;
-    if(!d||lts>rts){this.pushNow();return}
-    if(rts>lts){let nd;try{nd=JSON.parse(d.json)}catch(e){return}
+    firebase.auth().onAuthStateChanged(u=>this.onUser(u))},
+  async onUser(u){if(this.unsub){this.unsub();this.unsub=null}this.key=null;this.locked=false;
+    if(!u){this.user=null;this.status='';rerenderSettings();return}
+    let key=null;
+    if(PENDING_PW){key=await CRYPT.derive(PENDING_PW,u.uid);PENDING_PW=null;await CRYPT.saveKey(u.uid,key)}
+    else key=await CRYPT.loadKey(u.uid);
+    if(!key){this.status='ادخل تاني بالإيميل والباسورد';await firebase.auth().signOut();return}
+    this.user=u;this.key=key;
+    this.doc=firebase.firestore().collection('users').doc(u.uid).collection('app').doc('state');this.status='بيتزامن…';
+    this.unsub=this.doc.onSnapshot(sn=>this.onRemote(sn),e=>{this.status='مشكلة في المزامنة: '+e.code;rerenderSettings()});
+    rerenderSettings()},
+  async onRemote(sn){const d=sn.exists?sn.data():null;const rts=d?d.ts:0,lts=S._ts||0;
+    if(sn.metadata&&sn.metadata.hasPendingWrites)return;
+    if(!d||!d.enc||lts>rts){this.pushNow();return}
+    if(rts>lts){let nd;
+      try{nd=JSON.parse(await CRYPT.dec(this.key,d))}
+      catch(e){ // locked with an older password (after "forgot password")
+        if(S.periods.length){this.pushNow();this.status='اتقفلت أرقامك بالباسورد الجديد';rerenderSettings();return}
+        this.locked=true;this.status='أرقامك اللي على النت مقفولة بالباسورد القديم. ادخل بالباسورد القديم من جهاز عليه أرقامك.';rerenderSettings();return}
       if(sheetOpen()||typing()){this.pending=nd;return}this.apply(nd)}
     this.last=Date.now();this.status='متزامن';rerenderSettings()},
   apply(nd){S=nd;['cats','fixedCats','plans','periods','debts'].forEach(k=>{if(!S[k])S[k]=[]});
     if(!S.periods.find(p=>p.id===curId))curId=(S.periods[S.periods.length-1]||{}).id;save(true);render();this.status='متزامن';this.last=Date.now()},
   flush(){if(this.pending){const nd=this.pending;this.pending=null;this.apply(nd)}},
-  push(){if(!this.user)return;clearTimeout(this.timer);this.status='بيتزامن…';this.timer=setTimeout(()=>this.pushNow(),1200)},
-  pushNow(){if(!this.user||!this.doc)return;const ts=S._ts||Date.now();S._ts=ts;
-    this.doc.set({json:JSON.stringify(S),ts,device:navigator.userAgent.slice(0,80)}).then(()=>{this.last=Date.now();this.status='متزامن';rerenderSettings()}).catch(e=>{this.status='هتتزامن لما النت يرجع';rerenderSettings()})}
+  push(){if(!this.user||this.locked)return;clearTimeout(this.timer);this.status='بيتزامن…';this.timer=setTimeout(()=>this.pushNow(),1200)},
+  async pushNow(){if(!this.user||!this.doc||!this.key||this.locked)return;const ts=S._ts||Date.now();S._ts=ts;
+    try{const e=await CRYPT.enc(this.key,JSON.stringify(S));
+      await this.doc.set({v:2,iv:e.iv,enc:e.enc,ts});this.last=Date.now();this.status='متزامن'}
+    catch(err){this.status='هتتزامن لما النت يرجع'}
+    rerenderSettings()}
 };
 const sheetOpen=()=>!!document.querySelector('#overlay .sheet');
 const typing=()=>{const a=document.activeElement;return a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)};
@@ -300,6 +330,7 @@ function authForm(title,intro,skip){
     <div class="btnrow"><button class="btn" data-act="syncNew">اعمل حساب جديد</button><button class="btn ghost" data-act="syncIn">عندي حساب، ادخل</button></div>
     <button class="chip" data-act="syncForgot" style="align-self:flex-start">نسيت الباسورد</button>
     ${skip?`<button class="chip" data-act="accSkip" style="align-self:flex-start">كمّل من غير حساب (الأرقام تفضل على الموبايل ده بس)</button>`:''}
+    <p class="note" style="margin:0">🔒 أرقامك بتتقفل على موبايلك بالباسورد بتاعك قبل ما تتحفظ، فمحدش يقدر يقراها غيرك، ولا حتى صاحب البرنامج. عشان كده لو نسيت الباسورد، أرقامك اللي على النت مش هترجع إلا من جهاز لسه عليه أرقامك.</p>
     <p class="note" style="margin:0">${esc(SYNC.status)}</p></div>`;
 }
 let ACC_SKIP=false; try{ACC_SKIP=localStorage.getItem('masrofat_acc_skip')==='1'}catch(e){}
@@ -874,12 +905,13 @@ document.addEventListener('click',e=>{
   if(a==='fresh'){if(!t.dataset.sure){t.dataset.sure='1';t.textContent='متأكد؟ اضغط تاني وهيتمسح كل اللي فات';t.classList.add('danger');return}
     S={rate:S.rate,cats:S.cats,fixedCats:S.fixedCats,plans:[],debts:[],periods:[]};curId=null;save();tab='home';render();openSheet('newPeriod');return}
   if(a==='syncIn'||a==='syncNew'){const em=$('#syEmail').value.trim(),pw=$('#syPass').value;
+    PENDING_PW=pw;
     const fn=a==='syncIn'?firebase.auth().signInWithEmailAndPassword(em,pw):firebase.auth().createUserWithEmailAndPassword(em,pw);
-    SYNC.status='لحظة…';fn.then(()=>toast('دخلت، والمزامنة شغالة')).catch(e=>{SYNC.status=AUTH_ERR[e.code]||('حصلت مشكلة: '+e.code);render()});return}
+    SYNC.status='لحظة…';fn.then(()=>toast('دخلت، وأرقامك محفوظة ومقفولة بالباسورد بتاعك')).catch(e=>{PENDING_PW=null;SYNC.status=AUTH_ERR[e.code]||('حصلت مشكلة: '+e.code);render()});return}
   if(a==='syncForgot'){const em=$('#syEmail').value.trim();if(!em){toast('اكتب إيميلك الأول');return}
     firebase.auth().sendPasswordResetEmail(em).then(()=>toast('بعتنالك رسالة على الإيميل تغيّر منها الباسورد')).catch(e=>{SYNC.status=AUTH_ERR[e.code]||('حصلت مشكلة: '+e.code);render()});return}
   if(a==='accSkip'){ACC_SKIP=true;try{localStorage.setItem('masrofat_acc_skip','1')}catch(e){}render();return}
-  if(a==='syncOut'){firebase.auth().signOut().then(()=>toast('خرجت من المزامنة على الجهاز ده'));return}
+  if(a==='syncOut'){if(SYNC.user)CRYPT.forget(SYNC.user.uid);firebase.auth().signOut().then(()=>toast('خرجت من المزامنة على الجهاز ده'));return}
   if(a==='install'){if(INSTALL_EVT){INSTALL_EVT.prompt();INSTALL_EVT.userChoice.finally(()=>{INSTALL_EVT=null;render()});return}openSheet('install');return}
   if(a==='installNow'){if(INSTALL_EVT){INSTALL_EVT.prompt();INSTALL_EVT.userChoice.finally(()=>{INSTALL_EVT=null;closeSheet();render()})}return}
   if(a==='installHide'){INSTALL_HIDE=true;try{localStorage.setItem('masrofat_install_hide','1')}catch(e){}render();return}
