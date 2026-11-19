@@ -398,8 +398,10 @@ function home(){
       <div class="lbl" style="margin-top:4px">من ${dshort(p.start)} لحد ${dshort(c.end)}${closed?'':' (متوقع)'}</div></div>
       <div class="row">
         <div class="tap" data-act="goMoney"><span>المرتب ✎</span><b>${p.salary.cur==='USD'?'$'+fmt(p.salary.amount):fmt(p.salary.amount)+' ج'}</b></div>
-        <div><span>اتحوّل</span><b>$${fmt(c.transUSD)}</b></div>
-        <div><span>لسه ما اتحوّلش</span><b>$${fmt(c.usdLeft)}</b></div>
+        ${p.salary.cur==='USD'?`<div><span>اتحوّل</span><b>$${fmt(c.transUSD)}</b></div>
+        <div><span>لسه ما اتحوّلش</span><b>$${fmt(c.usdLeft)}</b></div>`
+        :`<div><span>الأساسية</span><b>${fmt(c.fixedAll)} ج</b></div>
+        <div><span>اليومية</span><b>${fmt(c.daily)} ج</b></div>`}
       </div>
       ${closed?'':`<button class="btn usd" data-open="newPeriod" style="background:var(--card);color:var(--accent)">نزل المرتب الجديد؟ ابدأ شهر جديد</button>`}
     </div>
@@ -409,9 +411,9 @@ function home(){
     <div class="stats">
       <div class="stat"><span>متوسط الصرف اليومي</span><b>${egp(c.avg)}</b><em class="muted">من غير الأساسيات</em></div>
       ${closed?`<div class="stat"><span>إجمالي المصروفات</span><b>${egp(c.spent)}</b><em class="muted">أساسية ${fmt(c.fixedPaid)} + يومية ${fmt(c.daily)}</em></div>`
-      :`<div class="stat"><span>تقدر تصرف في اليوم</span><b class="${c.allow<c.avg?'bad':'good'}">${egp(c.allow)}</b><em class="muted">لباقي الشهر (${c.left} يوم)</em></div>`}
+      :`<div class="stat"><span>تقدر تصرف في اليوم</span><b class="${c.allow<=0||c.allow<c.avg?'bad':'good'}">${egp(Math.max(0,c.allow))}</b><em class="${c.allow<=0?'bad':'muted'}">${c.allow<=0?'الفلوس مش مكفية باقي الشهر':`لباقي الشهر (${c.left} يوم)`}</em></div>`}
       <div class="stat"><span>${closed?'المصروفات مقارنة بالمرتب':'المتوقع آخر الشهر'}</span><b class="${(closed?c.spent>c.budget:over)?'bad':''}">${egp(closed?c.spent:c.projected)}</b><em class="${(closed?c.spent>c.budget:over)?'bad':'good'}">${(()=>{const v=closed?c.spent:c.projected;return v>c.budget?'أكتر من المرتب بـ '+fmt(v-c.budget):'أقل من المرتب بـ '+fmt(c.budget-v)})()}</em></div>
-      <div class="stat"><span>باقي بعد الأساسيات</span><b>${egp(c.free)}</b><em class="muted">+ ${usd(c.usdLeft)} لسه بالدولار</em></div>
+      <div class="stat"><span>باقي بعد الأساسيات</span><b>${egp(c.free)}</b><em class="${c.free<0?'bad':'muted'}">${c.free<0?'الأساسيات والمصروفات أكتر من اللي معاك':c.usdLeft?`+ ${usd(c.usdLeft)} لسه بالدولار`:'بعد كل الأساسيات'}</em></div>
     </div>
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <div style="display:flex;justify-content:space-between;font-size:13px"><span>اتصرف من المرتب</span><b class="num">${Math.round(used/Math.max(1,c.budget)*100)}%</b></div>
