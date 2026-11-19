@@ -154,6 +154,17 @@ nav.tabs button.on{color:var(--accent);font-weight:600}
 .toast{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:13px;z-index:30}
 .empty{text-align:center;color:var(--muted);font-size:13px;padding:18px 8px}
 @media (prefers-reduced-motion:no-preference){.sheet>div{animation:up .22s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.4}}}
+.brand{white-space:nowrap}
+header.top{flex-wrap:wrap;row-gap:8px}
+.iconbtn{border:1px solid var(--line);background:var(--card);color:var(--accent);width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex:none}
+.iconbtn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9}
+.install{background:var(--accent-soft);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-top:10px}
+.install img{width:40px;height:40px;border-radius:10px;flex:none}
+.install div{flex:1;min-width:0;font-size:13px}
+.install b{display:block;font-size:14px}
+.qrbox{background:#fff;border-radius:16px;padding:12px;display:grid;place-items:center;border:1px solid var(--line)}
+.qrbox img{width:min(240px,70vw);height:auto;image-rendering:pixelated}
+.steps{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}
 .lock{background:var(--usd-soft);border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13.5px}
 .lock b{font-family:var(--f-num)}
 .badge{display:inline-block;font-size:11px;font-weight:600;border-radius:999px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle;font-family:var(--f-body)}
@@ -173,7 +184,8 @@ nav.tabs button.on{color:var(--accent);font-weight:600}
 
 <div class="app" dir="rtl" lang="ar" id="app">
   <header class="top">
-    <div class="brand">مصروفات البيت<small id="sub">حساب البيت شهر بشهر</small></div>
+    <div style="display:flex;align-items:center;gap:10px;min-width:0"><div class="brand">مصروفات البيت<small id="sub">حساب البيت شهر بشهر</small></div>
+    <button class="iconbtn" data-open="share" aria-label="شارك البرنامج" title="شارك البرنامج"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg></button></div>
     <div class="month"><button id="mPrev" aria-label="الشهر اللي قبله">›</button><span id="mLabel"></span><button id="mNext" aria-label="الشهر اللي بعده">‹</button></div>
   </header>
   <main id="view"></main>
@@ -361,6 +373,26 @@ function debtsSection(full){
     ${full?`<div class="card list">${S.debts.length?S.debts.map(debtRow).join(''):'<div class="empty">مفيش ديون مسجلة</div>'}</div>
     <div class="btnrow"><button class="btn" data-open="debt">+ دين أو سلفة جديدة</button></div>`:''}
   </section>`;
+}
+
+/* install & share */
+const APP_URL='https://ahmed-elbaz84.github.io/?install=1';
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+let INSTALL_EVT=null, INSTALL_HIDE=false;
+try{INSTALL_HIDE=localStorage.getItem('masrofat_install_hide')==='1'}catch(e){}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();INSTALL_EVT=e;if(!sheetOpen())render()});
+addEventListener('appinstalled',()=>{INSTALL_EVT=null;closeSheet();render();toast('اتثبّت البرنامج على الموبايل')});
+function deviceKind(){const u=navigator.userAgent;if(/iPhone|iPad|iPod/.test(u))return 'ios';if(/SamsungBrowser/.test(u))return 'samsung';if(/Android/.test(u))return 'android';return 'pc'}
+function installBanner(){
+  if(isStandalone()||INSTALL_HIDE)return '';
+  return `<div class="install"><img src="icon-192.png" alt=""><div><b>ثبّت البرنامج على موبايلك</b>يفتح من أيقونة على الشاشة زي أي تطبيق</div><button class="btn" data-act="install">ثبّت</button><button class="x" data-act="installHide" aria-label="اقفل">×</button></div>`;
+}
+function installSteps(){
+  const k=deviceKind();
+  if(k==='ios')return `<ol class="steps"><li>افتح الرابط في <b>Safari</b>.</li><li>دوس زرار المشاركة (مربع طالع منه سهم) تحت.</li><li>اختار <b>«إضافة إلى الشاشة الرئيسية»</b> وبعدين <b>«إضافة»</b>.</li></ol>`;
+  if(k==='samsung')return `<ol class="steps"><li>دوس السهم ⬇ اللي فوق جنب العنوان، واختار <b dir="ltr">Install</b>.</li><li>أو دوس ☰ تحت، وبعدين <b dir="ltr">Add page to</b>، وبعدين <b dir="ltr">Home screen</b>، وبعدين <b dir="ltr">Add</b>.</li></ol>`;
+  if(k==='android')return `<ol class="steps"><li>دوس ⋮ فوق على اليمين.</li><li>اختار <b>«تثبيت التطبيق»</b> أو <b>«إضافة إلى الشاشة الرئيسية»</b>.</li></ol>`;
+  return `<ol class="steps"><li>على الكمبيوتر: دوس أيقونة التثبيت في آخر شريط العنوان، أو ⋯ ← <b>«التطبيقات»</b> ← <b>«تثبيت»</b>.</li><li>على الموبايل: صوّر كود QR من «شارك البرنامج».</li></ol>`;
 }
 
 /* ---------- views ---------- */
@@ -553,7 +585,7 @@ function settings(){
     <h2>سعر الدولار</h2>
     <div class="card" style="display:flex;flex-direction:column;gap:8px">
       <div class="field"><label for="rate">سعر الدولار بالجنيه (بيتستخدم في الحسابات التقريبية)</label><input id="rate" class="num" inputmode="decimal" value="${S.rate}"></div>
-      <p class="note" style="margin:0">ده رقم مثال. في التطبيق الحقيقي ممكن يتحدّث لوحده، أو تكتبه إنت.</p>
+      <p class="note" style="margin:0">غيّره لما سعر الدولار يتغير.</p>
     </div>
   </section>
   <section>
@@ -565,6 +597,13 @@ function settings(){
     <h2>أنواع المصروفات الأساسية</h2>
     <div class="card list">${S.fixedCats.map((c,i)=>`<div class="item"><div class="ic usd">${esc(c).slice(0,1)}</div><div class="txt tap" data-editcat="fixedCats:${i}"><b>${esc(c)}</b><span class="hint">اضغط عشان تغيّر الاسم</span></div><button class="x" data-delcat="fixedCats:${i}" aria-label="امسح">×</button></div>`).join('')}</div>
     <div class="btnrow"><div class="field" style="flex:2"><input id="newFixedCat" placeholder="نوع جديد، مثلاً: تأمين"></div><button class="btn" data-act="addCat" data-list="fixedCats" style="flex:1">أضف</button></div>
+  </section>
+  <section>
+    <h2>شارك البرنامج</h2>
+    <div class="card" style="display:flex;flex-direction:column;gap:8px">
+      <p class="note" style="margin:0">ابعت البرنامج لحد تاني (زي مراتك). هيبدأ عنده فاضي، وأرقامه تبقى خاصة بيه.</p>
+      <button class="btn full" data-open="share">اعرض كود QR وابعت الرابط</button>
+    </div>
   </section>
   <section>
     <h2>المزامنة</h2>
@@ -667,6 +706,16 @@ function openSheet(kind,o){
     <button class="btn full" data-act="saveDebtPay" data-id="${o.id}">سجّل الدفعة</button>
     <div class="card list">${o.payments.length?[...o.payments].sort((a,b)=>b.date.localeCompare(a.date)).map(x=>`<div class="item"><div class="txt"><b class="num" style="text-align:right">${fmt(x.amount)} ج.م</b><span>${dayName(x.date)} ${dshort(x.date)} ${x.date.slice(0,4)}</span></div><button class="x" data-act="delDebtPay" data-id="${o.id}" data-pid="${x.id}" aria-label="امسح">×</button></div>`).join(''):'<div class="empty">لسه مفيش دفعات</div>'}</div>
     <button class="btn ghost full" data-act="editDebt" data-id="${o.id}">تعديل الاسم أو المبلغ</button>`;
+  } else if(kind==='share'){
+    html=`<h3>شارك «مصروفات البيت»</h3>
+    <p class="note" style="margin:0">خلّي اللي عايز تبعتله يصوّر الكود بكاميرا موبايله، وهيفتح له البرنامج ويطلب منه يثبّته. كل واحد أرقامه بتبقى على موبايله ومحدش بيشوفها غيره.</p>
+    <div class="qrbox"><img src="qr.png" alt="كود QR لرابط البرنامج"></div>
+    <div class="conv" style="justify-content:center"><span class="num" style="font-size:14px">ahmed-elbaz84.github.io</span></div>
+    <div class="btnrow"><button class="btn" data-act="shareSend">ابعته (واتساب وغيره)</button><button class="btn ghost" data-act="shareCopy">انسخ الرابط</button></div>`;
+  } else if(kind==='install'){
+    html=`<h3>ثبّت «مصروفات البيت»</h3>
+    <div style="display:flex;gap:12px;align-items:center"><img src="icon-192.png" alt="" style="width:56px;height:56px;border-radius:14px"><p class="note" style="margin:0">هتلاقي له أيقونة على شاشة الموبايل، ويفتح على الشاشة كلها، ويشتغل حتى من غير نت.</p></div>
+    ${INSTALL_EVT?`<button class="btn full" data-act="installNow">ثبّت دلوقتي</button>`:installSteps()}`;
   } else if(kind==='plan'){
     const ty=o?o.type:'قسط';
     html=`<h3>${o?'تعديل '+(ty==='جمعية'?'الجمعية':'القسط'):'قسط أو جمعية جديدة'}</h3>
@@ -693,10 +742,10 @@ function render(){
   const p=P();
   if(!p){
     $('#mLabel').innerHTML='—';
-    $('#view').innerHTML=tab==='settings'?settings():onboarding();
+    $('#view').innerHTML=installBanner()+(tab==='settings'?settings():onboarding());
   } else {
     $('#mLabel').innerHTML=`${pname(p)}<small>${dshort(p.start)} ← ${p.end?dshort(p.end):'دلوقتي'}</small>`;
-    $('#view').innerHTML={home,daily,fixed,money,settings}[tab]();
+    $('#view').innerHTML=(tab==='home'||tab==='settings'?installBanner():'')+{home,daily,fixed,money,settings}[tab]();
   }
   $('#mPrev').disabled=!p||!prevP(p); $('#mNext').disabled=!p||!nextP(p);
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
@@ -818,6 +867,12 @@ document.addEventListener('click',e=>{
     const fn=a==='syncIn'?firebase.auth().signInWithEmailAndPassword(em,pw):firebase.auth().createUserWithEmailAndPassword(em,pw);
     SYNC.status='لحظة…';fn.then(()=>toast('دخلت، والمزامنة شغالة')).catch(e=>{SYNC.status=AUTH_ERR[e.code]||('حصلت مشكلة: '+e.code);render()});return}
   if(a==='syncOut'){firebase.auth().signOut().then(()=>toast('خرجت من المزامنة على الجهاز ده'));return}
+  if(a==='install'){if(INSTALL_EVT){INSTALL_EVT.prompt();INSTALL_EVT.userChoice.finally(()=>{INSTALL_EVT=null;render()});return}openSheet('install');return}
+  if(a==='installNow'){if(INSTALL_EVT){INSTALL_EVT.prompt();INSTALL_EVT.userChoice.finally(()=>{INSTALL_EVT=null;closeSheet();render()})}return}
+  if(a==='installHide'){INSTALL_HIDE=true;try{localStorage.setItem('masrofat_install_hide','1')}catch(e){}render();return}
+  if(a==='shareSend'){const d={title:'مصروفات البيت',text:'برنامج «مصروفات البيت» لحساب مصاريف البيت. افتح الرابط وثبّته على موبايلك:',url:APP_URL};
+    if(navigator.share)navigator.share(d).catch(()=>{});else location.href='https://wa.me/?text='+encodeURIComponent(d.text+' '+APP_URL);return}
+  if(a==='shareCopy'){const done=()=>toast('اتنسخ الرابط');(navigator.clipboard?navigator.clipboard.writeText(APP_URL).then(done):Promise.reject()).catch(()=>{prompt('انسخ الرابط:',APP_URL)});return}
   if(a==='backup'){const blob=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});const u=URL.createObjectURL(blob);const l=document.createElement('a');l.href=u;l.download='masrofat-elbeit-backup-'+TODAY+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('اتنزلت النسخة الاحتياطية');return}
   if(a==='restore'){$('#restoreFile').click();return}
   if(a==='reset'){if(S.periods.length&&!t.dataset.sure){t.dataset.sure='1';t.textContent='متأكد؟ أرقامك هتتمسح. اضغط تاني';return}S=sample();curId=S.periods[S.periods.length-1].id;save();tab='home';render();toast('رجعت الأرقام المثال');return}
@@ -837,6 +892,7 @@ document.addEventListener('input',e=>{const id=e.target.id;
 });
 document.addEventListener('focusout',()=>setTimeout(()=>{if(!typing()&&!sheetOpen())SYNC.flush()},300));
 SYNC.load();
+if(/[?&]install=1/.test(location.search)&&!isStandalone()){history.replaceState(null,'',location.pathname);setTimeout(()=>{if(!sheetOpen())openSheet('install')},1500)}
 $('#fab').onclick=()=>openSheet(tab==='fixed'?'fixed':'daily');
 $('#mPrev').onclick=()=>{const p=prevP(P());if(p){curId=p.id;render()}};
 $('#mNext').onclick=()=>{const p=nextP(P());if(p){curId=p.id;render()}};
