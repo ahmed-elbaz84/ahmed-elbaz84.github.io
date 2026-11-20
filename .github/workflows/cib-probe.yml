@@ -1,0 +1,13 @@
+name: cib-probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+          for u in https://www.cibeg.com/en/currency-converter https://www.cibeg.com/ar/currency-converter https://www.cibeg.com/en/exchange-rates https://www.cibeg.com/; do
+            echo "=== $u"; curl -sL -A "$UA" -o p.html -w "%{http_code} %{size_download}\n" "$u"
+            grep -oiE '(https?:)?/[^"'"'"' ]*(api|currenc|rate)[^"'"'"' ]*' p.html | sort -u | head -40
+            grep -oiE '.{0,120}USD.{0,200}' p.html | head -5
+          done
