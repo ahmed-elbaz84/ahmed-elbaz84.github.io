@@ -239,7 +239,9 @@ body.kb .stick{bottom:0}
 .itbl .ip{width:70px;border-style:dashed}
 .itbl .iqt{border-color:color-mix(in srgb,var(--pri) 45%,var(--line))}
 .itbl td{vertical-align:middle;padding:6px}
-.itbl .itot{font-weight:700;min-width:4em}
+.itbl .itot{font-weight:700;display:block;min-width:3.5em}
+.itbl .irm{display:none;margin:2px auto 0;width:30px;height:26px;border-radius:8px;border:1px solid color-mix(in srgb,var(--bad) 40%,transparent);background:none;color:var(--bad);font-size:16px;line-height:1;cursor:pointer}
+.itbl tr.sel .irm{display:block}
 .itbl .lwarn{font-size:11px;margin:0}
 .tbl th,.tbl td,.tbl td.n,.tbl th.n{text-align:center}
 .tbl th.first,.tbl td.first,.tbl td.nm,.itbl th:first-child,.itbl td.nm,.tbl td.nt{text-align:start}
@@ -534,7 +536,7 @@ function invRowsHtml(){
   <td class="nm"><b ${i.gone?'':`data-act="item:${i.id}"`}>${esc(i.name)}</b><small>${esc(i.unit)} · متاح ${fmt(i.qty)}</small><div class="lwarn"></div></td>
   <td class="n"><input class="iqt" inputmode="decimal" placeholder="0" value="${esc(qq)}" aria-label="كمية ${esc(i.name)}"></td>
   <td class="n"><input class="ip" inputmode="decimal" value="${fmt(dPrice(i.id)).replace(/,/g,'')}" aria-label="سعر ${esc(i.name)}"></td>
-  <td class="n itot">${num(qq)>0?fmt(num(qq)*dPrice(i.id)):'—'}</td></tr>`}).join('');
+  <td class="n"><span class="itot">${num(qq)>0?fmt(num(qq)*dPrice(i.id)):'—'}</span><button class="irm" data-act="unpick:${i.id}" aria-label="شيل ${esc(i.name)} من الفاتورة">×</button></td></tr>`}).join('');
 }
 function vInv(){
   const d=draft;
@@ -549,7 +551,7 @@ function vInv(){
   <input class="search" id="isq" placeholder="ابحث عن صنف…" value="${esc(invItemQ)}" type="search">
   <div class="chips"><button class="chip ${invSel==='all'?'on':''}" data-act="isel:all">كل الأصناف</button><button class="chip ${invSel==='sel'?'on':''}" data-act="isel:sel">المختار <span id="selcnt">0</span></button></div>
   <div class="scroll"><table class="tbl itbl"><thead><tr><th>الصنف</th><th class="n">الكمية</th><th class="n">السعر</th><th class="n">الإجمالي</th></tr></thead><tbody id="ibody">${invRowsHtml()}</tbody></table></div>
-  <p class="mut" style="font-size:12px;margin:6px 2px 0">اكتب الكمية قدام الصنف والإجمالي بيتحسب لوحده. السعر جاي من سعر الشركة، وتقدر تغيّره في الفاتورة دي بس، أو تضغط على اسم الصنف تعدّل بياناته.</p>
+  <p class="mut" style="font-size:12px;margin:6px 2px 0">اكتب الكمية قدام الصنف والإجمالي بيتحسب لوحده. الأصناف اللي من غير كمية مش بتظهر في الفاتورة، وزرار × يشيل الصنف منها. السعر جاي من سعر الشركة، وتقدر تغيّره في الفاتورة دي بس، أو تضغط على اسم الصنف تعدّل بياناته.</p>
   </div>
   <div class="card" style="margin-top:12px"><div class="tot">
   <span>الإجمالي قبل الخصم</span><b id="tsub">0</b>
@@ -706,7 +708,7 @@ async function importData(file){try{const j=JSON.parse(await file.text()),d=j.da
 const A={
   go:v=>go(v),close:()=>closeModal(),
   hp:()=>{document.body.classList.toggle('hp');try{localStorage.setItem('sc-hp',document.body.classList.contains('hp')?'1':'0')}catch(e){}hpIcon()},
-  period:p=>{period=p;render()},pay:p=>{draft.pay=p;render()},lowall:()=>{stockF='low';go('stock')},sf:k=>{stockF=k;render()},if:k=>{invF=k;render()},
+  period:p=>{period=p;render()},pay:p=>{draft.pay=p;render()},unpick:id=>{delete draft.q[id];delete draft.p[id];const tr=$(`#ibody tr[data-id="${id}"]`);if(tr){if(invSel==='sel')tr.remove();else{tr.querySelector('.iqt').value='';tr.querySelector('.ip').value=fmt(dPrice(id)).replace(/,/g,'')}}if(invSel==='sel'&&!chosen().length)$('#ibody').innerHTML=invRowsHtml();recalc();toast('اتشال من الفاتورة')},lowall:()=>{stockF='low';go('stock')},sf:k=>{stockF=k;render()},if:k=>{invF=k;render()},
   item:id=>itemModal(id),newitem:()=>itemModal(null),
   cust:id=>custModal(id),newcust:()=>custModal(null),
   custinv:id=>{closeModal();draft=newDraft(id);go('inv')},
