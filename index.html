@@ -196,6 +196,14 @@ nav.tabs button.on{color:var(--accent-text);font-weight:700}
 .onb{display:flex;flex-direction:column;gap:14px;align-items:stretch;text-align:center;padding-block:30px}
 .onb h2{justify-content:center;font-size:20px}
 .onb .house{width:120px;height:120px;margin:0 auto}
+.back{border:1px solid var(--line);background:var(--card);color:var(--ink);width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;padding:0}
+.back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2}
+[dir=ltr] .back svg{transform:scaleX(-1)}
+.sheethead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0 -6px}
+.sheethead .x{width:40px;height:40px;font-size:20px;background:var(--bg)}
+.grab{width:56px;height:5px;margin:2px auto 8px;cursor:grab}
+.sheet>div{touch-action:pan-y;will-change:transform}
+.toast{cursor:pointer}
 header.top{flex-wrap:wrap;row-gap:8px}
 header.top .who{flex:1 1 100%}
 .iconbtn{border:1px solid var(--line);background:var(--card);color:var(--accent-text);width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;padding:0}
@@ -225,6 +233,7 @@ header.top .who{flex:1 1 100%}
 <div class="app" id="app">
   <header class="top">
     <div class="who">
+      <button class="back" id="backBtn" data-act="back" hidden><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
       <button class="av" id="avBtn" data-act="profile"></button>
       <div class="brand"><span id="title">مصروفات البيت</span><small id="sub"></small></div>
       <button class="iconbtn" id="shareBtn" data-open="share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg></button>
@@ -241,7 +250,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-20 · 2';
+const VER='2026-11-20 · 3';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -934,9 +943,34 @@ function openSheet(kind,o){
     <p class="note" style="margin:0">${L('لو بدأت من قبل كده، اختار أول شهر الحقيقي، والشهور اللي فاتت هتتحسب إنها اتدفعت.','If it started earlier, pick the real first month; past months count as paid.')}</p>
     <div class="btnrow"><button class="btn" data-act="savePlan" style="flex:2">${L('احفظ','Save')}</button>${del}</div>`;
   }
-  $('#overlay').innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" dir="${DIR()}"><div><div class="grab"></div>${html}</div></div>`;
+  const wasOpen=sheetOpen();
+  html=html.replace(/<h3>([\s\S]*?)<\/h3>/,(m,h)=>`<div class="sheethead"><h3>${h}</h3><button class="x" data-act="close" aria-label="${L('اقفل','Close')}">×</button></div>`);
+  $('#overlay').innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" dir="${DIR()}"><div><div class="grab" aria-hidden="true"></div>${html}</div></div>`;
+  if(!wasOpen){try{history.pushState({app:1,tab,sheet:1},'')}catch(e){}}
 }
-function closeSheet(){$('#overlay').innerHTML='';setTimeout(()=>SYNC.flush(),50)}
+function closeSheet(fromBack){if(!sheetOpen())return;$('#overlay').innerHTML='';setTimeout(()=>SYNC.flush(),50);
+  if(!fromBack&&history.state&&history.state.sheet){SKIP_POP=true;try{history.back()}catch(e){SKIP_POP=false}}}
+let SKIP_POP=false;
+/* phone Back button / gesture: close the open sheet, else go to the previous tab */
+try{history.replaceState({app:1,tab:'home'},'')}catch(e){}
+addEventListener('popstate',e=>{
+  if(SKIP_POP){SKIP_POP=false;return}
+  if(sheetOpen()){closeSheet(true);return}
+  const st=e.state||{};tab=st.tab||'home';filter='*';QUICK=false;render();scrollTo(0,0)});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&sheetOpen())closeSheet()});
+/* swipe a sheet down to close it */
+let DRAG=null;
+document.addEventListener('touchstart',e=>{const box=e.target.closest('.sheet>div');if(!box)return;
+  if(box.scrollTop>2&&!e.target.closest('.grab,.sheethead'))return;
+  DRAG={y:e.touches[0].clientY,box,dy:0,on:false}},{passive:true});
+document.addEventListener('touchmove',e=>{if(!DRAG)return;const dy=e.touches[0].clientY-DRAG.y;
+  if(!DRAG.on){if(dy<8){if(dy<-8)DRAG=null;return}DRAG.on=true;const a=document.activeElement;if(a&&a.blur)a.blur()}
+  DRAG.dy=dy;DRAG.box.style.transition='none';DRAG.box.style.transform=`translateY(${Math.max(0,dy)}px)`},{passive:true});
+document.addEventListener('touchend',()=>{if(!DRAG)return;const {box,dy,on}=DRAG;DRAG=null;if(!on)return;
+  box.style.transition='transform .2s ease-out';
+  if(dy>90){box.style.transform='translateY(110%)';setTimeout(()=>closeSheet(),190)}else box.style.transform=''});
+/* toasts: tap or swipe to dismiss */
+document.addEventListener('pointerdown',e=>{const t=e.target.closest('.toast');if(t)t.remove()});
 function toast(t){const el=document.createElement('div');el.className='toast';el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),2400)}
 const numv=id=>parseFloat(String(($(id)||{}).value||'').replace(/,/g,''))||0;
 function readPhoto(file,cb){const fr=new FileReader();fr.onload=()=>{const img=new Image();img.onload=()=>{const s=180,c=document.createElement('canvas');c.width=c.height=s;const x=c.getContext('2d');const m=Math.min(img.width,img.height);x.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,s,s);cb(c.toDataURL('image/jpeg',.82))};img.onerror=()=>toast(L('مش قادر أقرا الصورة دي','Could not read that image'));img.src=fr.result};fr.readAsDataURL(file)}
@@ -957,6 +991,7 @@ function render(){
   const pf=S.profile;
   $('#title').textContent=pf.home?L('مصروفات ','Expenses · ')+pf.home:L('مصروفات البيت','Home Expenses');
   $('#sub').textContent=pf.name?L('أهلاً يا ','Hi, ')+pf.name:L('حساب البيت شهر بشهر','Your home, month by month');
+  $('#backBtn').hidden=tab==='home';$('#backBtn').setAttribute('aria-label',L('رجوع','Back'));
   $('#avBtn').innerHTML=avatar(); $('#avBtn').setAttribute('aria-label',L('حسابي','My account'));
   $('#mPrev').textContent=L('›','‹'); $('#mNext').textContent=L('‹','›');
   $('#mPrev').setAttribute('aria-label',L('الشهر اللي قبله','Previous month')); $('#mNext').setAttribute('aria-label',L('الشهر اللي بعده','Next month'));
@@ -979,7 +1014,7 @@ function render(){
 function updSal(){const o=$('#salConv');if(!o)return;const a=numv('#salAmt'),r=numv('#salRate')||S.rate,c=SALCUR||P().salary.cur;
   o.textContent=c==='USD'?fmt(a*r)+' '+CUR():'$'+fmt(a/r)}
 function updConv(){const o=$('#cvOut');if(o)o.textContent=fmt(numv('#cvUsd')*numv('#cvRate'))+' '+CUR()}
-const go=t=>{tab=t;filter='*';QUICK=false;render();scrollTo(0,0)};
+const go=t=>{if(t!==tab){try{history.pushState({app:1,tab:t},'')}catch(e){}}tab=t;filter='*';QUICK=false;render();scrollTo(0,0)};
 const RO_MSG=()=>L('الشهر ده مقفول. افتحه للتعديل الأول','This month is closed. Unlock it first');
 function applyNext(p,name,patch){S.periods.slice(idx(p)+1).forEach(q=>q.fixed.forEach(x=>{if(x.name===name)Object.assign(x,patch)}))}
 
@@ -1006,6 +1041,7 @@ document.addEventListener('click',e=>{
   if(a==='refresh'){save(true);toast(L('بيتحدّث…','Updating…'));const go2=()=>{try{location.reload()}catch(e){}};
     const reg=navigator.serviceWorker&&navigator.serviceWorker.getRegistration?navigator.serviceWorker.getRegistration():Promise.resolve(null);
     Promise.race([reg.then(r=>r&&r.update()).catch(()=>{}),new Promise(r=>setTimeout(r,2500))]).then(()=>setTimeout(go2,200));return}
+  if(a==='back'){if(sheetOpen()){closeSheet();return}if(history.state&&history.state.tab&&history.state.tab!=='home'&&history.length>1)history.back();else go('home');return}
   if(a==='profile'){openSheet('profile');return}
   if(a==='rateNow'){fetchRate(true);return}
   if(a==='pfPhoto'){$('#pfFile').click();return}
