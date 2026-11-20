@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#0089b0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -173,6 +174,70 @@ body.hp .pf{filter:blur(7px);user-select:none}
 .prev{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff;margin-bottom:12px}
 .prev .paper{zoom:.5;padding:24px}
 @media(min-width:560px){.prev .paper{zoom:.75}}
+
+/* ---- compact, professional sizing (v2) ---- */
+body{font-size:14.5px;line-height:1.5;padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+.top{padding:calc(8px + env(safe-area-inset-top)) max(4vw,14px) 8px;gap:8px;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+.top .logo{width:26px;height:26px}.top h1{font-size:16px}.top small{font-size:11px;font-weight:500}
+.ib{width:36px;height:36px;border-radius:10px}.ib svg{width:19px;height:19px}
+.band{padding:12px max(4vw,14px)}
+.hero{padding-bottom:16px}
+.hero .lbl{font-size:13px;font-weight:500}
+.hero .big{font-size:clamp(24px,7vw,32px);margin:2px 0 4px}
+.hero .sub{font-size:12.5px;font-weight:500;gap:2px 14px}
+.chips{gap:6px;margin-bottom:10px}
+.chip{min-height:32px;padding:2px 12px;font-size:12.5px;font-weight:600}
+.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(min-width:700px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.kpi{border-radius:12px;padding:9px 12px}
+.kpi span{font-size:11.5px;font-weight:500}
+.kpi b{font-size:16px;font-weight:700}
+.card{border-radius:14px;padding:12px;margin-bottom:10px}
+.card h2,.sec{font-size:15px;font-weight:700;margin-bottom:8px}
+.bars .r{font-size:12.5px;margin:5px 0}.bars .t{height:8px}
+.btn{min-height:40px;padding:6px 14px;border-radius:10px;font-size:14px;font-weight:600}
+.btn.sm{min-height:34px;padding:3px 10px;font-size:12.5px}
+.search{height:42px;border-radius:10px;margin-bottom:8px}
+.tbl th,.tbl td{padding:8px;font-size:13px}
+.tbl th{font-weight:600}
+.list .it{padding:9px 2px;gap:8px}
+.list .it b{font-size:14px;font-weight:600}
+.list .it small{font-size:12px}
+.list .it .amt{font-size:14px;font-weight:700}
+.tag{font-size:11px;font-weight:600}
+.empty{padding:18px 10px;font-size:13px}
+.tiles{gap:10px}.tile{border-radius:14px;padding:14px 12px;min-height:88px}.tile svg{width:24px;height:24px}.tile b{font-size:14.5px;font-weight:700}.tile small{font-size:12px}
+.fld{margin-bottom:8px}.fld>span{font-size:12px;font-weight:600}
+.fld input,.fld select,.fld textarea,.in{min-height:42px;border-radius:10px;padding:6px 10px}
+.line{border-radius:12px;padding:8px;margin-bottom:8px}
+.line select{min-height:42px;border-radius:10px;font-size:15px;font-weight:600}
+.lnums{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr) 40px;gap:6px;margin-top:6px}
+.lnums label span{font-size:11px;font-weight:600}
+.lnums input{min-height:40px;border-radius:10px}
+.lt{min-height:40px;font-size:14px;font-weight:700}
+.x{width:40px;height:40px;border-radius:10px;font-size:20px}
+.tot{font-size:13.5px;gap:4px 10px}.tot .in{min-height:38px;width:8em}.tot .grand{font-size:17px;font-weight:700}
+.stick{bottom:calc(64px + env(safe-area-inset-bottom));padding:8px 0}
+.tabs button{min-height:54px;font-size:11px;font-weight:600}.tabs button svg{width:21px;height:21px}
+.tabs .fab span.c{width:46px;height:46px;margin-top:-20px;border-width:3px}.tabs .fab span.c svg{width:22px;height:22px}
+.note{font-size:13px;padding:8px 10px}
+.margin{font-size:13px}
+.chk{font-weight:600;font-size:14px}
+/* sheet: scroll inside it from anywhere, never the page behind */
+.modal{height:100dvh}
+.sheet{max-height:calc(100dvh - 16px);overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;border-radius:18px 18px 0 0;padding:12px max(4vw,14px) calc(16px + env(safe-area-inset-bottom))}
+.sheet h3{font-size:16px;font-weight:700;margin-bottom:10px}
+body.lock{overflow:hidden}
+/* while typing: hide the tab bar so the keyboard leaves room */
+body.kb .tabs{display:none}
+body.kb{padding-bottom:0}
+body.kb .stick{bottom:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+.seg button{border:0;background:none;min-height:34px;padding:2px 16px;font-weight:600;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--pri);color:#fff}
+:root{--pri:light-dark(#0089b0,#1488ad);--pri2:light-dark(#006a8a,#8fe0f5)}
+.top,.hero{background:light-dark(#0089b0,#0d5f7a)}
+.hero .chip.on{color:#00607d}
 @media(max-width:600px){.hide-s{display:none}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
@@ -286,8 +351,8 @@ async function auth(kind){const fm=$('#authf');if(!fm)return;const d=formData(fm
 /* ---------- ui helpers ---------- */
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
 let onClose=null;
-function openModal(html,bind){$('#sheet').innerHTML='<div class="grab"></div>'+html;$('#modal').hidden=false;$('#sheet').scrollTop=0;bind&&bind($('#sheet'))}
-function closeModal(){$('#modal').hidden=true;$('#sheet').innerHTML='';const f=onClose;onClose=null;f&&f()}
+function openModal(html,bind){document.body.classList.add('lock');$('#sheet').innerHTML='<div class="grab"></div>'+html;$('#modal').hidden=false;$('#sheet').scrollTop=0;bind&&bind($('#sheet'))}
+function closeModal(){document.body.classList.remove('lock');$('#modal').hidden=true;$('#sheet').innerHTML='';const f=onClose;onClose=null;f&&f()}
 function ask(msg,yes='تأكيد',danger=true){return new Promise(res=>{const prev=$('#sheet').innerHTML,wasOpen=!$('#modal').hidden;
   openModal(`<h3>${esc(msg)}</h3><div class="acts"><button class="btn ${danger?'d':'p'} grow" id="ay">${yes}</button><button class="btn grow" id="an">رجوع</button></div>`,s=>{
     const done=v=>{if(wasOpen&&!v){$('#sheet').innerHTML=prev;rebind&&rebind($('#sheet'))}else closeModal();res(v)};
@@ -330,6 +395,8 @@ function vHome(){
   <section class="band">
   <div class="kpis">
     <div class="kpi"><span>عدد الفواتير</span><b>${iv.length}</b></div>
+    <div class="kpi"><span>اتحصّل نقدي</span><b>${egp(sum(iv.filter(i=>(i.pay||'نقدي')==='نقدي'),i=>i.paid))}</b></div>
+    <div class="kpi"><span>اتحصّل تحويل</span><b>${egp(sum(iv.filter(i=>i.pay==='تحويل'),i=>i.paid))}</b></div>
     <div class="kpi"><span>فلوس عند العملاء</span><b class="${debts>0?'neg':''}">${egp(debts)}</b></div>
     <div class="kpi"><span>قيمة المخزن (تكلفة)</span><b>${egp(sv)}</b></div>
     <div class="kpi pf"><span>مكسب متوقع من المخزن</span><b class="pos">${egp(ssv-sv)}</b></div>
@@ -339,12 +406,12 @@ function vHome(){
   <div class="card"><h2>الأكثر مبيعاً <span class="mut" style="font-size:13px;font-weight:600">${pl}</span></h2>
   ${top.length?`<div class="bars">${top.map(([n,v])=>`<div class="r"><span>${esc(n)}</span><div class="t"><i style="width:${Math.max(4,v.v/mx*100)}%"></i></div><b>${egp(v.v)}</b></div>`).join('')}</div>`:'<div class="empty">لا توجد مبيعات في هذه الفترة</div>'}</div>
   <div class="card"><h2>نواقص المخزن <span class="tag ${low.length?'bad':'ok'}">${low.length}</span></h2>
-  ${low.length?`<div class="list">${low.map(i=>`<div class="it" data-act="item:${i.id}"><div class="grow"><b>${esc(i.name)}</b><small>الحد الأدنى ${fmt(i.min)} ${esc(i.unit)}</small></div><div class="amt neg">${fmt(i.qty)} ${esc(i.unit)}</div></div>`).join('')}</div>`:'<div class="empty">كل الأصناف فوق الحد الأدنى</div>'}</div>
+  ${low.length?`<div class="list">${low.slice(0,5).map(i=>`<div class="it" data-act="item:${i.id}"><div class="grow"><b>${esc(i.name)}</b><small>الحد الأدنى ${fmt(i.min)} ${esc(i.unit)}</small></div><div class="amt neg">${fmt(i.qty)} ${esc(i.unit)}</div></div>`).join('')}${low.length>5?`<button class="btn sm" style="width:100%;margin-top:6px" data-act="lowall">عرض كل النواقص (${low.length})</button>`:''}</div>`:'<div class="empty">كل الأصناف فوق الحد الأدنى</div>'}</div>
   <div class="card"><h2>آخر الفواتير<span class="sp"></span><button class="btn sm" data-act="go:invoices">الكل</button></h2>
   ${invs().slice(0,5).map(invItem).join('')||'<div class="empty">لا توجد فواتير بعد. اضغط زر «فاتورة» بالأسفل</div>'}</div>
   </section>`;
 }
-const invItem=i=>`<div class="list"><div class="it" data-act="invoice:${i.id}"><div class="grow"><b>#${i.no} — ${esc(i.custName)}</b><small>${i.date} · ${(i.lines||[]).length} صنف ${due(i)>0?`· <span class="tag bad">باقي ${egp(due(i))}</span>`:''}</small></div><div class="amt">${egp(i.total)}<br><small class="pos pf">+${fmt(i.profit)}</small></div></div></div>`;
+const invItem=i=>`<div class="list"><div class="it" data-act="invoice:${i.id}"><div class="grow"><b>#${i.no} — ${esc(i.custName)}</b><small>${i.date} · <span class="tag">${esc(i.pay||'نقدي')}</span> · ${(i.lines||[]).length} صنف ${due(i)>0?`· <span class="tag bad">باقي ${egp(due(i))}</span>`:''}</small></div><div class="amt">${egp(i.total)}<br><small class="pos pf">+${fmt(i.profit)}</small></div></div></div>`;
 
 /* ---------- stock ---------- */
 function vStock(){
@@ -438,7 +505,7 @@ function custModal(id,after){
 /* ---------- invoice editor ---------- */
 const nextNo=()=>Math.max(0,...list('invoices').map(i=>num(i.no)))+1;
 const blank=()=>({itemId:'',name:'',unit:'',qty:1,price:0,cost:0});
-function newDraft(cust){return{id:null,no:nextNo(),date:today(),cust:cust||'',lines:[blank()],discount:'',paid:'',notes:''}}
+function newDraft(cust){return{id:null,no:nextNo(),date:today(),cust:cust||'',lines:[blank()],discount:'',paid:'',notes:'',pay:'نقدي'}}
 const priceFor=(it,cid)=>{const c=S.customers[cid];return c&&c.type==='جملة'&&num(it.whole)>0?num(it.whole):num(it.sell)};
 function vInv(){
   const d=draft,its=items().filter(i=>i.active!==false||d.lines.some(l=>l.itemId===i.id));
@@ -446,9 +513,9 @@ function vInv(){
   return `<section class="band">
   <div class="sec">${d.id?'تعديل فاتورة':'فاتورة جديدة'} <span class="tag">#${d.no}</span><span class="sp"></span><button class="btn sm" data-act="clearinv">${d.id?'إلغاء التعديل':'تفريغ'}</button></div>
   <div class="card">
-  <div class="g2"><label class="fld"><span>العميل</span><select id="icust" class="in"><option value="">عميل نقدي</option>${custs().map(c=>`<option value="${c.id}" ${c.id===d.cust?'selected':''}>${esc(c.name)}${c.type==='جملة'?' (جملة)':''}</option>`).join('')}</select></label>
+  <div class="g2"><label class="fld"><span>العميل</span><select id="icust" class="in"><option value="">عميل ${d.pay}</option>${custs().map(c=>`<option value="${c.id}" ${c.id===d.cust?'selected':''}>${esc(c.name)}${c.type==='جملة'?' (جملة)':''}</option>`).join('')}</select></label>
   <label class="fld"><span>التاريخ</span><input id="idate" type="date" class="in" value="${d.date}"></label></div>
-  <button class="btn sm" data-act="quickcust">+ عميل جديد</button>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="mut" style="font-size:12px;font-weight:600">طريقة الدفع</span><div class="seg">${['نقدي','تحويل'].map(p=>`<button class="${d.pay===p?'on':''}" data-act="pay:${p}">${p}</button>`).join('')}</div><span style="flex:1"></span><button class="btn sm" data-act="quickcust">+ عميل جديد</button></div>
   </div>
   <div id="lines">${d.lines.map((l,i)=>`<div class="line" data-i="${i}"><select class="lsel">${opts(l.itemId)}</select>
   <div class="lnums"><label><span>الكمية</span><input class="lq" inputmode="decimal" value="${l.qty}"></label><label><span>السعر</span><input class="lp" inputmode="decimal" value="${l.itemId?l.price:''}"></label><div class="lt"><small>الإجمالي</small><span class="ltv">0</span></div><button class="x" data-act="rmline:${i}" aria-label="حذف السطر">×</button></div><div class="lwarn"></div></div>`).join('')}</div>
@@ -491,7 +558,7 @@ async function saveInv(btn){
   if(old)(old.lines||[]).forEach(l=>delta[l.itemId]=(delta[l.itemId]||0)-num(l.qty));
   const sub=r2(sum(lines,l=>num(l.qty)*num(l.price))),cost=r2(sum(lines,l=>num(l.qty)*num(l.cost))),disc=r2(d.discount),total=r2(Math.max(0,sub-disc));
   const paid=d.paid===''?total:r2(d.paid),c=S.customers[d.cust];
-  const inv={no:d.no,date:d.date||today(),cust:d.cust||'',custName:c?c.name:'عميل نقدي',custPhone:c?c.phone||'':'',lines:lines.map(l=>({itemId:l.itemId,name:l.name,unit:l.unit,qty:r2(l.qty),price:r2(l.price),cost:r2(l.cost)})),sub,discount:disc,total,paid,cost,profit:r2(total-cost),notes:String(d.notes||'').trim(),created:old?old.created:Date.now(),updated:Date.now()};
+  const inv={no:d.no,date:d.date||today(),cust:d.cust||'',custName:c?c.name:'عميل '+(d.pay||'نقدي'),pay:d.pay||'نقدي',custPhone:c?c.phone||'':'',lines:lines.map(l=>({itemId:l.itemId,name:l.name,unit:l.unit,qty:r2(l.qty),price:r2(l.price),cost:r2(l.cost)})),sub,discount:disc,total,paid,cost,profit:r2(total-cost),notes:String(d.notes||'').trim(),created:old?old.created:Date.now(),updated:Date.now()};
   for(const [iid,dq] of Object.entries(delta)){if(!r2(dq))continue;const it=S.items[iid];if(!it)continue;
     await put('items',iid,{...it,qty:r2(num(it.qty)-dq)});
     await put('moves',uid(),{date:inv.date,ts:Date.now(),itemId:iid,name:it.name,unit:it.unit,qty:r2(-dq),type:dq>0?'بيع':'مرتجع',ref:`فاتورة #${inv.no}`,inv:id});}
@@ -504,19 +571,19 @@ function vInvoices(){
   const all=list('invoices');
   return `<section class="band"><div class="sec">الفواتير <span class="tag">${all.length}</span><span class="sp"></span><button class="btn a sm" data-act="go:inv">+ فاتورة</button></div>
   <input class="search" id="iq" placeholder="ابحث برقم الفاتورة أو اسم العميل…" value="${esc(invQ)}" type="search">
-  <div class="chips">${[['all','الكل'],['due','عليها باقي'],['today','اليوم'],['month','هذا الشهر']].map(([k,l])=>`<button class="chip ${invF===k?'on':''}" data-act="if:${k}">${l}</button>`).join('')}</div>
+  <div class="chips">${[['all','الكل'],['due','عليها باقي'],['نقدي','نقدي'],['تحويل','تحويل'],['today','اليوم'],['month','هذا الشهر']].map(([k,l])=>`<button class="chip ${invF===k?'on':''}" data-act="if:${k}">${l}</button>`).join('')}</div>
   <div id="invBody">${invRows()}</div></section>`;
 }
 function invRows(){
   const q=invQ.trim();
-  const r=invs().filter(i=>(!q||String(i.no)===q||String(i.custName).includes(q))&&(invF==='all'||(invF==='due'?due(i)>0:invF==='today'?i.date===today():String(i.date).slice(0,7)===today().slice(0,7))));
+  const r=invs().filter(i=>(!q||String(i.no)===q||String(i.custName).includes(q))&&(invF==='all'||(invF==='due'?due(i)>0:invF==='نقدي'||invF==='تحويل'?(i.pay||'نقدي')===invF:invF==='today'?i.date===today():String(i.date).slice(0,7)===today().slice(0,7))));
   if(!r.length)return `<div class="empty">${list('invoices').length?'لا توجد نتائج':'لا توجد فواتير بعد'}</div>`;
   return `<div class="card" style="padding:4px 14px"><div class="mut" style="font-size:13px;padding-top:8px">الإجمالي ${egp(sum(r,i=>i.total))} · <span class="pf">المكسب ${egp(sum(r,i=>i.profit))}</span></div>${r.map(invItem).join('')}</div>`;
 }
 function invDoc(i){
   const s=st(),ph=[s.phone,s.phone2].filter(Boolean);
   return `<div class="paper"><div class="ph"><div class="brand">${LOGO('#0089b0')}<div><b>${esc(s.shop)}</b><small>${esc(s.tag)}</small></div></div>
-  <div class="pmeta"><b>فاتورة بيع</b><span>رقم: ${i.no}</span><span>التاريخ: ${i.date}</span></div></div>
+  <div class="pmeta"><b>فاتورة بيع</b><span>رقم: ${i.no}</span><span>الدفع: ${esc(i.pay||'نقدي')}</span><span>التاريخ: ${i.date}</span></div></div>
   <div class="pcust">العميل: <b>${esc(i.custName)}</b>${i.custPhone?` — <span dir="ltr">${esc(i.custPhone)}</span>`:''}</div>
   <table><thead><tr><th>م</th><th>الصنف</th><th>الوحدة</th><th class="n">الكمية</th><th class="n">السعر</th><th class="n">الإجمالي</th></tr></thead><tbody>
   ${(i.lines||[]).map((l,k)=>`<tr><td>${k+1}</td><td>${esc(l.name)}</td><td>${esc(l.unit)}</td><td class="n">${fmt(l.qty)}</td><td class="n">${fmt(l.price)}</td><td class="n">${fmt(num(l.qty)*num(l.price))}</td></tr>`).join('')}</tbody></table>
@@ -525,7 +592,7 @@ function invDoc(i){
   ${i.notes?`<div class="pnote">ملاحظات: ${esc(i.notes)}</div>`:''}
   <div class="pfoot">${esc(s.footer)}<br>${ph.length?`للتواصل والطلبات: <b dir="ltr">${ph.map(esc).join('  |  ')}</b>`:''}${s.address?`<br>${esc(s.address)}`:''}</div></div>`;
 }
-function waText(i){const s=st();return `*${s.shop}* — فاتورة رقم ${i.no}\nالتاريخ: ${i.date}\nالعميل: ${i.custName}\n\n${(i.lines||[]).map(l=>`• ${l.name}: ${fmt(l.qty)} ${l.unit} × ${fmt(l.price)} = ${fmt(num(l.qty)*num(l.price))}`).join('\n')}\n\n${num(i.discount)?`خصم: ${egp(i.discount)}\n`:''}*المطلوب: ${egp(i.total)}*\nالمدفوع: ${egp(i.paid)}${due(i)>0?`\nالباقي: ${egp(due(i))}`:''}\n\n${s.footer}${s.phone?`\nللتواصل: ${s.phone}`:''}`}
+function waText(i){const s=st();return `*${s.shop}* — فاتورة رقم ${i.no}\nالتاريخ: ${i.date}\nالعميل: ${i.custName}\nالدفع: ${i.pay||'نقدي'}\n\n${(i.lines||[]).map(l=>`• ${l.name}: ${fmt(l.qty)} ${l.unit} × ${fmt(l.price)} = ${fmt(num(l.qty)*num(l.price))}`).join('\n')}\n\n${num(i.discount)?`خصم: ${egp(i.discount)}\n`:''}*المطلوب: ${egp(i.total)}*\nالمدفوع: ${egp(i.paid)}${due(i)>0?`\nالباقي: ${egp(due(i))}`:''}\n\n${s.footer}${s.phone?`\nللتواصل: ${s.phone}`:''}`}
 const waNum=p=>{let d=String(p||'').replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);else if(d.startsWith('0'))d='2'+d;return d};
 function invModal(id){
   const i=S.invoices[id];if(!i)return;
@@ -605,7 +672,7 @@ async function importData(file){try{const j=JSON.parse(await file.text()),d=j.da
 const A={
   go:v=>go(v),close:()=>closeModal(),
   hp:()=>{document.body.classList.toggle('hp');try{localStorage.setItem('sc-hp',document.body.classList.contains('hp')?'1':'0')}catch(e){}hpIcon()},
-  period:p=>{period=p;render()},sf:k=>{stockF=k;render()},if:k=>{invF=k;render()},
+  period:p=>{period=p;render()},pay:p=>{draft.pay=p;render()},lowall:()=>{stockF='low';go('stock')},sf:k=>{stockF=k;render()},if:k=>{invF=k;render()},
   item:id=>itemModal(id),newitem:()=>itemModal(null),
   cust:id=>custModal(id),newcust:()=>custModal(null),
   custinv:id=>{closeModal();draft=newDraft(id);go('inv')},
@@ -618,7 +685,7 @@ const A={
   pdf:(id,b)=>makePdf(id,b),sharepdf:(id,b)=>makePdf(id,b,true),
   signup:()=>auth('up'),forgot:()=>auth('forgot'),signout:async()=>{if(await ask('خروج من الحساب على الموبايل ده؟','خروج')){await fb.auth().signOut();toast('خرجت من الحساب')}},
   copyinv:async id=>{try{await navigator.clipboard.writeText(waText(S.invoices[id]));toast('تم النسخ')}catch(e){toast('تعذر النسخ')}},
-  editinv:id=>{const i=S.invoices[id];closeModal();draft={id,no:i.no,date:i.date,cust:i.cust,lines:(i.lines||[]).map(l=>({...l})),discount:num(i.discount)?String(i.discount):'',paid:String(i.paid),notes:i.notes||''};go('inv')},
+  editinv:id=>{const i=S.invoices[id];closeModal();draft={id,no:i.no,date:i.date,cust:i.cust,lines:(i.lines||[]).map(l=>({...l})),discount:num(i.discount)?String(i.discount):'',paid:String(i.paid),notes:i.notes||'',pay:i.pay||'نقدي'};go('inv')},
   delinv:async id=>{const i=S.invoices[id];if(!(await ask(`حذف فاتورة #${i.no}؟ سيتم إرجاع الكميات للمخزن.`,'حذف')))return;
     for(const l of i.lines||[]){const it=S.items[l.itemId];if(!it)continue;await put('items',it.id,{...S.items[it.id],qty:r2(num(S.items[it.id].qty)+num(l.qty))});await put('moves',uid(),{date:today(),ts:Date.now(),itemId:it.id,name:it.name,unit:it.unit,qty:r2(l.qty),type:'إلغاء فاتورة',ref:`فاتورة #${i.no}`})}
     await del('invoices',id);toast('تم حذف الفاتورة وإرجاع الكميات');render()},
@@ -651,6 +718,10 @@ $('#view').addEventListener('change',e=>{const t=e.target;
 });
 $('#view').addEventListener('submit',async e=>{if(e.target.id==='authf'){e.preventDefault();auth('in');return}if(e.target.id!=='sf')return;e.preventDefault();const d=formData(e.target);await put('settings','main',{...st(),...Object.fromEntries(Object.entries(d).map(([k,v])=>[k,v.trim()]))});toast('تم حفظ الإعدادات')});
 
+/* keyboard: hide the tab bar while an input is focused, keep the field in view */
+const isField=t=>t&&t.matches&&t.matches('input:not([type=checkbox]):not([type=file]),textarea,select');
+document.addEventListener('focusin',e=>{if(!isField(e.target))return;document.body.classList.add('kb');const t=e.target;setTimeout(()=>{try{t.scrollIntoView({block:'center',behavior:'smooth'})}catch(x){}},300)});
+document.addEventListener('focusout',()=>setTimeout(()=>{if(!isField(document.activeElement))document.body.classList.remove('kb')},120));
 boot();
 }
 </script>
