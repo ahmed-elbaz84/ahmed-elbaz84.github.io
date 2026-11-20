@@ -6,8 +6,8 @@ jobs:
     steps:
       - run: |
           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
-          for u in https://www.cibeg.com/en/currency-converter https://www.cibeg.com/ar/currency-converter https://www.cibeg.com/en/exchange-rates https://www.cibeg.com/; do
-            echo "=== $u"; curl -sL -A "$UA" -o p.html -w "%{http_code} %{size_download}\n" "$u"
-            grep -oiE '(https?:)?/[^"'"'"' ]*(api|currenc|rate)[^"'"'"' ]*' p.html | sort -u | head -40
-            grep -oiE '.{0,120}USD.{0,200}' p.html | head -5
-          done
+          curl -sL -A "$UA" -o p.html https://www.cibeg.com/en/currency-converter
+          grep -oE '.{0,300}/api/currency/rates.{0,300}' p.html | head -3
+          grep -oE '.{0,200}exchange-rates-.{0,200}' p.html | head -3
+          echo "=== GET"; curl -s -A "$UA" -H "Accept: application/json" -w "\n%{http_code}\n" https://www.cibeg.com/api/currency/rates | head -c 3000
+          echo; echo "=== POST"; curl -s -A "$UA" -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{}' -w "\n%{http_code}\n" https://www.cibeg.com/api/currency/rates | head -c 3000
