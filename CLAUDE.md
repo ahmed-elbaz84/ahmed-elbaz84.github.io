@@ -12,3 +12,6 @@ Read `HANDOVER.md` first. It has the full status, the data model, the sync and e
 - Never change the localStorage key `masrofat_elbeit_app_v1` or the data shape without a migration. Real user data lives there.
 - Sync is off until `FB_CONFIG` is filled in with the owner's own Firebase project. Synced data is encrypted on the device with a key derived from each user's password, so the owner cannot read other users' data. Keep it that way.
 - Test over http://localhost with Playwright at phone size. Don't create accounts on the real Firebase while testing.
+
+## Other app in this repo
+- `superclean/` is a separate app (Super Clean, the owner's wife's cleaning-products shop). Read `superclean/HANDOVER.md` before touching it, and bump `CACHE` in `superclean/sw.js` on every change there.
