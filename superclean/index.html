@@ -719,7 +719,7 @@ function vSettings(){const s=st();
   ${acctCard()}
   <div class="card"><h2>نسخة احتياطية</h2><p class="mut" style="margin-top:0">${user?'البيانات محفوظة على الحساب وتتزامن تلقائياً، والنسخة الاحتياطية للاطمئنان فقط.':'البيانات محفوظة على الموبايل ده بس. اعمل دخول بحساب أو نزّل نسخة احتياطية كل فترة.'}</p>
   <div class="acts"><button class="btn grow" data-act="export">تنزيل نسخة احتياطية</button><button class="btn grow" data-act="import">استرجاع من ملف</button></div></div>
-  <div class="card"><h2>تثبيت التطبيق على الموبايل <span class="tag">إصدار 9</span></h2><p style="margin:0" class="mut">افتح <b dir="ltr">ahmed-elbaz84.github.io/superclean</b> في المتصفح ثم: <b>أندرويد</b>: القائمة ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». <b>آيفون (سفاري)</b>: زر المشاركة ← «إضافة إلى الشاشة الرئيسية». أي تحديث جديد بيوصل لوحده لما تفتح التطبيق والنت شغال.</p></div></section>`}
+  <div class="card"><h2>تثبيت التطبيق على الموبايل <span class="tag">إصدار 10</span></h2><p style="margin:0" class="mut">افتح <b dir="ltr">ahmed-elbaz84.github.io/superclean</b> في المتصفح ثم: <b>أندرويد</b>: القائمة ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». <b>آيفون (سفاري)</b>: زر المشاركة ← «إضافة إلى الشاشة الرئيسية». أي تحديث جديد بيوصل لوحده لما تفتح التطبيق والنت شغال.</p></div></section>`}
 async function exportData(){const data=JSON.stringify({app:'superclean',at:new Date().toISOString(),data:Object.fromEntries(COLS.map(c=>[c,S[c]]))});
   saveBlob(new Blob([data],{type:'application/json'}),`superclean-backup-${today()}.json`);toast('تم تنزيل النسخة الاحتياطية')}
 async function importData(file){try{const j=JSON.parse(await file.text()),d=j.data||j;if(!(await ask('استرجاع البيانات من الملف؟ السجلات الموجودة بنفس الرقم ستُستبدل.','استرجاع',false)))return;
