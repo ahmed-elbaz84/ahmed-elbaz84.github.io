@@ -232,6 +232,15 @@ body.lock{overflow:hidden}
 body.kb .tabs{display:none}
 body.kb{padding-bottom:0}
 body.kb .stick{bottom:0}
+.itbl td.nm{min-width:7.5em}.itbl td.nm b{display:block;font-weight:600;cursor:pointer;text-decoration:underline dotted color-mix(in srgb,var(--mut) 60%,transparent);text-underline-offset:3px}.itbl td.nm small{display:block;color:var(--mut);font-size:11.5px}
+.itbl tbody tr{cursor:default}.itbl tbody tr:active{background:none}
+.itbl tr.sel td{background:color-mix(in srgb,var(--pri) 10%,var(--card))}
+.itbl input{width:62px;min-height:38px;border-radius:8px;border:1px solid var(--line);background:var(--bg);text-align:center;font-size:16px;padding:2px 4px}
+.itbl .ip{width:70px;border-style:dashed}
+.itbl .iqt{border-color:color-mix(in srgb,var(--pri) 45%,var(--line))}
+.itbl td{vertical-align:middle;padding:6px}
+.itbl .itot{font-weight:700;min-width:4em}
+.itbl .lwarn{font-size:11px;margin:0}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
 .seg button{border:0;background:none;min-height:34px;padding:2px 16px;font-weight:600;font-size:13px;cursor:pointer}
 .seg button.on{background:var(--pri);color:#fff}
@@ -420,20 +429,20 @@ function vStock(){
   <div class="sec">المخزن الرئيسي <span class="tag">${its.length} صنف</span><span class="sp"></span><button class="btn p sm" data-act="newitem">+ صنف جديد</button></div>
   <input class="search" id="sq" placeholder="ابحث باسم الصنف…" value="${esc(stockQ)}" type="search">
   <div class="chips">${[['all','الكل'],['low','النواقص'],['off','الخامل']].map(([k,l])=>`<button class="chip ${stockF===k?'on':''}" data-act="sf:${k}">${l}</button>`).join('')}</div>
-  <div class="scroll"><table class="tbl"><thead><tr><th class="first">الصنف</th><th>الوحدة</th><th class="n">الكمية</th><th class="n">السعر الأساسي</th><th class="n">سعر البيع</th><th class="n">سعر الجملة</th><th class="n pf">المكسب</th><th>ملاحظات</th></tr></thead>
+  <div class="scroll"><table class="tbl"><thead><tr><th class="first">الصنف</th><th>الوحدة</th><th class="n">الكمية</th><th class="n">السعر الأساسي</th><th class="n">سعر الشركة</th><th class="n pf">المكسب</th><th>ملاحظات</th></tr></thead>
   <tbody id="stockBody">${stockRows()}</tbody>
-  <tfoot><tr><td class="first">قيمة المخزن</td><td></td><td></td><td class="n">${egp(sum(its,i=>num(i.qty)*num(i.cost)))}</td><td class="n">${egp(sum(its,i=>num(i.qty)*num(i.sell)))}</td><td></td><td></td><td></td></tr></tfoot></table></div>
+  <tfoot><tr><td class="first">قيمة المخزن</td><td></td><td></td><td class="n">${egp(sum(its,i=>num(i.qty)*num(i.cost)))}</td><td class="n">${egp(sum(its,i=>num(i.qty)*num(i.sell)))}</td><td></td><td></td></tr></tfoot></table></div>
   <p class="mut" style="font-size:13px">اضغط على أي سطر لتعديل الاسم أو السعر أو الوحدة أو الكمية أو إضافة رصيد جديد.</p>
   </section>`;
 }
 function stockRows(){
   const q=stockQ.trim();
   const r=items().filter(i=>(!q||String(i.name).includes(q))&&(stockF==='all'||(stockF==='low'?i.active!==false&&num(i.qty)<=num(i.min):i.active===false)));
-  if(!r.length)return `<tr><td colspan="8" class="empty">${list('items').length?'لا توجد نتائج':'المخزن فارغ — أضف أول صنف'}</td></tr>`;
-  return r.map(i=>{const m=num(i.sell)-num(i.cost);return `<tr data-act="item:${i.id}" class="${i.active===false?'off':''} ${num(i.qty)<=num(i.min)?'low':''}"><td class="nm first">${esc(i.name)}${i.active===false?' <span class="tag">خامل</span>':''}</td><td>${esc(i.unit)}</td><td class="n q">${fmt(i.qty)}</td><td class="n">${fmt(i.cost)}</td><td class="n">${fmt(i.sell)}</td><td class="n">${num(i.whole)?fmt(i.whole):'—'}</td><td class="n pf ${m>=0?'pos':'neg'}">${fmt(m)}${num(i.cost)?` <small>(${Math.round(m/num(i.cost)*100)}%)</small>`:''}</td><td class="nt">${esc(i.notes)}</td></tr>`}).join('');
+  if(!r.length)return `<tr><td colspan="7" class="empty">${list('items').length?'لا توجد نتائج':'المخزن فارغ — أضف أول صنف'}</td></tr>`;
+  return r.map(i=>{const m=num(i.sell)-num(i.cost);return `<tr data-act="item:${i.id}" class="${i.active===false?'off':''} ${num(i.qty)<=num(i.min)?'low':''}"><td class="nm first">${esc(i.name)}${i.active===false?' <span class="tag">خامل</span>':''}</td><td>${esc(i.unit)}</td><td class="n q">${fmt(i.qty)}</td><td class="n">${fmt(i.cost)}</td><td class="n">${fmt(i.sell)}</td><td class="n pf ${m>=0?'pos':'neg'}">${fmt(m)}${num(i.cost)?` <small>(${Math.round(m/num(i.cost)*100)}%)</small>`:''}</td><td class="nt">${esc(i.notes)}</td></tr>`}).join('');
 }
 function itemModal(id){
-  const o=id?S.items[id]:{name:'',unit:'عدد',qty:0,cost:'',sell:'',whole:'',min:0,cat:'',notes:'',active:true};
+  const o=id?S.items[id]:{name:'',unit:'عدد',qty:0,cost:'',sell:'',min:0,cat:'',notes:'',active:true};
   if(!o)return;
   const cats=[...new Set(list('items').map(i=>i.cat).filter(Boolean))];
   const draw=()=>openModal(`<h3>${id?'تعديل صنف':'صنف جديد'}</h3>
@@ -443,7 +452,7 @@ function itemModal(id){
   <label class="fld"><span>التصنيف</span><input name="cat" list="cl" value="${esc(o.cat)}"></label></div>
   <datalist id="ul">${UNITS.map(u=>`<option value="${u}">`).join('')}</datalist><datalist id="cl">${cats.map(u=>`<option value="${esc(u)}">`).join('')}</datalist>
   <div class="g2">${f('qty','الكمية الحالية',fmt(o.qty).replace(/,/g,''),'num')}${f('min','الحد الأدنى (تنبيه نواقص)',o.min,'num')}</div>
-  <div class="g3">${f('cost','السعر الأساسي (تكلفة)',o.cost,'num')}${f('sell','سعر البيع (قطاعي)',o.sell,'num')}${f('whole','سعر الجملة',o.whole,'num')}</div>
+  <div class="g2">${f('cost','السعر الأساسي (تكلفة)',o.cost,'num')}${f('sell','سعر الشركة (البيع)',o.sell,'num')}</div>
   <div class="margin pf" id="mg"></div>
   <label class="fld"><span>ملاحظات</span><textarea name="notes">${esc(o.notes)}</textarea></label>
   <label class="chk"><input type="checkbox" name="active" ${o.active!==false?'checked':''}> الصنف نشط (يظهر في الفواتير)</label>
@@ -453,11 +462,11 @@ function itemModal(id){
   const bind=s=>{
     rebind=bind;
     const fm=s.querySelector('#itf');
-    const upd=()=>{const d=formData(fm),c=num(d.cost),p=num(d.sell),w=num(d.whole);s.querySelector('#mg').innerHTML=`مكسب القطاعي: <span class="${p-c>=0?'pos':'neg'}">${egp(p-c)}</span>${w?` · مكسب الجملة: <span class="${w-c>=0?'pos':'neg'}">${egp(w-c)}</span>`:''}`};
+    const upd=()=>{const d=formData(fm),c=num(d.cost),p=num(d.sell);s.querySelector('#mg').innerHTML=`المكسب في ال${esc(d.unit||'وحدة')}: <span class="${p-c>=0?'pos':'neg'}">${egp(p-c)}</span>${c?` (${Math.round((p-c)/c*100)}%)`:''}`};
     fm.addEventListener('input',upd);upd();
     fm.onsubmit=async e=>{e.preventDefault();const d=formData(fm);if(!d.name.trim())return toast('اكتب اسم الصنف');
       const nid=id||uid(),nq=r2(d.qty);
-      const n={...(id?S.items[id]:{order:list('items').length+1,created:Date.now()}),name:d.name.trim(),unit:d.unit.trim()||'عدد',cat:d.cat.trim(),qty:nq,min:r2(d.min),cost:r2(d.cost),sell:r2(d.sell),whole:r2(d.whole),notes:d.notes.trim(),active:!!d.active,updated:Date.now()};
+      const n={...(id?S.items[id]:{order:list('items').length+1,created:Date.now()}),name:d.name.trim(),unit:d.unit.trim()||'عدد',cat:d.cat.trim(),qty:nq,min:r2(d.min),cost:r2(d.cost),sell:r2(d.sell),notes:d.notes.trim(),active:!!d.active,updated:Date.now()};
       closeModal();
       await put('items',nid,n);
       const oq=id?num(o.qty):0;
@@ -484,43 +493,60 @@ function custStats(id){const iv=list('invoices').filter(i=>i.cust===id);return{n
 function custRows(){
   const q=custQ.trim();const r=custs().filter(c=>!q||String(c.name).includes(q)||String(c.phone).includes(q));
   if(!r.length)return `<div class="empty">${list('customers').length?'لا توجد نتائج':'لا يوجد عملاء بعد'}</div>`;
-  return r.map(c=>{const s=custStats(c.id);return `<div class="it" data-act="cust:${c.id}"><div class="grow"><b>${esc(c.name)} <span class="tag">${esc(c.type||'قطاعي')}</span></b><small>${esc(c.phone||'بدون رقم')} · ${s.n} فاتورة</small></div><div class="amt">${egp(s.total)}${s.due>0?`<br><small class="neg">باقي ${fmt(s.due)}</small>`:''}</div></div>`}).join('');
+  return r.map(c=>{const s=custStats(c.id);return `<div class="it" data-act="cust:${c.id}"><div class="grow"><b>${esc(c.name)}</b><small>${esc(c.phone||'بدون رقم')} · ${s.n} فاتورة</small></div><div class="amt">${egp(s.total)}${s.due>0?`<br><small class="neg">باقي ${fmt(s.due)}</small>`:''}</div></div>`}).join('');
 }
 function custModal(id,after){
-  const o=id?S.customers[id]:{name:'',phone:'',type:'قطاعي',address:'',notes:''};if(!o)return;
+  const o=id?S.customers[id]:{name:'',phone:'',address:'',notes:''};if(!o)return;
   const s=id?custStats(id):null;
   const bind=sh=>{rebind=bind;const fm=sh.querySelector('#cf');
     fm.onsubmit=async e=>{e.preventDefault();const d=formData(fm);if(!d.name.trim())return toast('اكتب اسم العميل');const nid=id||uid();
-      closeModal();await put('customers',nid,{...(id?S.customers[id]:{created:Date.now()}),name:d.name.trim(),phone:d.phone.trim(),type:d.type,address:d.address.trim(),notes:d.notes.trim()});toast('تم حفظ العميل');after?after(nid):render()};
+      closeModal();await put('customers',nid,{...(id?S.customers[id]:{created:Date.now()}),name:d.name.trim(),phone:d.phone.trim(),address:d.address.trim(),notes:d.notes.trim()});toast('تم حفظ العميل');after?after(nid):render()};
     const dx=sh.querySelector('#cdel');if(dx)dx.onclick=async()=>{if(await ask(`حذف العميل «${o.name}»؟ فواتيره ستبقى محفوظة.`,'حذف')){await del('customers',id);render()}}};
   openModal(`<h3>${id?esc(o.name):'عميل جديد'}</h3>
   ${s?`<div class="kpis" style="margin-bottom:12px"><div class="kpi"><span>الفواتير</span><b>${s.n}</b></div><div class="kpi"><span>إجمالي المشتريات</span><b>${egp(s.total)}</b></div><div class="kpi"><span>الباقي عليه</span><b class="${s.due>0?'neg':''}">${egp(s.due)}</b></div><div class="kpi pf"><span>مكسبك منه</span><b class="pos">${egp(s.profit)}</b></div></div>`:''}
   <form id="cf">${f('name','اسم العميل',o.name,'text','required')}
-  <div class="g2">${f('phone','رقم الموبايل',o.phone,'tel','dir="ltr"')}<label class="fld"><span>نوع السعر</span><select name="type">${['قطاعي','جملة'].map(t=>`<option ${o.type===t?'selected':''}>${t}</option>`).join('')}</select></label></div>
+  ${f('phone','رقم الموبايل',o.phone,'tel','dir="ltr"')}
   ${f('address','العنوان',o.address)}<label class="fld"><span>ملاحظات</span><textarea name="notes">${esc(o.notes)}</textarea></label>
   <div class="acts"><button class="btn p grow" type="submit">حفظ</button>${id?`<button class="btn a" type="button" data-act="custinv:${id}">فاتورة جديدة له</button><button class="btn d" type="button" id="cdel">حذف</button>`:''}<button class="btn" type="button" data-act="close">إلغاء</button></div></form>
   ${id&&s.n?`<h3 style="margin-top:14px;font-size:17px">فواتيره</h3>${invs().filter(i=>i.cust===id).map(invItem).join('')}`:''}`,bind);
 }
 
-/* ---------- invoice editor ---------- */
+/* ---------- invoice editor: every item in one table, type the quantity only ---------- */
 const nextNo=()=>Math.max(0,...list('invoices').map(i=>num(i.no)))+1;
-const blank=()=>({itemId:'',name:'',unit:'',qty:1,price:0,cost:0});
-function newDraft(cust){return{id:null,no:nextNo(),date:today(),cust:cust||'',lines:[blank()],discount:'',paid:'',notes:'',pay:'نقدي'}}
-const priceFor=(it,cid)=>{const c=S.customers[cid];return c&&c.type==='جملة'&&num(it.whole)>0?num(it.whole):num(it.sell)};
+let invSel='all',invItemQ='';
+function newDraft(cust){return{id:null,no:nextNo(),date:today(),cust:cust||'',q:{},p:{},meta:{},discount:'',paid:'',notes:'',pay:'نقدي'}}
+const dPrice=id=>{const d=draft;if(d.p[id]!==undefined&&d.p[id]!=='')return num(d.p[id]);const it=S.items[id];return it?num(it.sell):num((d.meta[id]||{}).price)};
+const dCost=id=>{const m=draft.meta[id];if(m&&m.cost!==undefined)return num(m.cost);const it=S.items[id];return it?num(it.cost):0};
+const chosen=()=>Object.keys(draft.q).filter(id=>num(draft.q[id])>0);
+function invRowsHtml(){
+  const d=draft,q=invItemQ.trim(),ids=new Set(chosen());
+  let r=items().filter(i=>i.active!==false||ids.has(i.id));
+  Object.keys(d.meta).forEach(id=>{if(!S.items[id]&&ids.has(id))r.push({id,name:d.meta[id].name,unit:d.meta[id].unit,qty:0,gone:true})});
+  if(invSel==='sel')r=r.filter(i=>ids.has(i.id));
+  if(q)r=r.filter(i=>String(i.name).includes(q));
+  if(!r.length)return `<tr><td colspan="4" class="empty">${invSel==='sel'?'لسه ما اخترتش أصناف — اكتب الكمية قدام الصنف':'لا توجد نتائج'}</td></tr>`;
+  return r.map(i=>{const qq=d.q[i.id]??'';return `<tr data-id="${i.id}" class="${num(qq)>0?'sel':''}">
+  <td class="nm"><b ${i.gone?'':`data-act="item:${i.id}"`}>${esc(i.name)}</b><small>${esc(i.unit)} · متاح ${fmt(i.qty)}</small><div class="lwarn"></div></td>
+  <td class="n"><input class="ip" inputmode="decimal" value="${fmt(dPrice(i.id)).replace(/,/g,'')}" aria-label="سعر ${esc(i.name)}"></td>
+  <td class="n"><input class="iqt" inputmode="decimal" placeholder="0" value="${esc(qq)}" aria-label="كمية ${esc(i.name)}"></td>
+  <td class="n itot">${num(qq)>0?fmt(num(qq)*dPrice(i.id)):'—'}</td></tr>`}).join('');
+}
 function vInv(){
-  const d=draft,its=items().filter(i=>i.active!==false||d.lines.some(l=>l.itemId===i.id));
-  const opts=sel=>`<option value="">— اختر الصنف —</option>`+its.map(i=>`<option value="${i.id}" ${i.id===sel?'selected':''}>${esc(i.name)} (${esc(i.unit)}) — متاح ${fmt(i.qty)}</option>`).join('');
+  const d=draft;
   return `<section class="band">
   <div class="sec">${d.id?'تعديل فاتورة':'فاتورة جديدة'} <span class="tag">#${d.no}</span><span class="sp"></span><button class="btn sm" data-act="clearinv">${d.id?'إلغاء التعديل':'تفريغ'}</button></div>
   <div class="card">
-  <div class="g2"><label class="fld"><span>العميل</span><select id="icust" class="in"><option value="">عميل ${d.pay}</option>${custs().map(c=>`<option value="${c.id}" ${c.id===d.cust?'selected':''}>${esc(c.name)}${c.type==='جملة'?' (جملة)':''}</option>`).join('')}</select></label>
+  <div class="g2"><label class="fld"><span>العميل</span><select id="icust" class="in"><option value="">عميل ${d.pay}</option>${custs().map(c=>`<option value="${c.id}" ${c.id===d.cust?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
   <label class="fld"><span>التاريخ</span><input id="idate" type="date" class="in" value="${d.date}"></label></div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="mut" style="font-size:12px;font-weight:600">طريقة الدفع</span><div class="seg">${['نقدي','تحويل'].map(p=>`<button class="${d.pay===p?'on':''}" data-act="pay:${p}">${p}</button>`).join('')}</div><span style="flex:1"></span><button class="btn sm" data-act="quickcust">+ عميل جديد</button></div>
   </div>
-  <div id="lines">${d.lines.map((l,i)=>`<div class="line" data-i="${i}"><select class="lsel">${opts(l.itemId)}</select>
-  <div class="lnums"><label><span>الكمية</span><input class="lq" inputmode="decimal" value="${l.qty}"></label><label><span>السعر</span><input class="lp" inputmode="decimal" value="${l.itemId?l.price:''}"></label><div class="lt"><small>الإجمالي</small><span class="ltv">0</span></div><button class="x" data-act="rmline:${i}" aria-label="حذف السطر">×</button></div><div class="lwarn"></div></div>`).join('')}</div>
-  <button class="btn" data-act="addline" style="width:100%;border-style:dashed">+ إضافة صنف</button>
-  <div class="card" style="margin-top:14px"><div class="tot">
+  <div id="lines">
+  <input class="search" id="isq" placeholder="ابحث عن صنف…" value="${esc(invItemQ)}" type="search">
+  <div class="chips"><button class="chip ${invSel==='all'?'on':''}" data-act="isel:all">كل الأصناف</button><button class="chip ${invSel==='sel'?'on':''}" data-act="isel:sel">المختار <span id="selcnt">0</span></button></div>
+  <div class="scroll"><table class="tbl itbl"><thead><tr><th>الصنف</th><th class="n">سعر الشركة</th><th class="n">الكمية</th><th class="n">الإجمالي</th></tr></thead><tbody id="ibody">${invRowsHtml()}</tbody></table></div>
+  <p class="mut" style="font-size:12px;margin:6px 2px 0">اكتب الكمية قدام الصنف والإجمالي بيتحسب لوحده. تقدر تغيّر السعر في الفاتورة دي بس، أو تضغط على اسم الصنف تعدّل بياناته.</p>
+  </div>
+  <div class="card" style="margin-top:12px"><div class="tot">
   <span>الإجمالي قبل الخصم</span><b id="tsub">0</b>
   <span>خصم</span><input class="in" id="idisc" inputmode="decimal" placeholder="0" value="${esc(d.discount)}">
   <hr><span><b>الصافي</b></span><b class="grand" id="ttot">0</b>
@@ -535,35 +561,38 @@ function vInv(){
 }
 function recalc(){
   const d=draft;if(!d||!$('#lines'))return;
-  let sub=0,cost=0;
-  d.lines.forEach((l,i)=>{const t=num(l.qty)*num(l.price);if(l.itemId){sub+=t;cost+=num(l.qty)*num(l.cost)}const el=$(`.line[data-i="${i}"] .ltv`);if(el)el.textContent=fmt(t)});
+  let sub=0,cost=0;const ids=chosen();
+  ids.forEach(id=>{const q=num(d.q[id]);sub+=q*dPrice(id);cost+=q*dCost(id)});
+  $$('#ibody tr[data-id]').forEach(tr=>{const id=tr.dataset.id,q=num(d.q[id]);tr.classList.toggle('sel',q>0);tr.querySelector('.itot').textContent=q>0?fmt(q*dPrice(id)):'—'});
   const disc=num(d.discount),tot=Math.max(0,sub-disc),paid=d.paid===''?tot:num(d.paid);
+  $('#selcnt').textContent=ids.length;
   $('#tsub').textContent=egp(sub);$('#ttot').textContent=egp(tot);$('#tdue').textContent=egp(Math.max(0,tot-paid));$('#tdue').className=tot-paid>0?'neg':'';
   $('#tcost').textContent=egp(cost);$('#tprof').textContent=egp(tot-cost);$('#tprof').classList.toggle('neg',tot-cost<0);
   refreshLineHints();
 }
 function refreshLineHints(){
-  if(!draft||!$('#lines'))return;const old=draft.id&&S.invoices[draft.id];
-  const want={};draft.lines.forEach(l=>{if(l.itemId)want[l.itemId]=(want[l.itemId]||0)+num(l.qty)});
-  draft.lines.forEach((l,i)=>{const w=$(`.line[data-i="${i}"] .lwarn`);if(!w)return;const it=S.items[l.itemId];if(!it){w.textContent='';return}
-    const back=old?sum((old.lines||[]).filter(x=>x.itemId===l.itemId),x=>x.qty):0,av=num(it.qty)+back;
-    w.textContent=want[l.itemId]>av?`المتاح ${fmt(av)} ${it.unit} فقط — الرصيد سيصبح بالسالب`:(num(l.price)<num(l.cost)?'تنبيه: السعر أقل من التكلفة':'')})
+  if(!draft||!$('#ibody'))return;const old=draft.id&&S.invoices[draft.id];
+  $$('#ibody tr[data-id]').forEach(tr=>{const id=tr.dataset.id,w=tr.querySelector('.lwarn'),it=S.items[id],q=num(draft.q[id]);if(!w)return;
+    if(!it||q<=0){w.textContent='';return}
+    const back=old?sum((old.lines||[]).filter(x=>x.itemId===id),x=>x.qty):0,av=num(it.qty)+back;
+    w.textContent=q>av?`المتاح ${fmt(av)} بس`:(dPrice(id)<dCost(id)?'السعر أقل من التكلفة':'')})
 }
 async function saveInv(btn){
-  const d=draft,lines=d.lines.filter(l=>l.itemId&&num(l.qty)>0);
-  if(!lines.length)return toast('اختر صنف واحد على الأقل واكتب الكمية');
+  const d=draft,ids=chosen();
+  if(!ids.length)return toast('اكتب الكمية قدام صنف واحد على الأقل');
   btn.disabled=true;
+  const lines=ids.map(id=>{const it=S.items[id],m=d.meta[id]||{};return{itemId:id,name:it?it.name:m.name,unit:it?it.unit:m.unit,qty:r2(d.q[id]),price:r2(dPrice(id)),cost:r2(dCost(id))}});
   const old=d.id?S.invoices[d.id]:null,id=d.id||uid();
   const delta={};lines.forEach(l=>delta[l.itemId]=(delta[l.itemId]||0)+num(l.qty));
   if(old)(old.lines||[]).forEach(l=>delta[l.itemId]=(delta[l.itemId]||0)-num(l.qty));
   const sub=r2(sum(lines,l=>num(l.qty)*num(l.price))),cost=r2(sum(lines,l=>num(l.qty)*num(l.cost))),disc=r2(d.discount),total=r2(Math.max(0,sub-disc));
   const paid=d.paid===''?total:r2(d.paid),c=S.customers[d.cust];
-  const inv={no:d.no,date:d.date||today(),cust:d.cust||'',custName:c?c.name:'عميل '+(d.pay||'نقدي'),pay:d.pay||'نقدي',custPhone:c?c.phone||'':'',lines:lines.map(l=>({itemId:l.itemId,name:l.name,unit:l.unit,qty:r2(l.qty),price:r2(l.price),cost:r2(l.cost)})),sub,discount:disc,total,paid,cost,profit:r2(total-cost),notes:String(d.notes||'').trim(),created:old?old.created:Date.now(),updated:Date.now()};
+  const inv={no:d.no,date:d.date||today(),cust:d.cust||'',custName:c?c.name:'عميل '+(d.pay||'نقدي'),pay:d.pay||'نقدي',custPhone:c?c.phone||'':'',lines,sub,discount:disc,total,paid,cost,profit:r2(total-cost),notes:String(d.notes||'').trim(),created:old?old.created:Date.now(),updated:Date.now()};
   for(const [iid,dq] of Object.entries(delta)){if(!r2(dq))continue;const it=S.items[iid];if(!it)continue;
     await put('items',iid,{...it,qty:r2(num(it.qty)-dq)});
     await put('moves',uid(),{date:inv.date,ts:Date.now(),itemId:iid,name:it.name,unit:it.unit,qty:r2(-dq),type:dq>0?'بيع':'مرتجع',ref:`فاتورة #${inv.no}`,inv:id});}
   await put('invoices',id,inv);
-  draft=null;view='invoices';render();toast(old?'تم تعديل الفاتورة':'تم حفظ الفاتورة');invModal(id);
+  draft=null;invSel='all';invItemQ='';view='invoices';render();toast(old?'تم تعديل الفاتورة':'تم حفظ الفاتورة');invModal(id);
 }
 
 /* ---------- invoices ---------- */
@@ -676,16 +705,16 @@ const A={
   item:id=>itemModal(id),newitem:()=>itemModal(null),
   cust:id=>custModal(id),newcust:()=>custModal(null),
   custinv:id=>{closeModal();draft=newDraft(id);go('inv')},
-  quickcust:()=>custModal(null,nid=>{draft.cust=nid;draft.lines.forEach(l=>{const it=S.items[l.itemId];if(it)l.price=priceFor(it,nid)});render()}),
+  quickcust:()=>custModal(null,nid=>{draft.cust=nid;render()}),
+  isel:k=>{invSel=k;$('#ibody').innerHTML=invRowsHtml();$$('[data-act^="isel:"]').forEach(b=>b.classList.toggle('on',b.dataset.act==='isel:'+k));recalc()},
   invoice:id=>invModal(id),
-  addline:()=>{draft.lines.push(blank());render();const ls=$$('.line select');ls[ls.length-1]&&ls[ls.length-1].focus()},
-  rmline:i=>{draft.lines.splice(+i,1);if(!draft.lines.length)draft.lines.push(blank());render()},
-  clearinv:async()=>{if(draft.lines.some(l=>l.itemId)&&!(await ask('تفريغ الفاتورة الحالية؟','تفريغ')))return;draft=null;go(draft?'inv':'inv')},
+  clearinv:async()=>{if(chosen().length&&!(await ask('تفريغ الفاتورة الحالية؟','تفريغ')))return;draft=null;go(draft?'inv':'inv')},
   saveinv:(a,b)=>saveInv(b),
   pdf:(id,b)=>makePdf(id,b),sharepdf:(id,b)=>makePdf(id,b,true),
   signup:()=>auth('up'),forgot:()=>auth('forgot'),signout:async()=>{if(await ask('خروج من الحساب على الموبايل ده؟','خروج')){await fb.auth().signOut();toast('خرجت من الحساب')}},
   copyinv:async id=>{try{await navigator.clipboard.writeText(waText(S.invoices[id]));toast('تم النسخ')}catch(e){toast('تعذر النسخ')}},
-  editinv:id=>{const i=S.invoices[id];closeModal();draft={id,no:i.no,date:i.date,cust:i.cust,lines:(i.lines||[]).map(l=>({...l})),discount:num(i.discount)?String(i.discount):'',paid:String(i.paid),notes:i.notes||'',pay:i.pay||'نقدي'};go('inv')},
+  editinv:id=>{const i=S.invoices[id];closeModal();const q={},p={},meta={};(i.lines||[]).forEach(l=>{q[l.itemId]=String(r2(num(q[l.itemId])+num(l.qty)));const it=S.items[l.itemId];if(!it||num(it.sell)!==num(l.price))p[l.itemId]=String(l.price);meta[l.itemId]={name:l.name,unit:l.unit,cost:l.cost,price:l.price}});
+    invSel='sel';invItemQ='';draft={id,no:i.no,date:i.date,cust:i.cust,q,p,meta,discount:num(i.discount)?String(i.discount):'',paid:String(i.paid),notes:i.notes||'',pay:i.pay||'نقدي'};go('inv')},
   delinv:async id=>{const i=S.invoices[id];if(!(await ask(`حذف فاتورة #${i.no}؟ سيتم إرجاع الكميات للمخزن.`,'حذف')))return;
     for(const l of i.lines||[]){const it=S.items[l.itemId];if(!it)continue;await put('items',it.id,{...S.items[it.id],qty:r2(num(S.items[it.id].qty)+num(l.qty))});await put('moves',uid(),{date:today(),ts:Date.now(),itemId:it.id,name:it.name,unit:it.unit,qty:r2(l.qty),type:'إلغاء فاتورة',ref:`فاتورة #${i.no}`})}
     await del('invoices',id);toast('تم حذف الفاتورة وإرجاع الكميات');render()},
@@ -701,8 +730,9 @@ $('#view').addEventListener('input',e=>{const t=e.target;
   if(t.id==='iq'){invQ=t.value;$('#invBody').innerHTML=invRows();return}
   if(t.id==='cq'){custQ=t.value;$('#custBody').innerHTML=custRows();return}
   if(!draft)return;
-  const ln=t.closest('.line');
-  if(ln){const l=draft.lines[+ln.dataset.i];if(t.classList.contains('lq'))l.qty=t.value;if(t.classList.contains('lp'))l.price=num(t.value);recalc();return}
+  if(t.id==='isq'){invItemQ=t.value;$('#ibody').innerHTML=invRowsHtml();recalc();return}
+  const tr=t.closest('#ibody tr[data-id]');
+  if(tr){const id=tr.dataset.id;if(t.classList.contains('iqt'))draft.q[id]=t.value;if(t.classList.contains('ip'))draft.p[id]=t.value;recalc();return}
   if(t.id==='idisc'){draft.discount=t.value;recalc()}
   if(t.id==='ipaid'){draft.paid=t.value;recalc()}
   if(t.id==='inotes')draft.notes=t.value;
@@ -710,10 +740,7 @@ $('#view').addEventListener('input',e=>{const t=e.target;
 $('#view').addEventListener('change',e=>{const t=e.target;
   if(t.id==='mf'){moveF=t.value;render();return}
   if(!draft)return;
-  if(t.classList.contains('lsel')){const l=draft.lines[+t.closest('.line').dataset.i],it=S.items[t.value];
-    if(it){l.itemId=it.id;l.name=it.name;l.unit=it.unit;l.price=priceFor(it,draft.cust);l.cost=num(it.cost);if(!num(l.qty))l.qty=1}else Object.assign(l,blank());
-    render();const q=$(`.line[data-i="${t.closest?draft.lines.indexOf(l):0}"] .lq`);q&&q.select&&q.focus();return}
-  if(t.id==='icust'){draft.cust=t.value;draft.lines.forEach(l=>{const it=S.items[l.itemId];if(it)l.price=priceFor(it,draft.cust)});render();return}
+  if(t.id==='icust'){draft.cust=t.value;return}
   if(t.id==='idate')draft.date=t.value;
 });
 $('#view').addEventListener('submit',async e=>{if(e.target.id==='authf'){e.preventDefault();auth('in');return}if(e.target.id!=='sf')return;e.preventDefault();const d=formData(e.target);await put('settings','main',{...st(),...Object.fromEntries(Object.entries(d).map(([k,v])=>[k,v.trim()]))});toast('تم حفظ الإعدادات')});
