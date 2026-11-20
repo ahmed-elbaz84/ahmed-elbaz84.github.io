@@ -241,7 +241,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-20';
+const VER='2026-11-20 · 2';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -304,7 +304,7 @@ let S; try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 function blank(){return {rate:47.6,cats:[...DEF_CATS],fixedCats:[...DEF_FIXED],plans:[],debts:[],periods:[]}}
 if(!S||!S.periods) S=blank();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-function fill(){['cats','fixedCats','plans','periods','debts'].forEach(k=>{if(!S[k])S[k]=[]});if(!S.profile)S.profile={name:'',home:'',email:'',phone:'',photo:''};if(!S.lang)S.lang='ar'}
+function fill(){['cats','fixedCats','plans','periods','debts'].forEach(k=>{if(!S[k])S[k]=[]});if(!S.profile)S.profile={name:'',home:'',email:'',phone:'',photo:''};if(!S.lang)S.lang='ar';if(S.rateAuto===undefined)S.rateAuto=true}
 fill(); LANG=S.lang;
 function save(fromCloud){if(!fromCloud)S._ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast(L('مساحة الحفظ مليانة، جرّب صورة أصغر','Storage is full, try a smaller photo'))}if(!fromCloud)SYNC.push()}
 
@@ -389,6 +389,33 @@ const AUTH_ERR_AR={'auth/invalid-email':'الإيميل مكتوب غلط','auth
 const AUTH_ERR_EN={'auth/invalid-email':'Email looks wrong','auth/missing-password':'Enter the password','auth/weak-password':'Password needs at least 6 characters','auth/email-already-in-use':'This email already has an account; sign in','auth/invalid-credential':'Wrong email or password','auth/wrong-password':'Wrong password','auth/user-not-found':'No account with this email','auth/network-request-failed':'No internet','auth/too-many-requests':'Too many tries, wait a bit'};
 const authErr=c=>(LANG==='en'?AUTH_ERR_EN:AUTH_ERR_AR)[c]||L('حصلت مشكلة: ','Problem: ')+c;
 
+/* live dollar rate from CIB (the owner's salary bank) */
+const RATE_SRC=['https://www.cibeg.com/api/currency/rates','https://raw.githubusercontent.com/ahmed-elbaz84/ahmed-elbaz84.github.io/main/rate.json','rate.json'];
+let RATE={buy:0,sell:0,at:null,busy:false,err:false};
+try{const r=JSON.parse(localStorage.getItem('masrofat_cib_rate')||'null');if(r&&r.buy)Object.assign(RATE,r)}catch(e){}
+function readRate(j){if(j&&Array.isArray(j.rates)){const u=j.rates.find(x=>x.currencyID==='USD');return u?{buy:+u.buyRate,sell:+u.sellRate}:null}
+  return j&&j.buy?{buy:+j.buy,sell:+j.sell}:null}
+async function fetchRate(manual){
+  if(RATE.busy)return;RATE.busy=true;RATE.err=false;if(manual)rerenderRate();
+  let got=null;
+  for(const u of RATE_SRC){try{const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),5000);
+    const r=await fetch(u+(u.includes('cibeg')?'':'?t='+Date.now()),{cache:'no-store',signal:ctl.signal});clearTimeout(tm);
+    if(!r.ok)continue;got=readRate(await r.json());if(got&&got.buy>0)break;got=null}catch(e){}}
+  RATE.busy=false;
+  if(!got){RATE.err=true;rerenderRate();if(manual)toast(L('مقدرتش أجيب السعر، اتأكد إن النت شغال','Could not get the rate; check your internet'));return}
+  Object.assign(RATE,got,{at:Date.now()});try{localStorage.setItem('masrofat_cib_rate',JSON.stringify({buy:RATE.buy,sell:RATE.sell,at:RATE.at}))}catch(e){}
+  if(S.rateAuto&&Math.abs(S.rate-RATE.buy)>0.0001){S.rate=RATE.buy;save();if(!sheetOpen()&&!typing())render();toast(L('سعر الدولار من CIB: ','CIB dollar rate: ')+RATE.buy)}
+  else{rerenderRate();if(manual)toast(L('السعر زي ما هو: ','Rate unchanged: ')+RATE.buy)}
+}
+function rerenderRate(){const el=$('#rateBox');if(el)el.outerHTML=rateBox()}
+function rateTime(t){return new Date(t).toLocaleString(LANG==='en'?'en-GB':'ar-EG-u-nu-latn',{weekday:'short',hour:'2-digit',minute:'2-digit'})}
+function rateBox(){
+  return `<div class="conv" id="rateBox" style="flex-direction:column;align-items:stretch">
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span>${L('سعر الدولار في CIB','CIB dollar rate')}</span>${RATE.buy?`<span><span class="num" style="font-weight:700">${RATE.buy}</span> ${L('شراء','buy')} · <span class="num">${RATE.sell}</span> ${L('بيع','sell')}</span>`:''}</div>
+    <span class="note">${RATE.busy?L('بيجيب السعر…','Getting the rate…'):RATE.err&&!RATE.buy?L('مقدرتش أجيب السعر دلوقتي','Could not get the rate now'):RATE.at?L('اتجاب ','Fetched ')+rateTime(RATE.at)+(RATE.err?L(' · مفيش نت دلوقتي',' · offline now'):''):''}</span>
+  </div>`;
+}
+
 /* install & share */
 const APP_URL='https://ahmed-elbaz84.github.io/?install=1';
 const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
@@ -408,7 +435,7 @@ function installSteps(){
   if(k==='android')return L(`<ol class="steps"><li>دوس ⋮ فوق على اليمين.</li><li>اختار <b>«تثبيت التطبيق»</b> أو <b>«إضافة إلى الشاشة الرئيسية»</b>.</li></ol>`,`<ol class="steps"><li>Tap ⋮ at the top right.</li><li>Choose <b>Install app</b> or <b>Add to Home screen</b>.</li></ol>`);
   return L(`<ol class="steps"><li>على الكمبيوتر: دوس أيقونة التثبيت في آخر شريط العنوان، أو ⋯ ← <b>«التطبيقات»</b> ← <b>«تثبيت»</b>.</li><li>على الموبايل: صوّر كود QR من «شارك البرنامج».</li></ol>`,`<ol class="steps"><li>On a computer: click the install icon at the end of the address bar, or ⋯ → <b>Apps</b> → <b>Install</b>.</li><li>On a phone: scan the QR code from "Share the app".</li></ol>`);
 }
-function keepMine(next){next.profile=S.profile;next.lang=S.lang;return next}
+function keepMine(next){next.profile=S.profile;next.lang=S.lang;next.rateAuto=S.rateAuto;if(S.rateAuto&&RATE.buy)next.rate=RATE.buy;return next}
 
 let curId=(S.periods[S.periods.length-1]||{}).id, tab='home', filter='*', QUICK=false;
 const UNLOCKED=new Set();
@@ -695,6 +722,7 @@ function money(){
         <div class="field"><label for="cvRate">${L('سعر الدولار','Dollar rate')}</label><input id="cvRate" class="num" inputmode="decimal" value="${S.rate}"></div>
       </div>
       <div class="conv"><span>${L('هتستلم','You get')}</span><b class="num" id="cvOut"></b></div>
+      ${RATE.buy?`<p class="note" style="margin:0">${L('سعر CIB: ','CIB rate: ')}<span class="num">${RATE.buy}</span> ${L('شراء','buy')} · <span class="num">${RATE.sell}</span> ${L('بيع','sell')}${RATE.at?' · '+rateTime(RATE.at):''}</p>`:''}
       <button class="btn usd full" data-act="saveTransfer">${L('سجّل التحويل ده','Record this conversion')}</button>
     </div>
   </section>`}
@@ -729,8 +757,11 @@ function settings(){
   <section>
     <h2>${L('سعر الدولار','Dollar rate')}</h2>
     <div class="card" style="display:flex;flex-direction:column;gap:8px">
-      <div class="field"><label for="rate">${L('سعر الدولار بالجنيه (بيتستخدم في الحسابات التقريبية)','Dollar rate in EGP (used for estimates)')}</label><input id="rate" class="num" inputmode="decimal" value="${S.rate}"></div>
-      <p class="note" style="margin:0">${L('غيّره لما سعر الدولار يتغير.','Change it when the rate changes.')}</p>
+      ${rateBox()}
+      <label class="note" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="rateAuto" class="chk" ${S.rateAuto?'checked':''}> ${L('خد سعر الشراء من CIB تلقائي (البنك اللي المرتب بينزل عليه)','Use CIB\'s buy rate automatically (your salary bank)')}</label>
+      <button class="btn ghost" data-act="rateNow">↻ ${L('هات السعر دلوقتي','Get the rate now')}</button>
+      <div class="field"><label for="rate">${L('السعر اللي البرنامج بيحسب بيه (ج.م لكل دولار)','Rate the app uses (EGP per USD)')}</label><input id="rate" class="num" inputmode="decimal" value="${S.rate}"></div>
+      <p class="note" style="margin:0">${S.rateAuto?L('بيتحدّث لوحده من CIB كل ما تفتح البرنامج. لو كتبت سعر بإيدك، التحديث التلقائي هيتقفل.','Updates from CIB whenever you open the app. Typing a rate yourself turns automatic updates off.'):L('التحديث التلقائي مقفول، والبرنامج بيحسب بالسعر اللي كتبته.','Automatic updates are off; the app uses the rate you typed.')}</p>
     </div>
   </section>
   <section>
@@ -976,6 +1007,7 @@ document.addEventListener('click',e=>{
     const reg=navigator.serviceWorker&&navigator.serviceWorker.getRegistration?navigator.serviceWorker.getRegistration():Promise.resolve(null);
     Promise.race([reg.then(r=>r&&r.update()).catch(()=>{}),new Promise(r=>setTimeout(r,2500))]).then(()=>setTimeout(go2,200));return}
   if(a==='profile'){openSheet('profile');return}
+  if(a==='rateNow'){fetchRate(true);return}
   if(a==='pfPhoto'){$('#pfFile').click();return}
   if(a==='pfNoPhoto'){PHOTO='';$('#pfAv').innerHTML=esc(initial($('#pfName').value))||'—';t.remove();return}
   if(a==='pfSave'){Object.assign(S.profile,{name:$('#pfName').value.trim(),home:$('#pfHome').value.trim(),email:$('#pfEmail').value.trim(),phone:$('#pfPhone').value.trim(),photo:PHOTO});save();closeSheet();render();toast(L('اتحفظ حسابك','Profile saved'));return}
@@ -1102,7 +1134,8 @@ document.addEventListener('change',e=>{
   if(t.id==='fPaid'){$('#fPaidOnF').hidden=!t.checked}
   if(t.id==='pfFile'&&t.files[0]){readPhoto(t.files[0],url=>{PHOTO=url;$('#pfAv').innerHTML=`<img src="${url}" alt="">`});t.value='';return}
   if(t.id==='restoreFile'&&t.files[0]){const fr=new FileReader();fr.onload=()=>{try{const d=JSON.parse(fr.result);if(!d.periods)throw 0;S=d;fill();LANG=S.lang;curId=(S.periods[S.periods.length-1]||{}).id;save();tab='home';render();toast(L('رجعت النسخة الاحتياطية','Backup restored'))}catch(e){toast(L('الملف ده مش نسخة احتياطية من البرنامج','That file is not a backup from this app'))}};fr.readAsText(t.files[0]);t.value='';return}
-  if(t.id==='rate'){const r=numv('#rate');if(r){S.rate=r;save();toast(L('اتحفظ السعر','Rate saved'))}}
+  if(t.id==='rate'){const r=numv('#rate');if(r){S.rate=r;const was=S.rateAuto;S.rateAuto=false;save();render();toast(was?L('اتحفظ السعر، والتحديث من CIB اتقفل','Rate saved; CIB auto-update turned off'):L('اتحفظ السعر','Rate saved'))}}
+  if(t.id==='rateAuto'){S.rateAuto=t.checked;save();if(S.rateAuto)fetchRate(true);else{render();toast(L('هتحسب بالسعر اللي تكتبه','Using the rate you type'))}}
   if(t.id==='nDate'){const d=t.value;if(d){$('#nKey').value=keyFor(d);const c=$('#nClose');if(c)c.textContent=dshort(addDays(d,-1))}}
 });
 document.addEventListener('input',e=>{const id=e.target.id;
@@ -1113,6 +1146,9 @@ document.addEventListener('input',e=>{const id=e.target.id;
 });
 document.addEventListener('focusout',()=>setTimeout(()=>{if(!typing()&&!sheetOpen())SYNC.flush()},300));
 SYNC.load();
+setTimeout(()=>fetchRate(false),800);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(!RATE.at||Date.now()-RATE.at>10*60e3))fetchRate(false)});
+setInterval(()=>{if(document.visibilityState==='visible')fetchRate(false)},30*60e3);
 if(/[?&]install=1/.test(location.search)&&!isStandalone()){history.replaceState(null,'',location.pathname);setTimeout(()=>{if(!sheetOpen())openSheet('install')},1500)}
 $('#fab').onclick=()=>openSheet(tab==='fixed'?'fixed':'daily');
 $('#mPrev').onclick=()=>{const p=prevP(P());if(p){curId=p.id;QUICK=false;render()}};
