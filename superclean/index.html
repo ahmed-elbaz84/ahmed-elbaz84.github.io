@@ -248,6 +248,7 @@ body.kb .stick{bottom:0}
 .itbl input{margin-inline:auto;display:block}
 .paper th,.paper td,.paper .n{text-align:center}
 .paper th:nth-child(2),.paper td:nth-child(2){text-align:start}
+.updbar{position:fixed;inset-inline:10px;bottom:calc(68px + env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--bg);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.25)}.updbar span{flex:1}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
 .seg button{border:0;background:none;min-height:34px;padding:2px 16px;font-weight:600;font-size:13px;cursor:pointer}
 .seg button.on{background:var(--pri);color:#fff}
@@ -287,6 +288,7 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
+const APP_V='12';
 const COLS=['items','customers','invoices','expenses','moves','settings'];
 const S={};COLS.forEach(c=>S[c]={});
 const LS='superclean-v1';
@@ -326,6 +328,7 @@ function loadScript(src){return new Promise((res,rej)=>{const s=document.createE
 
 async function boot(){
   initRoute();
+  setTimeout(checkUpdate,1500);
   try{if(localStorage.getItem('sc-hp')==='1')document.body.classList.add('hp')}catch(e){}
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
   if(acct())setSync('loading');else{loadLocal();setSync('local')}
@@ -405,6 +408,14 @@ window.addEventListener('popstate',e=>{
   show(st_.v||location.hash.slice(1)||'home');
 });
 function invHidSave(h){put('settings','main',{...st(),invHidden:h})}
+/* updates: version.txt holds the live version; a banner offers the update, and the button clears the app cache and reloads (data stays) */
+async function forceUpdate(){toast('جاري التحديث…');saveDraft();
+  try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.filter(r=>r.scope.includes('/superclean/')).map(r=>r.unregister()))}catch(e){}
+  try{const ks=await caches.keys();await Promise.all(ks.filter(k=>k.startsWith('superclean-')).map(k=>caches.delete(k)))}catch(e){}
+  location.replace(location.pathname+'?v='+Date.now()+location.hash)}
+async function checkUpdate(){try{const r=await fetch('version.txt?'+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
+  if(v&&v!==APP_V&&!$('#updbar')){const b=document.createElement('div');b.id='updbar';b.className='updbar';b.innerHTML=`<span>في نسخة جديدة من التطبيق (${esc(v)})</span><button class="btn sm a" data-act="forceupdate">تحديث</button>`;document.body.appendChild(b)}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 function saveDraft(){try{if(draft)localStorage.setItem('sc-draft',JSON.stringify(draft));else localStorage.removeItem('sc-draft')}catch(e){}}
 function loadDraft(){try{const d=JSON.parse(localStorage.getItem('sc-draft')||'null');if(d&&d.q)draft=d}catch(e){}}
 function initRoute(){loadDraft();const h=location.hash.slice(1);const v=VIEWS.includes(h)?h:'home';
@@ -719,7 +730,8 @@ function vSettings(){const s=st();
   ${acctCard()}
   <div class="card"><h2>نسخة احتياطية</h2><p class="mut" style="margin-top:0">${user?'البيانات محفوظة على الحساب وتتزامن تلقائياً، والنسخة الاحتياطية للاطمئنان فقط.':'البيانات محفوظة على الموبايل ده بس. اعمل دخول بحساب أو نزّل نسخة احتياطية كل فترة.'}</p>
   <div class="acts"><button class="btn grow" data-act="export">تنزيل نسخة احتياطية</button><button class="btn grow" data-act="import">استرجاع من ملف</button></div></div>
-  <div class="card"><h2>تثبيت التطبيق على الموبايل <span class="tag">إصدار 10</span></h2><p style="margin:0" class="mut">افتح <b dir="ltr">ahmed-elbaz84.github.io/superclean</b> في المتصفح ثم: <b>أندرويد</b>: القائمة ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». <b>آيفون (سفاري)</b>: زر المشاركة ← «إضافة إلى الشاشة الرئيسية». أي تحديث جديد بيوصل لوحده لما تفتح التطبيق والنت شغال.</p></div></section>`}
+  <div class="card"><h2>التحديث</h2><p class="mut" style="margin-top:0">إنت على إصدار ${APP_V}. لو اتعمل تعديل جديد ومش ظاهر، اضغط هنا. البيانات مش هتتمسح.</p><button class="btn p" style="width:100%" data-act="forceupdate">تحديث لآخر نسخة</button></div>
+  <div class="card"><h2>تثبيت التطبيق على الموبايل <span class="tag">إصدار ${APP_V}</span></h2><p style="margin:0" class="mut">افتح <b dir="ltr">ahmed-elbaz84.github.io/superclean</b> في المتصفح ثم: <b>أندرويد</b>: القائمة ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». <b>آيفون (سفاري)</b>: زر المشاركة ← «إضافة إلى الشاشة الرئيسية». أي تحديث جديد بيوصل لوحده لما تفتح التطبيق والنت شغال.</p></div></section>`}
 async function exportData(){const data=JSON.stringify({app:'superclean',at:new Date().toISOString(),data:Object.fromEntries(COLS.map(c=>[c,S[c]]))});
   saveBlob(new Blob([data],{type:'application/json'}),`superclean-backup-${today()}.json`);toast('تم تنزيل النسخة الاحتياطية')}
 async function importData(file){try{const j=JSON.parse(await file.text()),d=j.data||j;if(!(await ask('استرجاع البيانات من الملف؟ السجلات الموجودة بنفس الرقم ستُستبدل.','استرجاع',false)))return;
@@ -748,6 +760,7 @@ const A={
     for(const l of i.lines||[]){const it=S.items[l.itemId];if(!it)continue;await put('items',it.id,{...S.items[it.id],qty:r2(num(S.items[it.id].qty)+num(l.qty))});await put('moves',uid(),{date:today(),ts:Date.now(),itemId:it.id,name:it.name,unit:it.unit,qty:r2(l.qty),type:'إلغاء فاتورة',ref:`فاتورة #${i.no}`})}
     await del('invoices',id);toast('تم حذف الفاتورة وإرجاع الكميات');render()},
   exp:id=>expModal(id||null),
+  forceupdate:()=>forceUpdate(),
   export:()=>exportData(),import:()=>$('#impfile').click()
 };
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const s=b.dataset.act,k=s.indexOf(':'),a=k<0?s:s.slice(0,k),arg=k<0?'':s.slice(k+1);if(A[a]){if(b.tagName!=='A')e.preventDefault();A[a](arg,b,e)}});
