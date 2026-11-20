@@ -4,15 +4,28 @@
   "description": "مخزن وعملاء وفواتير ومكسب لمحل المنظفات",
   "lang": "ar",
   "dir": "rtl",
-  "id": "./",
-  "start_url": "./",
-  "scope": "./",
+  "id": "/superclean/",
+  "start_url": "/superclean/",
+  "scope": "/superclean/",
   "display": "standalone",
   "background_color": "#eef7fa",
   "theme_color": "#0089b0",
   "icons": [
-    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
