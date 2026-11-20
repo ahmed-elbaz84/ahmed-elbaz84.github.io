@@ -204,6 +204,7 @@ nav.tabs button.on{color:var(--accent-text);font-weight:700}
 .grab{width:56px;height:5px;margin:2px auto 8px;cursor:grab}
 .sheet>div{touch-action:pan-y;will-change:transform}
 .toast{cursor:pointer}
+html.modal,html.modal body{overscroll-behavior-y:none;overflow:hidden}
 header.top{flex-wrap:wrap;row-gap:8px}
 header.top .who{flex:1 1 100%}
 .iconbtn{border:1px solid var(--line);background:var(--card);color:var(--accent-text);width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;padding:0}
@@ -250,7 +251,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-20 · 3';
+const VER='2026-11-20 · 4';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -946,17 +947,29 @@ function openSheet(kind,o){
   const wasOpen=sheetOpen();
   html=html.replace(/<h3>([\s\S]*?)<\/h3>/,(m,h)=>`<div class="sheethead"><h3>${h}</h3><button class="x" data-act="close" aria-label="${L('اقفل','Close')}">×</button></div>`);
   $('#overlay').innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" dir="${DIR()}"><div><div class="grab" aria-hidden="true"></div>${html}</div></div>`;
-  if(!wasOpen){try{history.pushState({app:1,tab,sheet:1},'')}catch(e){}}
+  if(!wasOpen&&!REOPEN){try{history.pushState({app:1,tab,sheet:1},'')}catch(e){}}
+  REOPEN=false;
+  document.documentElement.classList.add('modal');
+  NAVSHEET=['cat'].includes(kind)?null:{kind,id:o&&o.id||null};saveNav();
 }
 function closeSheet(fromBack){if(!sheetOpen())return;$('#overlay').innerHTML='';setTimeout(()=>SYNC.flush(),50);
+  document.documentElement.classList.remove('modal');NAVSHEET=null;saveNav();
   if(!fromBack&&history.state&&history.state.sheet){SKIP_POP=true;try{history.back()}catch(e){SKIP_POP=false}}}
-let SKIP_POP=false;
-/* phone Back button / gesture: close the open sheet, else go to the previous tab */
-try{history.replaceState({app:1,tab:'home'},'')}catch(e){}
+let SKIP_POP=false, NAVSHEET=null, EXIT_AT=0;
+/* remember where the user is, so a refresh keeps the same page */
+function saveNav(){try{sessionStorage.setItem('masrofat_nav',JSON.stringify({tab,curId,sheet:NAVSHEET,y:Math.round(scrollY)}))}catch(e){}}
+addEventListener('scroll',()=>{clearTimeout(saveNav.t);saveNav.t=setTimeout(saveNav,250)},{passive:true});
+/* phone Back button / gesture: close the open sheet, else go to the previous tab; on Home, press twice to leave */
 addEventListener('popstate',e=>{
   if(SKIP_POP){SKIP_POP=false;return}
   if(sheetOpen()){closeSheet(true);return}
-  const st=e.state||{};tab=st.tab||'home';filter='*';QUICK=false;render();scrollTo(0,0)});
+  const st=e.state||{};
+  if(st.root||!st.app){
+    if(Date.now()-EXIT_AT<2500){EXIT_AT=0;try{history.back()}catch(err){}return}
+    EXIT_AT=Date.now();try{history.pushState({app:1,tab:'home'},'')}catch(err){}
+    if(tab!=='home'){tab='home';filter='*';QUICK=false;render();scrollTo(0,0)}
+    toast(L('دوس رجوع تاني عشان تخرج من البرنامج','Press Back again to leave the app'));return}
+  tab=st.tab||'home';filter='*';QUICK=false;render();scrollTo(0,0)});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&sheetOpen())closeSheet()});
 /* swipe a sheet down to close it */
 let DRAG=null;
@@ -965,7 +978,8 @@ document.addEventListener('touchstart',e=>{const box=e.target.closest('.sheet>di
   DRAG={y:e.touches[0].clientY,box,dy:0,on:false}},{passive:true});
 document.addEventListener('touchmove',e=>{if(!DRAG)return;const dy=e.touches[0].clientY-DRAG.y;
   if(!DRAG.on){if(dy<8){if(dy<-8)DRAG=null;return}DRAG.on=true;const a=document.activeElement;if(a&&a.blur)a.blur()}
-  DRAG.dy=dy;DRAG.box.style.transition='none';DRAG.box.style.transform=`translateY(${Math.max(0,dy)}px)`},{passive:true});
+  if(e.cancelable)e.preventDefault();
+  DRAG.dy=dy;DRAG.box.style.transition='none';DRAG.box.style.transform=`translateY(${Math.max(0,dy)}px)`},{passive:false});
 document.addEventListener('touchend',()=>{if(!DRAG)return;const {box,dy,on}=DRAG;DRAG=null;if(!on)return;
   box.style.transition='transform .2s ease-out';
   if(dy>90){box.style.transform='translateY(110%)';setTimeout(()=>closeSheet(),190)}else box.style.transform=''});
@@ -1009,6 +1023,7 @@ function render(){
   }
   $('#mPrev').disabled=!p||!prevP(p); $('#mNext').disabled=!p||!nextP(p);
   $('#fab').hidden=tab==='settings'||!p||isRO();
+  saveNav();
   if(tab==='money'&&p){updConv();updSal()}
 }
 function updSal(){const o=$('#salConv');if(!o)return;const a=numv('#salAmt'),r=numv('#salRate')||S.rate,c=SALCUR||P().salary.cur;
@@ -1186,10 +1201,23 @@ setTimeout(()=>fetchRate(false),800);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(!RATE.at||Date.now()-RATE.at>10*60e3))fetchRate(false)});
 setInterval(()=>{if(document.visibilityState==='visible')fetchRate(false)},30*60e3);
 if(/[?&]install=1/.test(location.search)&&!isStandalone()){history.replaceState(null,'',location.pathname);setTimeout(()=>{if(!sheetOpen())openSheet('install')},1500)}
+let NAV0=null, REOPEN=false;try{NAV0=JSON.parse(sessionStorage.getItem('masrofat_nav')||'null')}catch(e){}
+if(NAV0&&['home','daily','fixed','money','settings'].includes(NAV0.tab)){tab=NAV0.tab;if(NAV0.curId&&S.periods.find(x=>x.id===NAV0.curId))curId=NAV0.curId}
+try{const st=history.state;
+  if(st&&st.app){ // refreshed: keep the history we already have
+    if(st.sheet&&NAV0&&NAV0.sheet){history.replaceState({app:1,tab,sheet:1},'');REOPEN=true}
+    else if(st.sheet){SKIP_POP=true;history.back()}
+    else history.replaceState({app:1,tab,root:st.root?1:undefined},'')}
+  else{history.replaceState({app:1,root:1,tab:'home'},'');history.pushState({app:1,tab:'home'},'');if(tab!=='home')history.pushState({app:1,tab},'')}}catch(e){}
 $('#fab').onclick=()=>openSheet(tab==='fixed'?'fixed':'daily');
 $('#mPrev').onclick=()=>{const p=prevP(P());if(p){curId=p.id;QUICK=false;render()}};
 $('#mNext').onclick=()=>{const p=nextP(P());if(p){curId=p.id;QUICK=false;render()}};
 render();
+if(NAV0){if(NAV0.y)setTimeout(()=>scrollTo(0,NAV0.y),60);
+  const sh=NAV0.sheet;if(sh&&sh.kind){const p=P();let o=null;
+    if(sh.id){if(sh.kind==='daily'||sh.kind==='fixed'||sh.kind==='payFixed')o=p&&p[sh.kind==='daily'?'daily':'fixed'].find(x=>x.id===sh.id);
+      else if(sh.kind==='plan')o=S.plans.find(x=>x.id===sh.id);else if(sh.kind==='debt'||sh.kind==='debtPay')o=S.debts.find(x=>x.id===sh.id)}
+    if(!sh.id||o){try{openSheet(sh.kind,o||undefined)}catch(e){}}}REOPEN=false}
 })();
 </script>
 <script>if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
