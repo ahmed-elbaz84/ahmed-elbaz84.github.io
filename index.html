@@ -251,7 +251,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-20 · 4';
+const VER='2026-11-20 · 5';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -319,7 +319,14 @@ fill(); LANG=S.lang;
 function save(fromCloud){if(!fromCloud)S._ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast(L('مساحة الحفظ مليانة، جرّب صورة أصغر','Storage is full, try a smaller photo'))}if(!fromCloud)SYNC.push()}
 
 /* ---------- sync between phone and laptop (Firebase, the owner's own project) ---------- */
-const FB_CONFIG=null; // filled with the owner's Firebase web config to turn sync on
+const FB_CONFIG={ // the owner's own Firebase project "Family budget" (not secret; data is protected by Firestore rules + on-device encryption)
+  apiKey:"AIzaSyDbQdcqNXyoWHVU6nwo05qEOvYuoc6IGdo",
+  authDomain:"family-budget-4d53b.firebaseapp.com",
+  projectId:"family-budget-4d53b",
+  storageBucket:"family-budget-4d53b.firebasestorage.app",
+  messagingSenderId:"6821075959",
+  appId:"1:6821075959:web:8affa72e9dcae7de3a2cf2"
+};
 const FB_V='10.12.2';
 /* End-to-end encryption: data is locked with a key made from the user's own password on the device.
    Only scrambled text reaches Firebase, so the project owner cannot read anyone's numbers. */
@@ -339,7 +346,8 @@ let PENDING_PW=null;
 const SYNC={on:!!FB_CONFIG,ready:false,user:null,key:null,status:'',last:0,timer:null,pending:null,doc:null,unsub:null,locked:false,
   load(){if(!this.on)return;const urls=['app','auth','firestore'].map(n=>`https://www.gstatic.com/firebasejs/${FB_V}/firebase-${n}-compat.js`);
     const next=()=>{const u=urls.shift();if(!u)return this.init();const sc=document.createElement('script');sc.src=u;sc.onload=next;sc.onerror=()=>{this.status=L('مفيش نت، هتتزامن لما النت يرجع','No internet; will sync when it is back');rerenderSettings()};document.head.appendChild(sc)};next()},
-  init(){firebase.initializeApp(FB_CONFIG);this.ready=true;
+  init(){if(typeof firebase==='undefined'||!firebase.initializeApp){this.status=L('مفيش نت، هتتزامن لما النت يرجع','No internet; will sync when it is back');rerenderSettings();return}
+    try{firebase.initializeApp(FB_CONFIG)}catch(e){this.status=L('مشكلة في المزامنة: ','Sync problem: ')+(e.code||e.message);rerenderSettings();return}this.ready=true;
     firebase.auth().onAuthStateChanged(u=>this.onUser(u))},
   async onUser(u){if(this.unsub){this.unsub();this.unsub=null}this.key=null;this.locked=false;
     if(!u){this.user=null;this.status='';rerenderSettings();return}
