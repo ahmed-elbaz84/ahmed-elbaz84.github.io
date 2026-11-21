@@ -288,7 +288,7 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='14';
+const APP_V='15';
 const COLS=['items','customers','invoices','expenses','moves','settings'];
 const S={};COLS.forEach(c=>S[c]={});
 const LS='superclean-v1';
@@ -705,7 +705,7 @@ function invDoc(i){
   <table><thead><tr><th>م</th><th>الصنف</th><th>الوحدة</th><th class="n">الكمية</th><th class="n">السعر</th><th class="n">الإجمالي</th></tr></thead><tbody>
   ${(i.lines||[]).map((l,k)=>`<tr><td>${k+1}</td><td>${esc(l.name)}</td><td>${esc(l.unit)}</td><td class="n">${fmt(l.qty)}</td><td class="n">${fmt(l.price)}</td><td class="n">${fmt(num(l.qty)*num(l.price))}</td></tr>`).join('')}</tbody></table>
   <div class="ptot">${num(i.discount)?`<div><span>الإجمالي</span><span>${egp(i.sub)}</span></div><div><span>خصم</span><span>${egp(i.discount)}</span></div>`:''}
-  <div class="g"><span>المطلوب</span><span>${egp(i.total)}</span></div><div><span>المدفوع</span><span>${egp(i.paid)}</span></div>${due(i)>0?`<div><span>الباقي</span><span>${egp(due(i))}</span></div>`:''}</div>
+  <div class="g"><span>المطلوب</span><span>${egp(i.total)}</span></div>${due(i)>0?`<div><span>الباقي</span><span>${egp(due(i))}</span></div>`:''}</div>
   ${i.notes?`<div class="pnote">ملاحظات: ${esc(i.notes)}</div>`:''}
   <div class="pfoot">${esc(s.footer)}<br>${ph.length?`للتواصل والطلبات: <b dir="ltr">${ph.map(esc).join('  |  ')}</b>`:''}${s.address?`<br>${esc(s.address)}`:''}</div></div>`;
 }
