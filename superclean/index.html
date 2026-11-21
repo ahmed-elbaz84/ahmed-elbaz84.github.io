@@ -288,7 +288,7 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='16';
+const APP_V='17';
 const COLS=['items','customers','invoices','expenses','moves','settings'];
 const S={};COLS.forEach(c=>S[c]={});
 const LS='superclean-v1';
@@ -725,12 +725,25 @@ function payModal(id){const i=S.invoices[id];
     s.querySelector('#pf').onsubmit=async e=>{e.preventDefault();const a=num(s.querySelector('[name=amt]').value);if(a<=0)return toast('اكتب المبلغ');closeModal();await put('invoices',id,{...S.invoices[id],paid:r2(Math.min(num(i.total),num(i.paid)+a)),updated:Date.now()});toast('تم تسجيل الدفعة');render();invModal(id)}})}
 let h2p=null;
 function loadH2P(){return h2p||(h2p=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';s.onload=()=>window.html2pdf?res(window.html2pdf):rej();s.onerror=()=>{h2p=null;rej()};document.head.appendChild(s)}))}
+/* before html2pdf: (1) wrap each word in its own span, because html2canvas glues Arabic words together;
+   (2) split the items table at each A4 page edge and repeat the header row on every page. */
+function pdfPrep(paper){
+  const tw=document.createTreeWalker(paper,NodeFilter.SHOW_TEXT),ns=[];while(tw.nextNode())ns.push(tw.currentNode);
+  ns.forEach(n=>{const v=n.nodeValue;if(!/\S\s+\S/.test(v))return;const fr=document.createDocumentFragment();
+    v.split(/(\s+)/).forEach(p=>{if(!p)return;if(/^\s+$/.test(p))fr.appendChild(document.createTextNode(' '));else{const sp=document.createElement('span');sp.textContent=p;fr.appendChild(sp)}});n.replaceWith(fr)});
+  const W=paper.offsetWidth,H=Math.floor(W*285/198)-8,top=()=>paper.getBoundingClientRect().top;
+  let cur=paper.querySelector('table'),start=0;if(!cur||!cur.tHead)return;
+  for(let g=0;g<50;g++){const rows=[...cur.tBodies[0].rows],t0=top(),k=rows.findIndex(r=>r.getBoundingClientRect().bottom-t0-start>H);if(k<=0)break;
+    const br=document.createElement('div');br.className='html2pdf__page-break';
+    const nt=cur.cloneNode(false),nb=document.createElement('tbody');nt.appendChild(cur.tHead.cloneNode(true));nt.appendChild(nb);rows.slice(k).forEach(r=>nb.appendChild(r));
+    cur.after(br);br.after(nt);start=nt.getBoundingClientRect().top-top();cur=nt}
+}
 async function makePdf(id,btn,share){
   const i=S.invoices[id];if(!i)return;
   btn&&(btn.disabled=true);toast('جاري تجهيز ملف PDF…');
   try{const H=await loadH2P();try{await document.fonts.ready}catch(e){}
-    const box=$('#pdfbox');box.innerHTML=invDoc(i);
-    const blob=await H().set({margin:[6,6,6,6],image:{type:'jpeg',quality:.96},html2canvas:{scale:2,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).from(box.firstElementChild).outputPdf('blob');
+    const box=$('#pdfbox');box.innerHTML=invDoc(i);pdfPrep(box.firstElementChild);
+    const blob=await H().set({margin:[6,6,6,6],image:{type:'jpeg',quality:.96},html2canvas:{scale:2,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy'],avoid:['tr','.ptot','.pnote','.pfoot']}}).from(box.firstElementChild).outputPdf('blob');
     box.innerHTML='';
     const name=`SuperClean-فاتورة-${i.no}.pdf`,file=new File([blob],name,{type:'application/pdf'});
     if(share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:name})}catch(e){}return}

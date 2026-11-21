@@ -30,3 +30,4 @@
   - إرسال تلقائي يومي: Google Apps Script بيتعمل من حساب جوجل بتاع المالك. التطبيق بيبعت POST (`no-cors`, text/plain) لـ `settings/main.bkUrl` مرة في اليوم (`bkMail`). الإيميلات `bkTo` بتتحط جوه كود السكريبت (زرار «نسخ كود الإرسال»)، مش بتتبعت من التطبيق، عشان الرابط ما يتستخدمش يبعت لأي حد.
     الخطوات: script.google.com ← New project ← الصق الكود ← Deploy ← New deployment ← Web app، Execute as: Me، Who has access: Anyone ← Authorize ← انسخ الـ Web app URL والصقه في التطبيق.
 - نسيت الباسورد: Firebase بيبعت لينك على الإيميل (`languageCode='ar'`). الـ SMS محتاج Phone Auth، وده محتاج خطة Blaze المدفوعة، فما اتعملش.
+- (إصدار 17) PDF: `pdfPrep()` قبل html2pdf بيقسم جدول الأصناف على مقاس صفحة A4 (عرض 720px ⇒ ارتفاع الصفحة ≈ 1036px) ويكرر رأس الجدول في كل صفحة بـ `html2pdf__page-break`، وبيحط كل كلمة في span لوحدها لأن html2canvas كان بيلزق الكلمات العربي في بعض. السطر «المدفوع» اتشال من الفاتورة ومن رسالة الواتساب (المالك طلب كده)، و«الباقي» بيظهر بس لو فيه باقي.
