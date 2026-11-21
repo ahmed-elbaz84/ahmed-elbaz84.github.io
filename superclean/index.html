@@ -288,7 +288,7 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='15';
+const APP_V='16';
 const COLS=['items','customers','invoices','expenses','moves','settings'];
 const S={};COLS.forEach(c=>S[c]={});
 const LS='superclean-v1';
@@ -709,7 +709,7 @@ function invDoc(i){
   ${i.notes?`<div class="pnote">ملاحظات: ${esc(i.notes)}</div>`:''}
   <div class="pfoot">${esc(s.footer)}<br>${ph.length?`للتواصل والطلبات: <b dir="ltr">${ph.map(esc).join('  |  ')}</b>`:''}${s.address?`<br>${esc(s.address)}`:''}</div></div>`;
 }
-function waText(i){const s=st();return `*${s.shop}* — فاتورة رقم ${i.no}\nالتاريخ: ${i.date}\nالعميل: ${i.custName}\nالدفع: ${i.pay||'نقدي'}\n\n${(i.lines||[]).map(l=>`• ${l.name}: ${fmt(l.qty)} ${l.unit} × ${fmt(l.price)} = ${fmt(num(l.qty)*num(l.price))}`).join('\n')}\n\n${num(i.discount)?`خصم: ${egp(i.discount)}\n`:''}*المطلوب: ${egp(i.total)}*\nالمدفوع: ${egp(i.paid)}${due(i)>0?`\nالباقي: ${egp(due(i))}`:''}\n\n${s.footer}${s.phone?`\nللتواصل: ${s.phone}`:''}`}
+function waText(i){const s=st();return `*${s.shop}* — فاتورة رقم ${i.no}\nالتاريخ: ${i.date}\nالعميل: ${i.custName}\nالدفع: ${i.pay||'نقدي'}\n\n${(i.lines||[]).map(l=>`• ${l.name}: ${fmt(l.qty)} ${l.unit} × ${fmt(l.price)} = ${fmt(num(l.qty)*num(l.price))}`).join('\n')}\n\n${num(i.discount)?`خصم: ${egp(i.discount)}\n`:''}*المطلوب: ${egp(i.total)}*${due(i)>0?`\nالباقي: ${egp(due(i))}`:''}\n\n${s.footer}${s.phone?`\nللتواصل: ${s.phone}`:''}`}
 const waNum=p=>{let d=String(p||'').replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);else if(d.startsWith('0'))d='2'+d;return d};
 function invModal(id){
   const i=S.invoices[id];if(!i)return;
