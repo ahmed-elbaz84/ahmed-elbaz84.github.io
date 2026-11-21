@@ -288,7 +288,7 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='13';
+const APP_V='14';
 const COLS=['items','customers','invoices','expenses','moves','settings'];
 const S={};COLS.forEach(c=>S[c]={});
 const LS='superclean-v1';
@@ -354,7 +354,7 @@ async function boot(){
   hpIcon();render();
   initFb();
   addEventListener('online',()=>{initFb();trySync();flush()});
-  setInterval(()=>{initFb();trySync();flush()},30000);
+  setInterval(()=>{initFb();trySync();flush();autoBackup()},30000);
 }
 let fbLoading=false;const fbDone=new Set();
 async function initFb(){
@@ -392,7 +392,7 @@ async function trySync(){
       const o={};snap.docs.forEach(d=>{o[d.id]=d.data()});
       for(const [k,e] of Object.entries(outbox)){const i=k.indexOf('|');if(k.slice(0,i)!==c)continue;const id=k.slice(i+1);if(e.o)o[id]=e.o;else delete o[id]}
       S[c]=o;saveLocal();refreshSync();render(true)},()=>setSync('err'))));
-    flush();
+    flush();setTimeout(autoBackup,8000);
   }catch(e){if(user===u)setSync(e&&e.code==='permission-denied'?'err':'slow')}
   finally{syncing=false}
 }
@@ -406,11 +406,11 @@ async function onUser(u){
   const t=setTimeout(()=>{if(user===u&&!synced)setSync('slow')},10000);
   await trySync();clearTimeout(t);
 }
-const AUTHERR={'auth/invalid-credential':'الإيميل أو الباسورد غلط','auth/wrong-password':'الباسورد غلط','auth/user-not-found':'مفيش حساب بالإيميل ده، اضغط «حساب جديد»','auth/email-already-in-use':'الإيميل ده عليه حساب، اضغط «دخول»','auth/weak-password':'الباسورد لازم 6 حروف أو أكتر','auth/invalid-email':'الإيميل مكتوب غلط','auth/network-request-failed':'مفيش نت','auth/too-many-requests':'محاولات كتير، استنى شوية وجرب تاني','auth/missing-email':'اكتب الإيميل'};
+const AUTHERR={'auth/invalid-credential':'الإيميل أو الباسورد غلط','auth/wrong-password':'الباسورد غلط','auth/user-not-found':'مفيش حساب بالإيميل ده، اضغط «حساب جديد»','auth/email-already-in-use':'الإيميل ده عليه حساب، اضغط «دخول»','auth/weak-password':'الباسورد لازم 6 حروف أو أكتر','auth/invalid-email':'الإيميل مكتوب غلط','auth/network-request-failed':'مفيش نت','auth/too-many-requests':'محاولات كتير، استنى شوية وجرب تاني','auth/missing-email':'اكتب الإيميل','auth/user-disabled':'الحساب ده متوقف'};
 async function auth(kind){const fm=$('#authf');if(!fm)return;const d=formData(fm),em=String(d.em||'').trim(),pw=String(d.pw||''),out=$('#autherr');
   const show=m=>{out.hidden=false;out.textContent=m};
   if(!fb)return show('مفيش نت دلوقتي، جرب لما النت يرجع');
-  try{if(kind==='forgot'){await fb.auth().sendPasswordResetEmail(em);show('بعتنالك رسالة على الإيميل تغيّر منها الباسورد');return}
+  try{if(kind==='forgot'){if(!em)return show('اكتب الإيميل بتاعك في خانة الإيميل الأول، وبعدين اضغط «نسيت الباسورد»');fb.auth().languageCode='ar';show('لحظة…');await fb.auth().sendPasswordResetEmail(em);show(`بعتنا رسالة على ${em} فيها لينك تغيّر منه الباسورد. لو مش لاقياها في الوارد، دوري في Spam أو «الرسائل غير المرغوب فيها». بعد ما تغيّريه ارجعي هنا وادخلي بالباسورد الجديد.`);return}
     if(!em||!pw)return show('اكتب الإيميل والباسورد');
     show('لحظة…');
     if(kind==='up')await fb.auth().createUserWithEmailAndPassword(em,pw);else await fb.auth().signInWithEmailAndPassword(em,pw);
@@ -777,14 +777,60 @@ function vSettings(){const s=st();
   ${f('address','العنوان',s.address)}${f('footer','جملة أسفل الفاتورة',s.footer)}
   <button class="btn p" type="submit" style="width:100%">حفظ الإعدادات</button></form>
   ${acctCard()}
-  <div class="card"><h2>نسخة احتياطية</h2><p class="mut" style="margin-top:0">${user?'البيانات محفوظة على الحساب وتتزامن تلقائياً، والنسخة الاحتياطية للاطمئنان فقط.':'البيانات محفوظة على الموبايل ده بس. اعمل دخول بحساب أو نزّل نسخة احتياطية كل فترة.'}</p>
-  <div class="acts"><button class="btn grow" data-act="export">تنزيل نسخة احتياطية</button><button class="btn grow" data-act="import">استرجاع من ملف</button></div></div>
+  <div class="card"><h2>نسخة احتياطية</h2><p class="mut" style="margin-top:0">${user?`كل يوم بتتعمل نسخة لوحدها على الحساب (آخر 7 أيام)${s.bkCloud?` — آخر نسخة: <b>${esc(s.bkCloud)}</b>`:''}.`:'البيانات محفوظة على الموبايل ده بس. اعمل دخول بحساب أو ابعت نسخة على الإيميل كل فترة.'}</p>
+  <button class="btn p" style="width:100%" data-act="mailbk">إرسال نسخة على الإيميل</button>
+  <div class="acts" style="margin-top:8px">${user?'<button class="btn grow" data-act="cloudbk">النسخ التلقائية</button>':''}<button class="btn grow" data-act="export">تنزيل ملف</button><button class="btn grow" data-act="import">استرجاع من ملف</button></div></div>
+  ${user?`<form class="card" id="bkf"><h2>إرسال تلقائي على الإيميل كل يوم</h2>
+  <p class="mut" style="margin-top:0">${s.bkUrl?`شغال ✓ ${s.bkMail?`— آخر إرسال: <b>${esc(s.bkMail)}</b>`:''}`:'مش متفعّل لسه. بيتعمل مرة واحدة بس من الكمبيوتر (حوالي 5 دقايق).'}</p>
+  ${f('bkTo','الإيميلات اللي تستلم النسخة (افصل بينهم بمسافة)',s.bkTo,'text','dir="ltr" placeholder="her@gmail.com him@gmail.com"')}
+  ${f('bkUrl','رابط الإرسال (Web app URL)',s.bkUrl,'url','dir="ltr" placeholder="https://script.google.com/macros/s/…/exec"')}
+  <div class="acts"><button class="btn p grow" type="submit">حفظ</button><button class="btn grow" type="button" data-act="copyscript">نسخ كود الإرسال</button></div></form>`:''}
   <div class="card"><h2>التحديث</h2><p class="mut" style="margin-top:0">إنت على إصدار ${APP_V}. لو اتعمل تعديل جديد ومش ظاهر، اضغط هنا. البيانات مش هتتمسح.</p><button class="btn p" style="width:100%" data-act="forceupdate">تحديث لآخر نسخة</button></div>
   <div class="card"><h2>تثبيت التطبيق على الموبايل <span class="tag">إصدار ${APP_V}</span></h2><p style="margin:0" class="mut">افتح <b dir="ltr">ahmed-elbaz84.github.io/superclean</b> في المتصفح ثم: <b>أندرويد</b>: القائمة ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». <b>آيفون (سفاري)</b>: زر المشاركة ← «إضافة إلى الشاشة الرئيسية». أي تحديث جديد بيوصل لوحده لما تفتح التطبيق والنت شغال.</p></div></section>`}
 async function exportData(){const data=JSON.stringify({app:'superclean',at:new Date().toISOString(),data:Object.fromEntries(COLS.map(c=>[c,S[c]]))});
   saveBlob(new Blob([data],{type:'application/json'}),`superclean-backup-${today()}.json`);toast('تم تنزيل النسخة الاحتياطية')}
+async function restoreObj(d){toast('جاري الاسترجاع…');for(const c of COLS)for(const [id,o] of Object.entries(d[c]||{}))await put(c,id,o);toast('تم الاسترجاع');render()}
 async function importData(file){try{const j=JSON.parse(await file.text()),d=j.data||j;if(!(await ask('استرجاع البيانات من الملف؟ السجلات الموجودة بنفس الرقم ستُستبدل.','استرجاع',false)))return;
-  toast('جاري الاسترجاع…');for(const c of COLS)for(const [id,o] of Object.entries(d[c]||{}))await put(c,id,o);toast('تم الاسترجاع');render()}catch(e){toast('الملف غير صالح')}}
+  await restoreObj(d)}catch(e){toast('الملف غير صالح')}}
+
+/* ---------- backups: a daily copy inside the account (last 7 days), a daily e-mail (via the owner's Google Apps Script), and a share-to-e-mail button ---------- */
+const bkJSON=()=>JSON.stringify({app:'superclean',at:new Date().toISOString(),data:Object.fromEntries(COLS.map(c=>[c,S[c]]))});
+const bkSummary=()=>`${list('items').length} صنف · ${list('customers').length} عميل · ${list('invoices').length} فاتورة · ${list('expenses').length} مصروف`;
+const BKN='superclean-backup-';
+function b64(buf){const a=new Uint8Array(buf);let s='';for(let i=0;i<a.length;i+=32768)s+=String.fromCharCode.apply(null,a.subarray(i,i+32768));return btoa(s)}
+async function gz(str){if(!window.CompressionStream)return{z:0,s:str};return{z:1,s:b64(await new Response(new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer())}}
+async function ungz(z,s){if(!z)return s;const b=Uint8Array.from(atob(s),c=>c.charCodeAt(0));return await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'))).text()}
+const bkCol=c=>fs.collection('users').doc(user.uid).collection(c);
+const setMain=o=>put('settings','main',{...(S.settings.main||{id:'main'}),...o});
+let bkBusy=false;
+async function autoBackup(){
+  if(!user||!synced||bkBusy||!navigator.onLine)return;const d=today(),m=S.settings.main||{};
+  if(m.bkCloud===d&&(!m.bkUrl||m.bkMail===d))return;
+  if(!list('items').length)return;bkBusy=true;
+  try{const raw=bkJSON();
+    if(m.bkCloud!==d){const {z,s:str}=await gz(raw),P=700000,n=Math.ceil(str.length/P)||1;
+      for(let k=0;k<n;k++)await bkCol('sc_bkparts').doc(d+'_'+k).set({s:str.slice(k*P,(k+1)*P)});
+      await bkCol('sc_backups').doc(d).set({id:d,at:Date.now(),z,parts:n,sum:bkSummary()});
+      const old=(await bkCol('sc_backups').get()).docs.map(x=>x.data()).sort((a,b)=>String(b.id).localeCompare(a.id)).slice(7);
+      for(const o of old){for(let k=0;k<num(o.parts);k++)await bkCol('sc_bkparts').doc(o.id+'_'+k).delete();await bkCol('sc_backups').doc(o.id).delete()}
+      await setMain({bkCloud:d})}
+    if(m.bkUrl&&m.bkMail!==d){await fetch(m.bkUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({date:d,summary:bkSummary(),name:BKN+d+'.json',file:raw})});await setMain({bkMail:d})}
+  }catch(e){}finally{bkBusy=false}}
+async function cloudList(){
+  if(!user||!fs)return toast('لازم تكون داخل بحساب والنت شغال');
+  openModal('<h3>النسخ التلقائية على الحساب</h3><p class="mut">جاري التحميل…</p>');
+  try{const l=(await bkCol('sc_backups').get({source:'server'})).docs.map(x=>x.data()).sort((a,b)=>String(b.id).localeCompare(a.id));
+    openModal(`<h3>النسخ التلقائية على الحساب</h3><p class="mut" style="margin-top:0">نسخة كل يوم بتتحفظ لوحدها، وبنحتفظ بآخر 7 أيام. استرجاع نسخة بيرجّع الأصناف والفواتير زي ما كانت يومها (السجلات الجديدة بعدها بتفضل موجودة).</p>
+    ${l.length?l.map(o=>`<div class="box" style="display:flex;gap:8px;align-items:center"><div style="flex:1"><b>${esc(o.id)}</b><br><small class="mut">${esc(o.sum||'')}</small></div><button class="btn sm" data-bk="${esc(o.id)}">استرجاع</button></div>`).join(''):'<p class="empty">لسه مفيش نسخ. أول نسخة بتتعمل لوحدها النهارده.</p>'}
+    <div class="acts"><button class="btn" data-act="close">قفل</button></div>`,sh=>sh.querySelectorAll('[data-bk]').forEach(b=>b.onclick=async()=>{const o=l.find(x=>x.id===b.dataset.bk);
+      if(!(await ask(`استرجاع نسخة يوم ${o.id}؟`,'استرجاع',false)))return;
+      try{let str='';for(let k=0;k<num(o.parts);k++)str+=(await bkCol('sc_bkparts').doc(o.id+'_'+k).get()).data().s;closeModal();await restoreObj(JSON.parse(await ungz(o.z,str)).data)}catch(e){toast('مش قادر أجيب النسخة، اتأكد من النت')}}))
+  }catch(e){openModal('<h3>النسخ التلقائية</h3><p>مش قادر أوصل للحساب دلوقتي، اتأكد من النت وجرب تاني.</p><div class="acts"><button class="btn" data-act="close">قفل</button></div>')}}
+async function mailBackup(){const name=BKN+today()+'.json',file=new File([bkJSON()],name,{type:'application/json'});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Super Clean — نسخة احتياطية '+today(),text:'نسخة احتياطية من Super Clean ('+bkSummary()+')'});if(user)setMain({bkShared:today()});return}}catch(e){if(e&&e.name==='AbortError')return}
+  saveBlob(file,name);toast('الموبايل ده مش بيدعم المشاركة، الملف اتنزّل — ابعته على الإيميل من التنزيلات')}
+function mailScript(){const to=(st().bkTo||'').split(/[\s,;]+/).filter(Boolean).join(',')||'EMAIL1@gmail.com,EMAIL2@gmail.com';
+  return `// Super Clean — إرسال نسخة احتياطية يومية على الإيميل\nconst TO='${to}';\nfunction doPost(e){\n  const j=JSON.parse(e.postData.contents);\n  const blob=Utilities.newBlob(j.file,'application/json',j.name);\n  MailApp.sendEmail({to:TO,subject:'Super Clean — نسخة احتياطية '+j.date,\n    body:'نسخة احتياطية تلقائية من تطبيق Super Clean ('+j.summary+').\\nلو احتجتها: افتح التطبيق ← المزيد ← الإعدادات ← استرجاع من ملف، واختار الملف ده.',\n    attachments:[blob]});\n  return ContentService.createTextOutput('ok');\n}\n`}
 
 /* ---------- events ---------- */
 const A={
@@ -811,7 +857,8 @@ const A={
     await del('invoices',id);toast('تم حذف الفاتورة وإرجاع الكميات');render()},
   exp:id=>expModal(id||null),
   forceupdate:()=>forceUpdate(),
-  export:()=>exportData(),import:()=>$('#impfile').click()
+  export:()=>exportData(),import:()=>$('#impfile').click(),mailbk:()=>mailBackup(),cloudbk:()=>cloudList(),
+  copyscript:async()=>{try{await navigator.clipboard.writeText(mailScript());toast('اتنسخ الكود')}catch(e){openModal(`<h3>كود الإرسال</h3><textarea class="in" style="height:260px;direction:ltr" readonly>${esc(mailScript())}</textarea><div class="acts"><button class="btn" data-act="close">قفل</button></div>`)}}
 };
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const s=b.dataset.act,k=s.indexOf(':'),a=k<0?s:s.slice(0,k),arg=k<0?'':s.slice(k+1);if(A[a]){if(b.tagName!=='A')e.preventDefault();A[a](arg,b,e)}});
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
@@ -835,7 +882,8 @@ $('#view').addEventListener('change',e=>{const t=e.target;
   if(t.id==='icust'){draft.cust=t.value;saveDraft();return}
   if(t.id==='idate')draft.date=t.value;
 });
-$('#view').addEventListener('submit',async e=>{if(e.target.id==='authf'){e.preventDefault();auth('in');return}if(e.target.id!=='sf')return;e.preventDefault();const d=formData(e.target);await put('settings','main',{...st(),...Object.fromEntries(Object.entries(d).map(([k,v])=>[k,v.trim()]))});toast('تم حفظ الإعدادات')});
+$('#view').addEventListener('submit',async e=>{if(e.target.id==='authf'){e.preventDefault();auth('in');return}if(e.target.id==='bkf'){e.preventDefault();const d=formData(e.target),u=String(d.bkUrl||'').trim();if(u&&!/^https:\/\/script\.google\.com\//.test(u))return toast('الرابط لازم يبدأ بـ https://script.google.com/');await setMain({bkTo:String(d.bkTo||'').trim(),bkUrl:u,bkMail:''});toast('تم الحفظ');render();autoBackup();return}
+  if(e.target.id!=='sf')return;e.preventDefault();const d=formData(e.target);await put('settings','main',{...st(),...Object.fromEntries(Object.entries(d).map(([k,v])=>[k,v.trim()]))});toast('تم حفظ الإعدادات')});
 
 /* keyboard: hide the tab bar while an input is focused, keep the field in view */
 const isField=t=>t&&t.matches&&t.matches('input:not([type=checkbox]):not([type=file]),textarea,select');

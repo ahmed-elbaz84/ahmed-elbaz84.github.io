@@ -24,3 +24,9 @@
 - تحذير: ما تعملش `open('sw.js','w').write(open('sw.js').read()...)` في سطر واحد، لأنه بيفضّي الملف قبل ما يقراه (ده حصل مرة وفضّى `sw.js`). الـ SW بيجيب ملفات التطبيق بـ `cache:'no-cache'`، والصفحة بتعمل reload لوحدها لما نسخة جديدة توصل. رقم الإصدار ظاهر في الإعدادات.
 - الـ manifest فيه `id`/`start_url`/`scope` = `/superclean/` صريح، ومصروفات البيت نطاقها `/index.html` بس، فالتطبيقين منفصلين على الموبايل.
 - **مع كل تعديل:** زوّد `APP_V` في `index.html` و`superclean/version.txt` (نفس الرقم) و`CACHE` في `superclean/sw.js`. التطبيق بيقارن `APP_V` بـ `version.txt` كل ما يتفتح ويظهر شريط «في نسخة جديدة»، وفي الإعدادات زرار «تحديث لآخر نسخة» بيمسح كاش التطبيق ويعيد التحميل من غير ما يلمس البيانات.
+- (إصدار 14) **نسخ احتياطية:**
+  - نسخة يومية لوحدها جوه الحساب: `sc_backups/{yyyy-mm-dd}` (`{z,parts,sum}`) + `sc_bkparts/{date}_{k}` (JSON مضغوط gzip/base64 ومقسوم 700KB). بنحتفظ بآخر 7. `settings/main.bkCloud` = تاريخ آخر نسخة. الاسترجاع من «النسخ التلقائية» في الإعدادات.
+  - «إرسال نسخة على الإيميل»: Web Share بملف JSON (تختار Gmail وتكتب الإيميلات)، ولو مش مدعوم بينزّل الملف.
+  - إرسال تلقائي يومي: Google Apps Script بيتعمل من حساب جوجل بتاع المالك. التطبيق بيبعت POST (`no-cors`, text/plain) لـ `settings/main.bkUrl` مرة في اليوم (`bkMail`). الإيميلات `bkTo` بتتحط جوه كود السكريبت (زرار «نسخ كود الإرسال»)، مش بتتبعت من التطبيق، عشان الرابط ما يتستخدمش يبعت لأي حد.
+    الخطوات: script.google.com ← New project ← الصق الكود ← Deploy ← New deployment ← Web app، Execute as: Me، Who has access: Anyone ← Authorize ← انسخ الـ Web app URL والصقه في التطبيق.
+- نسيت الباسورد: Firebase بيبعت لينك على الإيميل (`languageCode='ar'`). الـ SMS محتاج Phone Auth، وده محتاج خطة Blaze المدفوعة، فما اتعملش.
