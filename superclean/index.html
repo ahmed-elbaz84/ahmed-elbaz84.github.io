@@ -256,6 +256,7 @@ body.kb .stick{bottom:0}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
 .seg button{border:0;background:none;min-height:34px;padding:2px 16px;font-weight:600;font-size:13px;cursor:pointer}
 .seg button.on{background:var(--pri);color:#fff}
+.kpi b span{display:inline;font-size:inherit;font-weight:inherit}.kpi b .neg{color:var(--bad)}.kpi b .pos{color:var(--ok)}.kpi b .mut{color:var(--mut)}
 :root{--pri:light-dark(#0089b0,#1488ad);--pri2:light-dark(#006a8a,#8fe0f5)}
 .top,.hero{background:light-dark(#0089b0,#0d5f7a)}
 .hero .chip.on{color:#00607d}
@@ -293,9 +294,10 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='20';
+const APP_V='21';
 /* what changed in each version; shown once after an update and from Settings ← «إيه الجديد؟». Add a line here with every new version. */
 const CHANGES=[
+  ['21',['جديد: «المتعاقد والموردين» من المزيد أو من المخزن. لكل صنف الكمية المتعاقد عليها مع الشركة، والمطلوب الشهر ده، والموجود، والباقي للشراء وفلوسه.','الموردين: كل صنف ليه مورد، وبتسجّلي الفلوس اللي دفعتيها لكل مورد (قبل التوريد أو بعده)، والبرنامج بيحسب اللي ليه عندك أو ليكي عنده.','لكل مورد: الكميات الباقية والفلوس المحتاجة علشان تكمّلي المطلوب، وزرار يبعتله الطلب واتساب.']],
   ['20',['الأرقام بفاصلة الآلاف زي 1,500 بقت بتتقري 1500 صح.','زرار «حفظ الفاتورة» ما بقاش بيقف لو نسيت تكتب المبلغ المدفوع.','حذف مصروف ثم «رجوع» ما بقاش بيعمل مشكلة، وتأمين أكتر لاسترجاع النسخ من ملف.']],
   ['19',['شارك التطبيق مع غيرك بكود QR: «المزيد» ← «شارك التطبيق». الشخص التاني بيبدأ عنده فاضي، وأرقامه وبياناته خاصة بيه.','بعد أي تحديث بيظهرلك اللي اتغيّر، وتقدر تشوفه تاني من الإعدادات ← «إيه الجديد؟».']],
   ['18',['التحصيل: الفاتورة الجديدة «لسه ما اتحصّلتش»، وتقدر تسجّل إنها اتحصّلت كلها أو جزء منها.','رأس الفاتورة فيه رقم الفاتورة وطريقة الدفع، والتاريخ يوم/شهر/سنة.']],
@@ -313,10 +315,10 @@ const standalone=()=>{try{return matchMedia('(display-mode: standalone)').matche
 const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 /* a phone that opened the app for the first time (nobody's data on it yet): starts empty, no shop name until they type one */
 const fresh=()=>{try{return localStorage.getItem('sc-fresh')==='1'}catch(e){return false}};
-const COLS=['items','customers','invoices','expenses','moves','settings'];
+const COLS=['items','customers','invoices','expenses','moves','settings','suppliers','spay'];
 const S={};COLS.forEach(c=>S[c]={});
 const LS='superclean-v1';
-let view='home',draft=null,period='month',stockQ='',stockF='all',invQ='',invF='all',custQ='',moveF='';
+let supF='all',view='home',draft=null,period='month',stockQ='',stockF='all',invQ='',invF='all',custQ='',moveF='';
 const LOGO=c=>`<svg viewBox="0 0 48 48"><path d="M24 5S10 20.5 10 30a14 14 0 0 0 28 0C38 20.5 24 5 24 5z" fill="${c}"/><path d="M17.5 30.5a6.5 6.5 0 0 0 6.5 6.5" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M38.5 4l1.5 3.3 3.3 1.5-3.3 1.5-1.5 3.3-1.5-3.3-3.3-1.5 3.3-1.5z" fill="#ffd23f"/></svg>`;
 const EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 const EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.3C3.6 8 2 12 2 12s3.6 7 10 7a9.6 9.6 0 0 0 4.3-1"/></svg>';
@@ -493,15 +495,16 @@ const formData=form=>Object.fromEntries(new FormData(form).entries());
 
 /* ---------- render ---------- */
 function render(fromSnap){
-  $$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===view||(b.dataset.v==='more'&&['customers','expenses','moves','settings'].includes(view))));
+  $$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===view||(b.dataset.v==='more'&&['customers','expenses','moves','settings','supply'].includes(view))));
   if(fromSnap&&view==='inv'){refreshLineHints();return}
+  if(fromSnap&&view==='supply'&&document.activeElement&&document.activeElement.matches('#view input'))return;
   if(fromSnap&&document.activeElement&&document.activeElement.matches('#view input,#view textarea')){partial();return}
-  const V={home:vHome,stock:vStock,inv:vInv,invoices:vInvoices,more:vMore,customers:vCustomers,expenses:vExpenses,moves:vMoves,settings:vSettings};
+  const V={home:vHome,stock:vStock,inv:vInv,invoices:vInvoices,more:vMore,customers:vCustomers,expenses:vExpenses,moves:vMoves,settings:vSettings,supply:vSupply};
   $('#view').innerHTML=(V[view]||vHome)();
   if(view==='inv')recalc();
 }
 function partial(){const m={stock:['#stockBody',stockRows],invoices:['#invBody',invRows],customers:['#custBody',custRows]}[view];if(m&&$(m[0]))$(m[0]).innerHTML=m[1]()}
-const VIEWS=['home','stock','inv','invoices','more','customers','expenses','moves','settings'];
+const VIEWS=['home','stock','inv','invoices','more','customers','expenses','moves','settings','supply'];
 function show(v){view=VIEWS.includes(v)?v:'home';if(view==='inv'&&!draft)draft=newDraft();render();window.scrollTo(0,0)}
 function go(v,replace){if(v===view&&!replace){show(v);return}try{history[replace?'replaceState':'pushState']({v,sid:SID},'','#'+v)}catch(e){}show(v)}
 /* back button: closes a sheet first, then walks back through screens, and on the home screen asks for a second press before leaving */
@@ -555,6 +558,7 @@ function vHome(){
     <div class="kpi"><span>اتحصّل تحويل</span><b>${egp(sum(iv.filter(i=>i.pay==='تحويل'),i=>i.paid))}</b></div>
     <div class="kpi"><span>فلوس عند العملاء</span><b class="${debts>0?'neg':''}">${egp(debts)}</b></div>
     <div class="kpi"><span>قيمة المخزن (تكلفة)</span><b>${egp(sv)}</b></div>
+    ${supTracked().length?`<div class="kpi" data-act="go:supply" style="cursor:pointer"><span>محتاجة للشراء (المتعاقد) ←</span><b class="${supTotals().need>0?'neg':'pos'}">${egp(supTotals().need)}</b></div>`:''}
     <div class="kpi pf"><span>مكسب متوقع من المخزن</span><b class="pos">${egp(ssv-sv)}</b></div>
   </div>
   </section>
@@ -573,7 +577,7 @@ const invItem=i=>`<div class="list"><div class="it" data-act="invoice:${esc(i.id
 function vStock(){
   const its=items();
   return `<section class="band">
-  <div class="sec">المخزن الرئيسي <span class="tag">${its.length} صنف</span><span class="sp"></span><button class="btn p sm" data-act="newitem">+ صنف جديد</button></div>
+  <div class="sec">المخزن الرئيسي <span class="tag">${its.length} صنف</span><span class="sp"></span><button class="btn sm" data-act="go:supply">المتعاقد والموردين</button><button class="btn p sm" data-act="newitem">+ صنف جديد</button></div>
   <input class="search" id="sq" placeholder="ابحث باسم الصنف…" value="${esc(stockQ)}" type="search">
   <div class="chips">${[['all','الكل'],['low','النواقص'],['off','الخامل']].map(([k,l])=>`<button class="chip ${stockF===k?'on':''}" data-act="sf:${k}">${l}</button>`).join('')}</div>
   <div class="scroll"><table class="tbl"><thead><tr><th class="first">الصنف</th><th>الوحدة</th><th class="n">الكمية</th><th class="n">السعر الأساسي</th><th class="n">سعر الشركة</th><th class="n pf">المكسب</th><th>ملاحظات</th></tr></thead>
@@ -601,6 +605,8 @@ function itemModal(id,after){
   <div class="g2">${f('qty','الكمية الحالية',fmt(o.qty).replace(/,/g,''),'num')}${f('min','الحد الأدنى (تنبيه نواقص)',o.min,'num')}</div>
   <div class="g2">${f('cost','السعر الأساسي (تكلفة)',o.cost,'num')}${f('sell','سعر الشركة (البيع)',o.sell,'num')}</div>
   <div class="margin pf" id="mg"></div>
+  <label class="fld"><span>المورد</span><select name="sup"><option value="">— من غير مورد —</option>${supL().map(x=>`<option value="${esc(x.id)}" ${x.id===(o.sup||'')?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>
+  <div class="g2">${f('contract','الكمية المتعاقد عليها مع الشركة',o.contract??'','num')}${f('req','المطلوب الشهر ده (فاضي = المتعاقد عليه)',o.req??'','num')}</div>
   <label class="fld"><span>ملاحظات</span><textarea name="notes">${esc(o.notes)}</textarea></label>
   <label class="chk"><input type="checkbox" name="active" ${o.active!==false?'checked':''}> الصنف نشط (يظهر في الفواتير)</label>
   <div class="acts"><button class="btn p grow" type="submit">حفظ</button>${id?'<button class="btn d" type="button" id="idel">حذف</button>':''}<button class="btn" type="button" data-act="close">إلغاء</button></div>
@@ -613,7 +619,7 @@ function itemModal(id,after){
     fm.addEventListener('input',upd);upd();
     fm.onsubmit=async e=>{e.preventDefault();const d=formData(fm);if(!d.name.trim())return toast('اكتب اسم الصنف');
       const nid=id||uid(),nq=r2(d.qty);
-      const n={...(id?S.items[id]:{order:list('items').length+1,created:Date.now()}),name:d.name.trim(),unit:d.unit.trim()||'عدد',cat:d.cat.trim(),qty:nq,min:r2(d.min),cost:r2(d.cost),sell:r2(d.sell),notes:d.notes.trim(),active:!!d.active,updated:Date.now()};
+      const n={...(id?S.items[id]:{order:list('items').length+1,created:Date.now()}),name:d.name.trim(),unit:d.unit.trim()||'عدد',cat:d.cat.trim(),qty:nq,min:r2(d.min),cost:r2(d.cost),sell:r2(d.sell),notes:d.notes.trim(),active:!!d.active,sup:d.sup||'',contract:optNum(d.contract),req:optNum(d.req),updated:Date.now()};
       closeModal();
       await put('items',nid,n);
       const oq=id?num(o.qty):0;
@@ -624,7 +630,7 @@ function itemModal(id,after){
     const ab=s.querySelector('#addb');if(ab)ab.onclick=async()=>{const q=num(s.querySelector('#addq').value),c=num(s.querySelector('#addc').value)||num(o.cost);if(q<=0)return toast('اكتب الكمية المضافة');
       const cur=S.items[id],oq=num(cur.qty),oc=num(cur.cost);const nc=oq>0?r2((oq*oc+q*c)/(oq+q)):c;
       closeModal();await put('items',id,{...cur,qty:r2(oq+q),cost:nc,updated:Date.now()});
-      await put('moves',uid(),{date:today(),ts:Date.now(),itemId:id,name:cur.name,unit:cur.unit,qty:q,cost:c,type:'شراء',ref:''});
+      await put('moves',uid(),{date:today(),ts:Date.now(),itemId:id,name:cur.name,unit:cur.unit,qty:q,cost:c,type:'شراء',ref:cur.sup&&S.suppliers[cur.sup]?'من '+S.suppliers[cur.sup].name:'',sup:cur.sup||''});
       toast(`تمت إضافة ${fmt(q)} ${cur.unit}`);render()};
   };
   draw();
@@ -815,10 +821,129 @@ async function makePdf(id,btn,share){
 }
 function saveBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},5000)}
 
+/* ---------- contracted quantities + suppliers (v21) ----------
+   item.contract = quantity agreed with the company each month (fixed); item.req = what the company asked for this month ('' = same as contract);
+   item.sup = supplier id. «الموجود» is item.qty, the price paid to the supplier is item.cost.
+   suppliers/{id} = {name, phone, notes, open (old balance owed to them)}; spay/{id} = {sup, date, amount, when, notes} money paid to a supplier.
+   A supplier's account = open + purchases recorded with that supplier (moves type 'شراء' carrying sup) − payments. */
+const optNum=v=>String(v??'').trim()===''?'':r2(v);
+const supL=()=>list('suppliers').sort((a,b)=>String(a.name).localeCompare(b.name,'ar'));
+const supName=id=>(S.suppliers[id]||{}).name||'';
+const reqOf=i=>String(i.req??'').trim()===''?num(i.contract):num(i.req);
+const leftOf=i=>Math.max(0,r2(reqOf(i)-num(i.qty)));
+const supTracked=()=>items().filter(i=>i.active!==false&&(num(i.contract)>0||num(i.req)>0));
+const WHEN=['قبل التوريد (مقدم)','بعد التوريد'];
+function supAcc(id){const s=S.suppliers[id]||{};
+  const bought=sum(list('moves').filter(m=>m.sup===id&&m.type==='شراء'),m=>num(m.qty)*num(m.cost));
+  const pays=list('spay').filter(p=>p.sup===id).sort((a,b)=>String(b.date).localeCompare(a.date)||num(b.ts)-num(a.ts));
+  const paid=sum(pays,p=>p.amount),bal=r2(num(s.open)+bought-paid);
+  const its=supTracked().filter(i=>(i.sup||'')===id),short=its.filter(i=>leftOf(i)>0);
+  const left=r2(sum(its,i=>leftOf(i)*num(i.cost)));
+  /* money still needed for this supplier: what the rest costs, less any advance they already hold */
+  return{bought,paid,bal,pays,its,short,left,need:Math.max(0,r2(left+Math.min(0,bal)))}}
+function supTotals(){const tr=supTracked();
+  const reqC=sum(tr,i=>reqOf(i)*num(i.cost)),have=sum(tr,i=>Math.min(num(i.qty),reqOf(i))*num(i.cost)),left=sum(tr,i=>leftOf(i)*num(i.cost)),sales=sum(tr,i=>reqOf(i)*num(i.sell));
+  let need=sum(tr.filter(i=>!S.suppliers[i.sup]),i=>leftOf(i)*num(i.cost)),owed=0;
+  supL().forEach(s=>{const a=supAcc(s.id);need+=a.need;if(a.bal>0)owed+=a.bal});
+  return{tr,reqC,have,left,need:r2(need),owed,sales,short:tr.filter(i=>leftOf(i)>0).length,noCost:tr.filter(i=>leftOf(i)>0&&!num(i.cost)).length}}
+const balTxt=b=>b>0?`<span class="neg">ليه عندك ${egp(b)}</span>`:b<0?`<span class="pos">ليكي عنده ${egp(-b)} (مقدم)</span>`:'<span class="mut">خالص</span>';
+function vSupply(){
+  const T=supTotals(),act=items().filter(i=>i.active!==false),sups=supL();
+  const kp=(l,v,c='')=>`<div class="kpi ${c}"><span>${l}</span><b>${v}</b></div>`;
+  return `<section class="band"><div class="sec"><button class="btn sm" data-act="go:more">→</button> المتعاقد والموردين<span class="sp"></span><button class="btn p sm" data-act="newsup">+ مورد</button></div>
+  ${T.tr.length?`<div class="kpis" style="margin-bottom:10px">
+    ${kp('المطلوب من الشركة الشهر ده (بسعر الشراء)',egp(T.reqC))}
+    ${kp('قيمة الموجود منه في المخزن',egp(T.have))}
+    ${kp('الفلوس المحتاجة للشراء',`<span class="${T.need>0?'neg':'pos'}">${egp(T.need)}</span>`)}
+    ${kp(`أصناف ناقصة (من ${T.tr.length})`,T.short)}
+    ${kp('عليكي للموردين',egp(T.owed))}
+    ${kp('مكسب متوقع من المطلوب',`<span class="pos">${egp(T.sales-T.reqC)}</span>`,'pf')}
+  </div>
+  ${T.need!==r2(T.left)?`<p class="mut" style="font-size:12.5px;margin:-4px 0 10px">الباقي للشراء ${egp(T.left)}، والمحتاجة أقل لأن فيه مقدم عند الموردين.</p>`:''}
+  ${T.noCost?`<div class="note">${T.noCost} صنف ناقص مالوش سعر شراء، فمش داخل في الفلوس. اضغطي على اسم الصنف واكتبي «السعر الأساسي».</div>`:''}`
+  :`<div class="note">لسه مفيش كميات متعاقد عليها. اكتبيها في الجدول تحت قدام كل صنف، أو املّيها مرة واحدة من فاتورة سوبر كلين للشركة (19/11/2026). <button class="btn sm a" data-act="fillcontract">املا من الفاتورة</button></div>`}
+  <div class="card"><h2>الموردين <span class="tag">${sups.length}</span></h2>
+  ${sups.length?`<div class="list">${sups.map(s=>{const a=supAcc(s.id);return `<div class="it" data-act="sup:${esc(s.id)}"><div class="grow"><b>${esc(s.name)}</b><small>${a.its.length} صنف · ${a.short.length?`<span class="neg">${a.short.length} ناقص</span>`:'كله موجود'} · ${balTxt(a.bal)}</small></div><div class="amt ${a.need>0?'neg':'pos'}">${egp(a.need)}<br><small class="mut">محتاجة</small></div></div>`}).join('')}</div>`
+  :'<div class="empty">ضيفي الموردين (مثلاً: مورد المناديل، مورد المنظفات، مورد باقي الأصناف) من «+ مورد»، وبعدين اختاري مورد كل صنف من الجدول.</div>'}</div>
+  <div class="card"><h2>الأصناف<span class="sp"></span><button class="btn sm" data-act="reqreset">شهر جديد</button></h2>
+  <div class="chips">${[['all','الكل'],['short','الناقص'],...sups.map(s=>[s.id,s.name]),['none','من غير مورد']].map(([k,l])=>`<button class="chip ${supF===k?'on':''}" data-act="supf:${esc(k)}">${esc(l)}</button>`).join('')}</div>
+  <div class="scroll"><table class="tbl itbl"><thead><tr><th class="first">الصنف</th><th>المورد</th><th class="n">المتعاقد عليه</th><th class="n">المطلوب الشهر ده</th><th class="n">الموجود</th><th class="n">الباقي للشراء</th><th class="n">سعر الشراء</th><th class="n">فلوس الباقي</th></tr></thead>
+  <tbody id="supBody">${supRows()}</tbody><tfoot id="supFoot">${supFoot()}</tfoot></table></div>
+  <p class="mut" style="font-size:12.5px;margin-bottom:0">«المطلوب الشهر ده» لو فاضي بيبقى زي المتعاقد عليه. لو الشركة طلبت أقل (مثلاً 800 بدل 1200) اكتبيه، و«شهر جديد» بيرجّعه زي المتعاقد عليه. «الموجود» بيتغير لوحده مع الشراء والفواتير، وسعر الشراء والموجود بيتعدّلوا من اسم الصنف.</p>
+  ${act.some(i=>num(i.contract)>0)?`<button class="btn sm" style="margin-top:8px" data-act="fillcontract">املا الفاضي من فاتورة الشركة (19/11/2026)</button>`:''}</div>
+  </section>`}
+function supRowsList(){let r=items().filter(i=>i.active!==false);
+  if(supF==='short')r=r.filter(i=>leftOf(i)>0);else if(supF==='none')r=r.filter(i=>!S.suppliers[i.sup]);else if(supF!=='all')r=r.filter(i=>i.sup===supF);return r}
+function supRows(){const r=supRowsList(),sups=supL();
+  if(!r.length)return `<tr><td colspan="8" class="empty">${supF==='short'?'مفيش أصناف ناقصة ✓':'مفيش أصناف هنا'}</td></tr>`;
+  return r.map(i=>{const l=leftOf(i),tr_=num(i.contract)>0||num(i.req)>0;return `<tr data-sid="${esc(i.id)}">
+  <td class="nm first"><b data-act="item:${esc(i.id)}">${esc(i.name)}</b><small>${esc(i.unit)}</small></td>
+  <td><select class="in ssup" style="min-height:38px;width:8.5em;font-size:13px;padding:2px 6px" aria-label="مورد ${esc(i.name)}"><option value="">—</option>${sups.map(s=>`<option value="${esc(s.id)}" ${s.id===i.sup?'selected':''}>${esc(s.name)}</option>`).join('')}</select></td>
+  <td class="n"><input class="sct" inputmode="decimal" value="${esc(i.contract??'')}" aria-label="المتعاقد عليه ${esc(i.name)}"></td>
+  <td class="n"><input class="srq" inputmode="decimal" value="${esc(i.req??'')}" placeholder="${esc(fmt(i.contract||0))}" aria-label="المطلوب ${esc(i.name)}"></td>
+  <td class="n">${fmt(i.qty)}</td>
+  <td class="n">${tr_?(l>0?`<b class="neg">${fmt(l)}</b>`:'<span class="tag ok">كامل</span>'):'—'}</td>
+  <td class="n">${num(i.cost)?fmt(i.cost):'<span class="tag bad">مفيش</span>'}</td>
+  <td class="n">${tr_&&l>0?`<b>${fmt(l*num(i.cost))}</b>`:'—'}</td></tr>`}).join('')}
+function supFoot(){const r=supRowsList();return `<tr><td class="first">الإجمالي</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="n">${egp(sum(r,i=>leftOf(i)*num(i.cost)))}</td></tr>`}
+/* inline edit in the table: save, redraw, keep the cursor where it went */
+async function supEdit(t){const tr=t.closest('tr[data-sid]'),id=tr&&tr.dataset.sid,it=S.items[id];if(!it)return;
+  const k=t.classList.contains('ssup')?'sup':t.classList.contains('sct')?'contract':'req',v=k==='sup'?t.value:optNum(t.value);
+  if(String(it[k]??'')===String(v))return;
+  await put('items',id,{...it,[k]:v,updated:Date.now()});
+  setTimeout(()=>{const a=document.activeElement,ar=a&&a.closest&&a.closest('#supBody tr[data-sid]'),cls=a&&a.className,sid=ar&&ar.dataset.sid,y=scrollY,sx=($('#supBody')&&$('#supBody').closest('.scroll')||{}).scrollLeft;
+    render();scrollTo(0,y);const sc=$('#supBody')&&$('#supBody').closest('.scroll');if(sc&&sx!=null)sc.scrollLeft=sx;
+    if(sid){const n=document.querySelector(`#supBody tr[data-sid="${CSS.escape(sid)}"] .${String(cls).split(' ').filter(c=>/^s(sup|ct|rq)$/.test(c))[0]||'x'}`);n&&n.focus({preventScroll:true})}},0)}
+async function reqReset(){const r=list('items').filter(i=>String(i.req??'')!=='');if(!r.length)return toast('المطلوب كله زي المتعاقد عليه بالفعل');
+  if(!(await ask(`شهر جديد: «المطلوب الشهر ده» يرجع زي المتعاقد عليه في ${r.length} صنف؟`,'رجّعه',false)))return;
+  for(const i of r)await put('items',i.id,{...i,req:'',updated:Date.now()});toast('رجع المطلوب زي المتعاقد عليه');render()}
+/* the contracted quantities and prices on the Super Clean invoice to the company (no. 1, 19/11/2026), in SEED order; null = not on the invoice */
+const CONTRACT_INV=[[1200,13],[500,18],[250,27.5],[29,150],[40,45],[6,62],[24,71],[5,28],[30,45],[30,30],[3,130],[6,130],[10,45],[18,110],null,[60,40],[8,120],[8,65],[24,25],[3,70],[18,70],[20,97],null,[2,40],[24,20],[12,15]];
+async function fillContract(){const plan=[];
+  list('items').forEach(i=>{let k=-1;const m=/^fm(\d\d)$/.exec(i.id);if(m)k=num(m[1])-1;else k=SEED.findIndex(s=>s[0].trim()===String(i.name).trim());
+    const c=CONTRACT_INV[k];if(!c)return;let [q,p]=c;if(k===16&&/ربع/.test(i.unit||'')){q*=2;p/=2}/* tea: 500 g packs on the invoice, quarters in the shop */
+    const o={};if(String(i.contract??'')==='')o.contract=q;if(!num(i.sell))o.sell=p;if(Object.keys(o).length)plan.push([i,o])});
+  if(!plan.length)return toast('مفيش أصناف فاضية تتملي من الفاتورة');
+  if(!(await ask(`هيتكتب المتعاقد عليه (وسعر الشركة لو فاضي) من الفاتورة في ${plan.length} صنف. الأرقام اللي انتي كاتباها مش هتتغير.`,'املا',false)))return;
+  for(const [i,o] of plan)await put('items',i.id,{...S.items[i.id],...o,updated:Date.now()});toast(`اتملى ${plan.length} صنف، راجعيهم في الجدول`);render()}
+function supModal(id){const o=id?S.suppliers[id]:{name:'',phone:'',notes:'',open:''};if(!o)return;const a=id?supAcc(id):null;
+  const bind=sh=>{rebind=bind;const fm=sh.querySelector('#spf');
+    fm.onsubmit=async e=>{e.preventDefault();const d=formData(fm);if(!d.name.trim())return toast('اكتبي اسم المورد');const nid=id||uid();
+      closeModal();await put('suppliers',nid,{...(id?S.suppliers[id]:{created:Date.now()}),name:d.name.trim(),phone:d.phone.trim(),notes:d.notes.trim(),open:optNum(d.open)});toast('اتحفظ المورد');render();if(!id)supModal(nid)};
+    const dx=sh.querySelector('#sdel');if(dx)dx.onclick=async()=>{if(!(await ask(`حذف المورد «${o.name}»؟ أصنافه هتفضل بس من غير مورد، والدفعات بتاعته هتتمسح.`,'حذف')))return;
+      for(const i of list('items').filter(i=>i.sup===id))await put('items',i.id,{...i,sup:'',updated:Date.now()});
+      for(const p of list('spay').filter(p=>p.sup===id))await del('spay',p.id);await del('suppliers',id);toast('اتمسح المورد');render()};
+    const c=sh.querySelector('#scopy');if(c)c.onclick=async()=>{try{await navigator.clipboard.writeText(supOrderText(id));toast('اتنسخ الطلب')}catch(e){toast('تعذر النسخ')}}};
+  openModal(`<h3>${id?esc(o.name):'مورد جديد'}</h3>
+  ${a?`<div class="kpis" style="margin-bottom:10px"><div class="kpi"><span>اشتريتي منه</span><b>${egp(a.bought)}</b></div><div class="kpi"><span>دفعتيله</span><b>${egp(a.paid)}</b></div><div class="kpi"><span>الحساب</span><b style="font-size:14px">${balTxt(a.bal)}</b></div><div class="kpi"><span>محتاجة علشان تكمّلي</span><b class="${a.need>0?'neg':'pos'}">${egp(a.need)}</b></div></div>
+  <div class="box" style="margin-top:0"><h4>الباقي للشراء منه</h4>${a.short.length?`<div class="list">${a.short.map(i=>`<div class="it" style="cursor:default"><div class="grow"><b>${esc(i.name)}</b><small>المطلوب ${fmt(reqOf(i))} · الموجود ${fmt(i.qty)}</small></div><div class="amt">${fmt(leftOf(i))} ${esc(i.unit)}<br><small class="mut">${num(i.cost)?egp(leftOf(i)*num(i.cost)):'مفيش سعر'}</small></div></div>`).join('')}</div>
+    <div class="tot" style="margin-top:6px"><span>إجمالي الباقي</span><b>${egp(a.left)}</b>${a.need!==a.left?`<span>بعد خصم المقدم اللي عنده</span><b>${egp(a.need)}</b>`:''}</div>
+    <div class="acts">${o.phone?`<a class="btn a grow" href="https://wa.me/${waNum(o.phone)}?text=${encodeURIComponent(supOrderText(id))}" target="_blank" rel="noopener">ابعتله الطلب واتساب</a>`:''}<button class="btn grow" type="button" id="scopy">نسخ الطلب</button></div>`
+    :'<div class="empty" style="padding:8px">كل أصنافه موجودة بالكمية المطلوبة ✓</div>'}</div>
+  <div class="box"><h4 style="display:flex;align-items:center;gap:8px">الفلوس اللي اتدفعتله<span style="flex:1"></span><button class="btn sm p" type="button" data-act="spay:${esc(id)}">+ دفعة</button></h4>
+    ${a.pays.length?`<div class="list">${a.pays.map(p=>`<div class="it" data-act="spay:${esc(id)}/${esc(p.id)}"><div class="grow"><b>${egp(p.amount)}</b><small>${esc(dmy(p.date))} · ${esc(p.when||'')}${p.notes?' · '+esc(p.notes):''}</small></div></div>`).join('')}</div>`:'<div class="empty" style="padding:8px">لسه مفيش دفعات</div>'}</div>`:''}
+  <form id="spf">${f('name','اسم المورد',o.name,'text','required')}${f('phone','رقم الموبايل (للواتساب)',o.phone,'tel','dir="ltr"')}
+  ${f('open','حساب قديم ليه عندك قبل البرنامج (لو فيه)',o.open??'','num')}
+  <label class="fld"><span>ملاحظات</span><textarea name="notes">${esc(o.notes)}</textarea></label>
+  <div class="acts"><button class="btn p grow" type="submit">حفظ</button>${id?'<button class="btn d" type="button" id="sdel">حذف</button>':''}<button class="btn" type="button" data-act="close">إغلاق</button></div></form>
+  ${a?'<p class="mut" style="font-size:12.5px;margin-bottom:0">«اشتريتي منه» = اللي اتضاف للمخزن من «إضافة رصيد» في أصناف المورد ده.</p>':''}`,bind)}
+function supOrderText(id){const a=supAcc(id),s=st();return `طلب من ${s.shop||'Super Clean'}\n`+a.short.map((i,k)=>`${k+1}. ${i.name}: ${fmt(leftOf(i))} ${i.unit}`).join('\n')}
+function payModal(sid,pid){const s=S.suppliers[sid];if(!s)return;const o=pid?S.spay[pid]:{date:today(),amount:'',when:WHEN[0],notes:''};if(!o)return;
+  openModal(`<h3>${pid?'تعديل دفعة':'دفعة جديدة'} — ${esc(s.name)}</h3><form id="pyf">
+  <div class="g2">${f('amount','المبلغ',o.amount,'num','required')}${f('date','التاريخ',o.date,'date')}</div>
+  <label class="fld"><span>إمتى</span><select name="when">${WHEN.map(w=>`<option ${w===o.when?'selected':''}>${w}</option>`).join('')}</select></label>
+  ${f('notes','ملاحظة (اختياري)',o.notes)}
+  <div class="acts"><button class="btn p grow" type="submit">حفظ</button>${pid?'<button class="btn d" type="button" id="pdel">حذف</button>':''}<button class="btn" type="button" id="pback">رجوع</button></div></form>`,sh=>{
+    sh.querySelector('#pback').onclick=()=>supModal(sid);
+    sh.querySelector('#pyf').onsubmit=async e=>{e.preventDefault();const d=formData(e.target),amt=r2(d.amount);if(amt<=0)return toast('اكتبي المبلغ');
+      await put('spay',pid||uid(),{...(pid?S.spay[pid]:{ts:Date.now()}),sup:sid,amount:amt,date:d.date||today(),when:d.when,notes:String(d.notes||'').trim()});toast('اتسجلت الدفعة');render();supModal(sid)};
+    const dx=sh.querySelector('#pdel');if(dx)dx.onclick=async()=>{if(!(await ask(`حذف دفعة ${egp(o.amount)}؟`,'حذف')))return payModal(sid,pid);await del('spay',pid);toast('اتمسحت');render();supModal(sid)}})}
+
 /* ---------- more / expenses / moves / settings ---------- */
 function vMore(){const T=(v,t,s,ic)=>`<button class="tile" data-act="go:${v}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic}</svg><b>${t}</b><small>${s}</small></button>`;
   return `<section class="band"><div class="sec">المزيد</div><div class="tiles">
   ${T('customers','العملاء',`${list('customers').length} عميل · الحسابات والباقي`,'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>')}
+  ${T('supply','المتعاقد والموردين','الباقي للشراء وفلوسه، وحساب كل مورد','<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>')}
   ${T('expenses','المصروفات','نقل، أكياس، دعاية… تُخصم من المكسب','<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/>')}
   ${T('moves','حركة المخزن','كل إضافة وبيع وتعديل','<path d="M7 4v16M7 4l-3 3M7 4l3 3M17 20V4M17 20l-3-3M17 20l3-3"/>')}
   <button class="tile" data-act="shareapp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h3M21 18v3h-3"/></svg><b>شارك التطبيق</b><small>كود QR لأي حد عنده مشروع</small></button>
@@ -936,6 +1061,9 @@ const A={
     for(const l of i.lines||[]){const it=S.items[l.itemId];if(!it)continue;await put('items',it.id,{...S.items[it.id],qty:r2(num(S.items[it.id].qty)+num(l.qty))});await put('moves',uid(),{date:today(),ts:Date.now(),itemId:it.id,name:it.name,unit:it.unit,qty:r2(l.qty),type:'إلغاء فاتورة',ref:`فاتورة #${i.no}`})}
     await del('invoices',id);toast('تم حذف الفاتورة وإرجاع الكميات');render()},
   exp:id=>expModal(id||null),
+  sup:id=>supModal(id),newsup:()=>supModal(null),spay:a=>{const [s_,p_]=a.split('/');payModal(s_,p_||null)},supf:k=>{supF=k;render()},
+  reqreset:()=>reqReset(),fillcontract:()=>fillContract(),
+
   forceupdate:()=>forceUpdate(),whatsnew:()=>whatsNew(true),shareapp:()=>shareModal(),sharelink:()=>shareLink(),
   install:async()=>{if(!bip)return;const e=bip;bip=null;e.prompt();const r=await e.userChoice.catch(()=>null);if(r&&r.outcome==='accepted')closeModal()},
   wlogin:()=>{onClose=null;closeModal();go('settings');setTimeout(()=>{const x=document.querySelector('#authf input');x&&x.focus()},100)},
@@ -959,6 +1087,7 @@ $('#view').addEventListener('input',e=>{const t=e.target;
   if(t.id==='inotes')draft.notes=t.value;
 });
 $('#view').addEventListener('change',e=>{const t=e.target;
+  if(t.matches('#supBody input,#supBody select')){supEdit(t);return}
   if(t.id==='mf'){moveF=t.value;render();return}
   if(!draft)return;
   if(t.id==='icust'){draft.cust=t.value;saveDraft();return}
