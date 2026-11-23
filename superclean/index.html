@@ -285,16 +285,18 @@ body.kb .stick{bottom:0}
 {
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const num=v=>{const x=parseFloat(String(v??'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[٫,]/g,'.'));return isFinite(x)?x:0};
+const num=v=>{let t=String(v??'').trim().replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/٬/g,'');
+  t=/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)?t.replace(/,/g,''):t.replace(/[٫,]/g,'.');const x=parseFloat(t);return isFinite(x)?x:0};
 const r2=v=>Math.round(num(v)*100)/100;
 const fmt=v=>r2(v).toLocaleString('en-US',{maximumFractionDigits:2});
 const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='19';
+const APP_V='20';
 /* what changed in each version; shown once after an update and from Settings ← «إيه الجديد؟». Add a line here with every new version. */
 const CHANGES=[
+  ['20',['الأرقام بفاصلة الآلاف زي 1,500 بقت بتتقري 1500 صح.','زرار «حفظ الفاتورة» ما بقاش بيقف لو نسيت تكتب المبلغ المدفوع.','حذف مصروف ثم «رجوع» ما بقاش بيعمل مشكلة، وتأمين أكتر لاسترجاع النسخ من ملف.']],
   ['19',['شارك التطبيق مع غيرك بكود QR: «المزيد» ← «شارك التطبيق». الشخص التاني بيبدأ عنده فاضي، وأرقامه وبياناته خاصة بيه.','بعد أي تحديث بيظهرلك اللي اتغيّر، وتقدر تشوفه تاني من الإعدادات ← «إيه الجديد؟».']],
   ['18',['التحصيل: الفاتورة الجديدة «لسه ما اتحصّلتش»، وتقدر تسجّل إنها اتحصّلت كلها أو جزء منها.','رأس الفاتورة فيه رقم الفاتورة وطريقة الدفع، والتاريخ يوم/شهر/سنة.']],
   ['17',['الـ PDF بيتقسم على صفحات A4 والكلام العربي بيظهر مظبوط.','سطر «المدفوع» اتشال من الفاتورة ورسالة الواتساب.']],
@@ -478,11 +480,11 @@ async function shareLink(){const text=SHARE_TXT+'\nحمّله من هنا:';
 /* ---------- ui helpers ---------- */
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
 let onClose=null;
-function openModal(html,bind){document.body.classList.add('lock');$('#sheet').innerHTML='<div class="grab"></div>'+html;$('#modal').hidden=false;$('#sheet').scrollTop=0;bind&&bind($('#sheet'))}
+function openModal(html,bind){rebind=null;document.body.classList.add('lock');$('#sheet').innerHTML='<div class="grab"></div>'+html;$('#modal').hidden=false;$('#sheet').scrollTop=0;bind&&bind($('#sheet'))}
 function closeModal(){document.body.classList.remove('lock');$('#modal').hidden=true;$('#sheet').innerHTML='';const f=onClose;onClose=null;f&&f()}
-function ask(msg,yes='تأكيد',danger=true){return new Promise(res=>{const prev=$('#sheet').innerHTML,wasOpen=!$('#modal').hidden;
+function ask(msg,yes='تأكيد',danger=true){return new Promise(res=>{const prev=$('#sheet').innerHTML,wasOpen=!$('#modal').hidden,rb=rebind;
   openModal(`<h3>${esc(msg)}</h3><div class="acts"><button class="btn ${danger?'d':'p'} grow" id="ay">${yes}</button><button class="btn grow" id="an">رجوع</button></div>`,s=>{
-    const done=v=>{if(wasOpen&&!v){$('#sheet').innerHTML=prev;rebind&&rebind($('#sheet'))}else closeModal();res(v)};
+    const done=v=>{if(wasOpen&&!v){$('#sheet').innerHTML=prev;rebind=rb;rb&&rb($('#sheet'))}else closeModal();res(v)};
     s.querySelector('#ay').onclick=()=>done(true);s.querySelector('#an').onclick=()=>done(false)})})}
 let rebind=null;
 function hpIcon(){const on=document.body.classList.contains('hp');$('#hpbtn').innerHTML=on?EYEOFF:EYE;$('#hpbtn').setAttribute('aria-label',on?'إظهار المكسب':'إخفاء المكسب')}
@@ -560,12 +562,12 @@ function vHome(){
   <div class="card"><h2>الأكثر مبيعاً <span class="mut" style="font-size:13px;font-weight:600">${pl}</span></h2>
   ${top.length?`<div class="bars">${top.map(([n,v])=>`<div class="r"><span>${esc(n)}</span><div class="t"><i style="width:${Math.max(4,v.v/mx*100)}%"></i></div><b>${egp(v.v)}</b></div>`).join('')}</div>`:'<div class="empty">لا توجد مبيعات في هذه الفترة</div>'}</div>
   <div class="card"><h2>نواقص المخزن <span class="tag ${low.length?'bad':'ok'}">${low.length}</span></h2>
-  ${low.length?`<div class="list">${low.slice(0,5).map(i=>`<div class="it" data-act="item:${i.id}"><div class="grow"><b>${esc(i.name)}</b><small>الحد الأدنى ${fmt(i.min)} ${esc(i.unit)}</small></div><div class="amt neg">${fmt(i.qty)} ${esc(i.unit)}</div></div>`).join('')}${low.length>5?`<button class="btn sm" style="width:100%;margin-top:6px" data-act="lowall">عرض كل النواقص (${low.length})</button>`:''}</div>`:'<div class="empty">كل الأصناف فوق الحد الأدنى</div>'}</div>
+  ${low.length?`<div class="list">${low.slice(0,5).map(i=>`<div class="it" data-act="item:${esc(i.id)}"><div class="grow"><b>${esc(i.name)}</b><small>الحد الأدنى ${fmt(i.min)} ${esc(i.unit)}</small></div><div class="amt neg">${fmt(i.qty)} ${esc(i.unit)}</div></div>`).join('')}${low.length>5?`<button class="btn sm" style="width:100%;margin-top:6px" data-act="lowall">عرض كل النواقص (${low.length})</button>`:''}</div>`:'<div class="empty">كل الأصناف فوق الحد الأدنى</div>'}</div>
   <div class="card"><h2>آخر الفواتير<span class="sp"></span><button class="btn sm" data-act="go:invoices">الكل</button></h2>
   ${invs().slice(0,5).map(invItem).join('')||'<div class="empty">لا توجد فواتير بعد. اضغط زر «فاتورة» بالأسفل</div>'}</div>
   </section>`;
 }
-const invItem=i=>`<div class="list"><div class="it" data-act="invoice:${i.id}"><div class="grow"><b>#${i.no} — ${esc(i.custName)}</b><small>${i.date} · <span class="tag">${esc(i.pay||'نقدي')}</span> · ${(i.lines||[]).length} صنف ${due(i)>0?`· <span class="tag bad">باقي ${egp(due(i))}</span>`:''}</small></div><div class="amt">${egp(i.total)}<br><small class="pos pf">+${fmt(i.profit)}</small></div></div></div>`;
+const invItem=i=>`<div class="list"><div class="it" data-act="invoice:${esc(i.id)}"><div class="grow"><b>#${esc(i.no)} — ${esc(i.custName)}</b><small>${esc(i.date)} · <span class="tag">${esc(i.pay||'نقدي')}</span> · ${(i.lines||[]).length} صنف ${due(i)>0?`· <span class="tag bad">باقي ${egp(due(i))}</span>`:''}</small></div><div class="amt">${egp(i.total)}<br><small class="pos pf">+${fmt(i.profit)}</small></div></div></div>`;
 
 /* ---------- stock ---------- */
 function vStock(){
@@ -584,7 +586,7 @@ function stockRows(){
   const q=stockQ.trim();
   const r=items().filter(i=>(!q||String(i.name).includes(q))&&(stockF==='all'||(stockF==='low'?i.active!==false&&num(i.qty)<=num(i.min):i.active===false)));
   if(!r.length)return `<tr><td colspan="7" class="empty">${list('items').length?'لا توجد نتائج':'المخزن فارغ — أضف أول صنف'}</td></tr>`;
-  return r.map(i=>{const m=num(i.sell)-num(i.cost);return `<tr data-act="item:${i.id}" class="${i.active===false?'off':''} ${num(i.qty)<=num(i.min)?'low':''}"><td class="nm first">${esc(i.name)}${i.active===false?' <span class="tag">خامل</span>':''}</td><td>${esc(i.unit)}</td><td class="n q">${fmt(i.qty)}</td><td class="n">${fmt(i.cost)}</td><td class="n">${fmt(i.sell)}</td><td class="n pf ${m>=0?'pos':'neg'}">${fmt(m)}${num(i.cost)?` <small>(${Math.round(m/num(i.cost)*100)}%)</small>`:''}</td><td class="nt">${esc(i.notes)}</td></tr>`}).join('');
+  return r.map(i=>{const m=num(i.sell)-num(i.cost);return `<tr data-act="item:${esc(i.id)}" class="${i.active===false?'off':''} ${num(i.qty)<=num(i.min)?'low':''}"><td class="nm first">${esc(i.name)}${i.active===false?' <span class="tag">خامل</span>':''}</td><td>${esc(i.unit)}</td><td class="n q">${fmt(i.qty)}</td><td class="n">${fmt(i.cost)}</td><td class="n">${fmt(i.sell)}</td><td class="n pf ${m>=0?'pos':'neg'}">${fmt(m)}${num(i.cost)?` <small>(${Math.round(m/num(i.cost)*100)}%)</small>`:''}</td><td class="nt">${esc(i.notes)}</td></tr>`}).join('');
 }
 function itemModal(id,after){
   const o=id?S.items[id]:{name:'',unit:'عدد',qty:0,cost:'',sell:'',min:0,cat:'',notes:'',active:true};
@@ -638,7 +640,7 @@ function custStats(id){const iv=list('invoices').filter(i=>i.cust===id);return{n
 function custRows(){
   const q=custQ.trim();const r=custs().filter(c=>!q||String(c.name).includes(q)||String(c.phone).includes(q));
   if(!r.length)return `<div class="empty">${list('customers').length?'لا توجد نتائج':'لا يوجد عملاء بعد'}</div>`;
-  return r.map(c=>{const s=custStats(c.id);return `<div class="it" data-act="cust:${c.id}"><div class="grow"><b>${esc(c.name)}</b><small>${esc(c.phone||'بدون رقم')} · ${s.n} فاتورة</small></div><div class="amt">${egp(s.total)}${s.due>0?`<br><small class="neg">باقي ${fmt(s.due)}</small>`:''}</div></div>`}).join('');
+  return r.map(c=>{const s=custStats(c.id);return `<div class="it" data-act="cust:${esc(c.id)}"><div class="grow"><b>${esc(c.name)}</b><small>${esc(c.phone||'بدون رقم')} · ${s.n} فاتورة</small></div><div class="amt">${egp(s.total)}${s.due>0?`<br><small class="neg">باقي ${fmt(s.due)}</small>`:''}</div></div>`}).join('');
 }
 function custModal(id,after){
   const o=id?S.customers[id]:{name:'',phone:'',address:'',notes:''};if(!o)return;
@@ -662,7 +664,7 @@ let invSel='all',invItemQ='';
 function newDraft(cust){return{id:null,no:nextNo(),date:today(),cust:cust||'',q:{},p:{},meta:{},hid:[...(st().invHidden||[])],discount:'',paid:'',coll:'no',notes:'',pay:'نقدي'}}
 const dPrice=id=>{const d=draft;if(d.p[id]!==undefined&&d.p[id]!=='')return num(d.p[id]);const it=S.items[id];return it?num(it.sell):num((d.meta[id]||{}).price)};
 const dCost=id=>{const m=draft.meta[id];if(m&&m.cost!==undefined)return num(m.cost);const it=S.items[id];return it?num(it.cost):0};
-const chosen=()=>Object.keys(draft.q).filter(id=>num(draft.q[id])>0);
+const chosen=()=>Object.keys(draft.q).filter(id=>num(draft.q[id])>0&&(S.items[id]||draft.meta[id]));
 function invRowsHtml(){
   const d=draft,q=invItemQ.trim(),ids=new Set(chosen());
   let r=items().filter(i=>i.active!==false||ids.has(i.id));
@@ -671,19 +673,19 @@ function invRowsHtml(){
   if(invSel==='sel')r=r.filter(i=>ids.has(i.id));else if(invSel==='hid')r=r.filter(i=>hid.has(i.id)&&!ids.has(i.id));else r=r.filter(i=>!hid.has(i.id)||ids.has(i.id));
   if(q)r=r.filter(i=>String(i.name).includes(q));
   if(!r.length)return `<tr><td colspan="4" class="empty">${invSel==='sel'?'لسه ما اخترتش أصناف — اكتب الكمية قدام الصنف':invSel==='hid'?'مفيش أصناف مشالة':list('items').length?'لا توجد نتائج':'مفيش أصناف لسه — دوس «+ صنف جديد»'}</td></tr>`;
-  return r.map(i=>{const qq=d.q[i.id]??'';return `<tr data-id="${i.id}" class="${num(qq)>0?'sel':''}">
-  <td class="nm"><b ${i.gone?'':`data-act="item:${i.id}"`}>${esc(i.name)}</b><small>${esc(i.unit)} · متاح ${fmt(i.qty)}</small><div class="lwarn"></div></td>
+  return r.map(i=>{const qq=d.q[i.id]??'';return `<tr data-id="${esc(i.id)}" class="${num(qq)>0?'sel':''}">
+  <td class="nm"><b ${i.gone?'':`data-act="item:${esc(i.id)}"`}>${esc(i.name)}</b><small>${esc(i.unit)} · متاح ${fmt(i.qty)}</small><div class="lwarn"></div></td>
   <td class="n"><input class="iqt" inputmode="decimal" placeholder="0" value="${esc(qq)}" aria-label="كمية ${esc(i.name)}"></td>
   <td class="n"><input class="ip" inputmode="decimal" value="${fmt(dPrice(i.id)).replace(/,/g,'')}" aria-label="سعر ${esc(i.name)}"></td>
-  <td class="n"><span class="itot">${num(qq)>0?fmt(num(qq)*dPrice(i.id)):'—'}</span>${invSel==='hid'?`<button class="irm add" data-act="unhide:${i.id}" aria-label="رجّع ${esc(i.name)}">+</button>`:`<button class="irm" data-act="hide:${i.id}" aria-label="شيل ${esc(i.name)} من القايمة">×</button>`}</td></tr>`}).join('');
+  <td class="n"><span class="itot">${num(qq)>0?fmt(num(qq)*dPrice(i.id)):'—'}</span>${invSel==='hid'?`<button class="irm add" data-act="unhide:${esc(i.id)}" aria-label="رجّع ${esc(i.name)}">+</button>`:`<button class="irm" data-act="hide:${esc(i.id)}" aria-label="شيل ${esc(i.name)} من القايمة">×</button>`}</td></tr>`}).join('');
 }
 function vInv(){
   const d=draft;
   return `<section class="band">
   <div class="sec">${d.id?'تعديل فاتورة':'فاتورة جديدة'} <span class="tag">#${d.id?d.no:nextNo()}</span><span class="sp"></span><button class="btn sm" data-act="clearinv">${d.id?'إلغاء التعديل':'تفريغ'}</button></div>
   <div class="card">
-  <div class="g2"><label class="fld"><span>العميل</span><select id="icust" class="in"><option value="">عميل ${d.pay}</option>${custs().map(c=>`<option value="${c.id}" ${c.id===d.cust?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
-  <label class="fld"><span>التاريخ</span><input id="idate" type="date" class="in" value="${d.date}"></label></div>
+  <div class="g2"><label class="fld"><span>العميل</span><select id="icust" class="in"><option value="">عميل ${d.pay}</option>${custs().map(c=>`<option value="${esc(c.id)}" ${c.id===d.cust?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+  <label class="fld"><span>التاريخ</span><input id="idate" type="date" class="in" value="${esc(d.date)}"></label></div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="mut" style="font-size:12px;font-weight:600">طريقة الدفع</span><div class="seg">${['نقدي','تحويل'].map(p=>`<button class="${d.pay===p?'on':''}" data-act="pay:${p}">${p}</button>`).join('')}</div><span style="flex:1"></span><button class="btn sm" data-act="quickitem">+ صنف جديد</button><button class="btn sm" data-act="quickcust">+ عميل جديد</button></div>
   </div>
   <div id="lines">
@@ -728,13 +730,13 @@ function refreshLineHints(){
 async function saveInv(btn){
   const d=draft,ids=chosen();
   if(!ids.length)return toast('اكتب الكمية قدام صنف واحد على الأقل');
-  btn.disabled=true;
   const lines=ids.map(id=>{const it=S.items[id],m=d.meta[id]||{};return{itemId:id,name:it?it.name:m.name,unit:it?it.unit:m.unit,qty:r2(d.q[id]),price:r2(dPrice(id)),cost:r2(dCost(id))}});
   const old=d.id?S.invoices[d.id]:null,id=d.id||uid();
   const delta={};lines.forEach(l=>delta[l.itemId]=(delta[l.itemId]||0)+num(l.qty));
   if(old)(old.lines||[]).forEach(l=>delta[l.itemId]=(delta[l.itemId]||0)-num(l.qty));
   const sub=r2(sum(lines,l=>num(l.qty)*num(l.price))),cost=r2(sum(lines,l=>num(l.qty)*num(l.cost))),disc=r2(d.discount),total=r2(Math.max(0,sub-disc));
   if(dColl(d,total)==='part'&&!(num(d.paid)>0))return toast('اكتب المبلغ اللي اتدفع');
+  if(btn)btn.disabled=true;
   const paid=dPaid(d,total),c=S.customers[d.cust];
   const inv={no:old?d.no:nextNo(),date:d.date||today(),cust:d.cust||'',custName:c?c.name:'عميل '+(d.pay||'نقدي'),pay:d.pay||'نقدي',custPhone:c?c.phone||'':'',lines,sub,discount:disc,total,paid,cost,profit:r2(total-cost),notes:String(d.notes||'').trim(),created:old?old.created:Date.now(),updated:Date.now()};
   for(const [iid,dq] of Object.entries(delta)){if(!r2(dq))continue;const it=S.items[iid];if(!it)continue;
@@ -761,7 +763,7 @@ function invRows(){
 function invDoc(i){
   const s=st(),ph=[s.phone,s.phone2].filter(Boolean);
   return `<div class="paper"><div class="ph"><div class="brand">${LOGO('#0089b0')}<div><b>${esc(s.shop)}</b><small>${esc(s.tag)}</small></div></div>
-  <div class="pmeta"><b>فاتورة بيع</b><span>رقم الفاتورة: ${i.no}</span><span>طريقة الدفع: ${esc(i.pay||'نقدي')}</span><span>التاريخ: ${dmy(i.date)}</span></div></div>
+  <div class="pmeta"><b>فاتورة بيع</b><span>رقم الفاتورة: ${esc(i.no)}</span><span>طريقة الدفع: ${esc(i.pay||'نقدي')}</span><span>التاريخ: ${esc(dmy(i.date))}</span></div></div>
   <div class="pcust">العميل: <b>${esc(i.custName)}</b>${i.custPhone?` — <span dir="ltr">${esc(i.custPhone)}</span>`:''}</div>
   <table><thead><tr><th>م</th><th>الصنف</th><th>الوحدة</th><th class="n">الكمية</th><th class="n">السعر</th><th class="n">الإجمالي</th></tr></thead><tbody>
   ${(i.lines||[]).map((l,k)=>`<tr><td>${k+1}</td><td>${esc(l.name)}</td><td>${esc(l.unit)}</td><td class="n">${fmt(l.qty)}</td><td class="n">${fmt(l.price)}</td><td class="n">${fmt(num(l.qty)*num(l.price))}</td></tr>`).join('')}</tbody></table>
@@ -775,14 +777,14 @@ const waNum=p=>{let d=String(p||'').replace(/\D/g,'');if(d.startsWith('00'))d=d.
 function invModal(id){
   const i=S.invoices[id];if(!i)return;
   const bind=s=>{rebind=bind;const pb=s.querySelector('#paybtn');if(pb)pb.onclick=()=>payModal(id)};
-  openModal(`<h3>فاتورة #${i.no}<span class="sp"></span>${due(i)<=0?'<span class="tag ok">تم التحصيل</span>':num(i.paid)>0?`<span class="tag bad">باقي ${egp(due(i))}</span>`:'<span class="tag bad">لسه ما اتحصّلتش</span>'}</h3>
+  openModal(`<h3>فاتورة #${esc(i.no)}<span class="sp"></span>${due(i)<=0?'<span class="tag ok">تم التحصيل</span>':num(i.paid)>0?`<span class="tag bad">باقي ${egp(due(i))}</span>`:'<span class="tag bad">لسه ما اتحصّلتش</span>'}</h3>
   <div class="prev">${invDoc(i)}</div>
   <div class="note pf">مكسب هذه الفاتورة: <b>${egp(i.profit)}</b> (التكلفة ${egp(i.cost)})</div>
   <div class="acts"><button class="btn p grow" data-act="pdf:${id}">تنزيل PDF</button>${navigator.canShare?`<button class="btn a grow" data-act="sharepdf:${id}">مشاركة PDF</button>`:''}<a class="btn grow" href="https://wa.me/${waNum(i.custPhone)}?text=${encodeURIComponent(waText(i))}" target="_blank" rel="noopener">إرسال واتساب</a></div>
   <div class="acts">${due(i)>0?`<button class="btn sm a" data-act="collfull:${id}">تم التحصيل بالكامل</button><button class="btn sm" id="paybtn">تحصيل جزء</button>`:''}${num(i.paid)>0?`<button class="btn sm" data-act="collnone:${id}">إلغاء التحصيل</button>`:''}<button class="btn sm" data-act="copyinv:${id}">نسخ كنص</button><button class="btn sm" data-act="editinv:${id}">تعديل</button><button class="btn sm d" data-act="delinv:${id}">حذف</button><button class="btn sm" data-act="close">إغلاق</button></div>`,bind);
 }
 function payModal(id){const i=S.invoices[id];
-  openModal(`<h3>تحصيل جزء — فاتورة #${i.no}</h3><p>الباقي: <b>${egp(due(i))}</b></p><form id="pf">${f('amt','المبلغ المدفوع الآن',due(i),'num')}<div class="acts"><button class="btn p grow" type="submit">حفظ</button><button class="btn" type="button" data-act="close">إلغاء</button></div></form>`,s=>{
+  openModal(`<h3>تحصيل جزء — فاتورة #${esc(i.no)}</h3><p>الباقي: <b>${egp(due(i))}</b></p><form id="pf">${f('amt','المبلغ المدفوع الآن',due(i),'num')}<div class="acts"><button class="btn p grow" type="submit">حفظ</button><button class="btn" type="button" data-act="close">إلغاء</button></div></form>`,s=>{
     s.querySelector('#pf').onsubmit=async e=>{e.preventDefault();const a=num(s.querySelector('[name=amt]').value);if(a<=0)return toast('اكتب المبلغ');closeModal();await put('invoices',id,{...S.invoices[id],paid:r2(Math.min(num(i.total),num(i.paid)+a)),updated:Date.now()});toast('تم تسجيل الدفعة');render();invModal(id)}})}
 let h2p=null;
 function loadH2P(){return h2p||(h2p=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';s.onload=()=>window.html2pdf?res(window.html2pdf):rej();s.onerror=()=>{h2p=null;rej()};document.head.appendChild(s)}))}
@@ -826,18 +828,18 @@ function vExpenses(){
   const ex=list('expenses').sort((a,b)=>String(b.date).localeCompare(a.date)),m=today().slice(0,7);
   return `<section class="band"><div class="sec"><button class="btn sm" data-act="go:more">→</button> المصروفات<span class="sp"></span><button class="btn p sm" data-act="exp:">+ مصروف</button></div>
   <div class="kpis" style="margin-bottom:14px"><div class="kpi"><span>مصروفات هذا الشهر</span><b>${egp(sum(ex.filter(e=>String(e.date).slice(0,7)===m),e=>e.amount))}</b></div><div class="kpi"><span>الإجمالي</span><b>${egp(sum(ex,e=>e.amount))}</b></div></div>
-  <div class="card list">${ex.map(e=>`<div class="it" data-act="exp:${e.id}"><div class="grow"><b>${esc(e.desc)}</b><small>${e.date} · ${esc(e.cat)}</small></div><div class="amt neg">${egp(e.amount)}</div></div>`).join('')||'<div class="empty">لا توجد مصروفات. أي مصروف للشغل (توصيل، أكياس…) سجليه هنا ليتخصم من صافي المكسب.</div>'}</div></section>`}
+  <div class="card list">${ex.map(e=>`<div class="it" data-act="exp:${esc(e.id)}"><div class="grow"><b>${esc(e.desc)}</b><small>${esc(e.date)} · ${esc(e.cat)}</small></div><div class="amt neg">${egp(e.amount)}</div></div>`).join('')||'<div class="empty">لا توجد مصروفات. أي مصروف للشغل (توصيل، أكياس…) سجليه هنا ليتخصم من صافي المكسب.</div>'}</div></section>`}
 function expModal(id){const o=id?S.expenses[id]:{date:today(),desc:'',amount:'',cat:ECATS[0]};
   openModal(`<h3>${id?'تعديل مصروف':'مصروف جديد'}</h3><form id="ef">${f('desc','البيان',o.desc,'text','required')}<div class="g2">${f('amount','المبلغ',o.amount,'num')}${f('date','التاريخ',o.date,'date')}</div>
   <label class="fld"><span>النوع</span><select name="cat">${ECATS.map(c=>`<option ${o.cat===c?'selected':''}>${c}</option>`).join('')}</select></label>
-  <div class="acts"><button class="btn p grow" type="submit">حفظ</button>${id?'<button class="btn d" type="button" id="edel">حذف</button>':''}<button class="btn" type="button" data-act="close">إلغاء</button></div></form>`,s=>{
+  <div class="acts"><button class="btn p grow" type="submit">حفظ</button>${id?'<button class="btn d" type="button" id="edel">حذف</button>':''}<button class="btn" type="button" data-act="close">إلغاء</button></div></form>`,function eb(s){rebind=eb;
     s.querySelector('#ef').onsubmit=async e=>{e.preventDefault();const d=formData(e.target);if(!d.desc.trim()||num(d.amount)<=0)return toast('اكتب البيان والمبلغ');closeModal();await put('expenses',id||uid(),{date:d.date||today(),desc:d.desc.trim(),amount:r2(d.amount),cat:d.cat});toast('تم الحفظ');render()};
     const x=s.querySelector('#edel');if(x)x.onclick=async()=>{if(await ask('حذف هذا المصروف؟','حذف')){await del('expenses',id);render()}}})}
 function vMoves(){
   const mv=list('moves').filter(m=>!moveF||m.itemId===moveF).sort((a,b)=>num(b.ts)-num(a.ts)).slice(0,300);
   return `<section class="band"><div class="sec"><button class="btn sm" data-act="go:more">→</button> حركة المخزن</div>
-  <select class="search" id="mf"><option value="">كل الأصناف</option>${items().map(i=>`<option value="${i.id}" ${i.id===moveF?'selected':''}>${esc(i.name)}</option>`).join('')}</select>
-  <div class="card list">${mv.map(m=>`<div class="it" ${m.inv&&S.invoices[m.inv]?`data-act="invoice:${m.inv}"`:''}><div class="grow"><b>${esc(m.name)}</b><small>${m.date} · <span class="tag ${num(m.qty)<0?'bad':'ok'}">${esc(m.type)}</span> ${esc(m.ref||'')}${m.cost?` · بسعر ${fmt(m.cost)}`:''}</small></div><div class="amt ${num(m.qty)<0?'neg':'pos'}" dir="ltr">${num(m.qty)>0?'+':''}${fmt(m.qty)} <small>${esc(m.unit)}</small></div></div>`).join('')||'<div class="empty">لا توجد حركات بعد</div>'}</div></section>`}
+  <select class="search" id="mf"><option value="">كل الأصناف</option>${items().map(i=>`<option value="${esc(i.id)}" ${i.id===moveF?'selected':''}>${esc(i.name)}</option>`).join('')}</select>
+  <div class="card list">${mv.map(m=>`<div class="it" ${m.inv&&S.invoices[m.inv]?`data-act="invoice:${esc(m.inv)}"`:''}><div class="grow"><b>${esc(m.name)}</b><small>${esc(m.date)} · <span class="tag ${num(m.qty)<0?'bad':'ok'}">${esc(m.type)}</span> ${esc(m.ref||'')}${m.cost?` · بسعر ${fmt(m.cost)}`:''}</small></div><div class="amt ${num(m.qty)<0?'neg':'pos'}" dir="ltr">${num(m.qty)>0?'+':''}${fmt(m.qty)} <small>${esc(m.unit)}</small></div></div>`).join('')||'<div class="empty">لا توجد حركات بعد</div>'}</div></section>`}
 function acctCard(){
   if(user)return `<div class="card"><h2>الحساب والمزامنة</h2><p style="margin-top:0">متصل بحساب <b dir="ltr">${esc(user.email)}</b>. أي موبايل يدخل بنفس الإيميل والباسورد يشوف نفس المخزن والفواتير.</p><button class="btn d" data-act="signout">خروج من الحساب</button></div>`;
   return `<form class="card" id="authf"><h2>الحساب والمزامنة</h2><p class="mut" style="margin-top:0">ادخل بنفس الإيميل على موبايلك وموبايل مراتك عشان الاتنين يشوفوا نفس البيانات. أول دخول بيرفع البيانات اللي على الموبايل ده للحساب.</p>
@@ -864,7 +866,8 @@ function vSettings(){const s=st();
   <div class="card"><h2>تثبيت التطبيق على الموبايل <span class="tag">إصدار ${APP_V}</span></h2><p style="margin:0" class="mut">افتح <b dir="ltr">ahmed-elbaz84.github.io/superclean</b> في المتصفح ثم: <b>أندرويد</b>: القائمة ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». <b>آيفون (سفاري)</b>: زر المشاركة ← «إضافة إلى الشاشة الرئيسية». أي تحديث جديد بيوصل لوحده لما تفتح التطبيق والنت شغال.</p>${standalone()?'':`<button class="btn p" style="width:100%;margin-top:10px" data-act="install" data-inst ${bip?'':'hidden'}>تثبيت التطبيق</button>`}<button class="btn" style="width:100%;margin-top:8px" data-act="shareapp">شارك التطبيق مع حد تاني (QR)</button></div></section>`}
 async function exportData(){const data=JSON.stringify({app:'superclean',at:new Date().toISOString(),data:Object.fromEntries(COLS.map(c=>[c,S[c]]))});
   saveBlob(new Blob([data],{type:'application/json'}),`superclean-backup-${today()}.json`);toast('تم تنزيل النسخة الاحتياطية')}
-async function restoreObj(d){toast('جاري الاسترجاع…');for(const c of COLS)for(const [id,o] of Object.entries(d[c]||{}))await put(c,id,o);toast('تم الاسترجاع');render()}
+async function restoreObj(d){toast('جاري الاسترجاع…');let n=0;for(const c of COLS)for(const [id,o] of Object.entries((d&&d[c])||{})){if(!/^[\w-]{1,60}$/.test(id)||!o||typeof o!=='object'||Array.isArray(o))continue;await put(c,id,o);n++}
+  if(!n)return toast('الملف مفيهوش بيانات من Super Clean');toast('تم الاسترجاع');render()}
 async function importData(file){try{const j=JSON.parse(await file.text()),d=j.data||j;if(!(await ask('استرجاع البيانات من الملف؟ السجلات الموجودة بنفس الرقم ستُستبدل.','استرجاع',false)))return;
   await restoreObj(d)}catch(e){toast('الملف غير صالح')}}
 
@@ -905,7 +908,7 @@ async function mailBackup(){const name=BKN+today()+'.json',file=new File([bkJSON
   try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Super Clean — نسخة احتياطية '+today(),text:'نسخة احتياطية من Super Clean ('+bkSummary()+')'});if(user)setMain({bkShared:today()});return}}catch(e){if(e&&e.name==='AbortError')return}
   saveBlob(file,name);toast('الموبايل ده مش بيدعم المشاركة، الملف اتنزّل — ابعته على الإيميل من التنزيلات')}
 function mailScript(){const to=(st().bkTo||'').split(/[\s,;]+/).filter(Boolean).join(',')||'EMAIL1@gmail.com,EMAIL2@gmail.com';
-  return `// Super Clean — إرسال نسخة احتياطية يومية على الإيميل\nconst TO='${to}';\nfunction doPost(e){\n  const j=JSON.parse(e.postData.contents);\n  const blob=Utilities.newBlob(j.file,'application/json',j.name);\n  MailApp.sendEmail({to:TO,subject:'Super Clean — نسخة احتياطية '+j.date,\n    body:'نسخة احتياطية تلقائية من تطبيق Super Clean ('+j.summary+').\\nلو احتجتها: افتح التطبيق ← المزيد ← الإعدادات ← استرجاع من ملف، واختار الملف ده.',\n    attachments:[blob]});\n  return ContentService.createTextOutput('ok');\n}\n`}
+  return `// Super Clean — إرسال نسخة احتياطية يومية على الإيميل\nconst TO='${to.replace(/[^\w.@+,-]/g,'')}';\nfunction doPost(e){\n  const j=JSON.parse(e.postData.contents);\n  const blob=Utilities.newBlob(j.file,'application/json',j.name);\n  MailApp.sendEmail({to:TO,subject:'Super Clean — نسخة احتياطية '+j.date,\n    body:'نسخة احتياطية تلقائية من تطبيق Super Clean ('+j.summary+').\\nلو احتجتها: افتح التطبيق ← المزيد ← الإعدادات ← استرجاع من ملف، واختار الملف ده.',\n    attachments:[blob]});\n  return ContentService.createTextOutput('ok');\n}\n`}
 
 /* ---------- events ---------- */
 const A={
