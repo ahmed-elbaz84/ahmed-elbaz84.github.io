@@ -251,7 +251,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-20 · 5';
+const VER='2026-11-23 · 6';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -490,7 +490,8 @@ function calc(p=P()){
   const salaryEGP=p.salary.cur==='USD'?p.salary.amount*S.rate:p.salary.amount;
   const transUSD=p.transfers.reduce((a,t)=>a+t.usd,0);
   const transEGP=p.transfers.reduce((a,t)=>a+t.usd*t.rate,0);
-  const income=p.salary.cur==='USD'?transEGP:p.salary.amount+transEGP;
+  const carry=+p.carry||0; // left over from the month before, added on purpose when the new salary was entered
+  const income=(p.salary.cur==='USD'?transEGP:p.salary.amount+transEGP)+carry;
   const act=S.plans.filter(x=>plan(x,k).active);
   const plansAll=act.reduce((a,x)=>a+x.monthly,0), plansPaid=act.filter(x=>(x.paid||{})[k]).reduce((a,x)=>a+x.monthly,0);
   const fixedAll=p.fixed.reduce((a,f)=>a+f.amount,0)+plansAll;
@@ -501,10 +502,10 @@ function calc(p=P()){
   const left=Math.max(0,D-el);
   const usdLeft=p.salary.cur==='USD'?Math.max(0,p.salary.amount-transUSD):0;
   const cash=income-fixedPaid-daily, free=income-fixedAll-daily;
-  const avg=el?daily/el:0, projected=fixedAll+avg*D, budget=salaryEGP;
+  const avg=el?daily/el:0, projected=fixedAll+avg*D, budget=salaryEGP+carry;
   const allow=left?(free+usdLeft*S.rate)/left:0;
   const spent=(p.end?fixedPaid:fixedAll)+daily;
-  return {p,act,salaryEGP,transUSD,transEGP,income,fixedAll,fixedPaid,daily,end,D,el,left,usdLeft,cash,free,avg,projected,budget,allow,spent};
+  return {p,act,carry,salaryEGP,transUSD,transEGP,income,fixedAll,fixedPaid,daily,end,D,el,left,usdLeft,cash,free,avg,projected,budget,allow,spent};
 }
 
 /* debts */
@@ -575,7 +576,7 @@ function home(){
       ${HOUSE('house')}
       <div><div class="lbl">${closed?L('فاضل معاك في آخر الشهر','Left at the end of the month'):L('الفلوس اللي معاك دلوقتي','Cash you have now')}</div>
       <div class="big"><span class="num">${fmt(c.cash)}</span> <small>${CUR()}</small></div>
-      <div class="lbl" style="margin-top:4px">${L('من','From')} ${dshort(p.start)} ${L('لحد','to')} ${dshort(c.end)}${closed?'':L(' (متوقع)',' (expected)')}</div></div>
+      <div class="lbl" style="margin-top:4px">${L('من','From')} ${dshort(p.start)} ${L('لحد','to')} ${dshort(c.end)}${closed?'':L(' (متوقع)',' (expected)')}</div>${c.carry?`<div class="lbl" style="margin-top:2px">${L('منهم','Includes')} <span class="num">${fmt(c.carry)}</span> ${CUR()} ${L('باقي من الشهر اللي فات','left from last month')}</div>`:''}</div>
       <div class="row">
         <div class="tap" data-act="goMoney"><span>${L('المرتب ✎','Salary ✎')}</span><b>${p.salary.cur==='USD'?'$'+fmt(p.salary.amount):fmt(p.salary.amount)+' '+CUR()}</b></div>
         ${p.salary.cur==='USD'?`<div><span>${L('اتحوّل','Converted')}</span><b>$${fmt(c.transUSD)}</b></div>
@@ -628,7 +629,7 @@ function home(){
   </section>`;
 }
 function histRow(p){
-  const c=calc(p), diff=c.income+c.usdLeft*S.rate-c.spent;
+  const c=calc(p), diff=c.income-c.carry+c.usdLeft*S.rate-c.spent;
   return `<div class="hist ${p.id===curId?'on':''}" data-period="${p.id}">
     <b>${pname(p)} <span class="badge ${p.end?'closed':'open'}">${p.end?L('مقفول','Closed'):L('الحالي','Current')}</span></b>
     <div class="r">${fmt(c.spent)} ${CUR()}</div>
@@ -722,6 +723,7 @@ function money(){
         <div class="field"><label for="salAmt" id="salAmtL">${p.salary.cur==='USD'?L('المرتب بالدولار','Salary in USD'):L('المرتب بالجنيه','Salary in EGP')}</label><input id="salAmt" class="num" inputmode="decimal" value="${p.salary.amount||''}" placeholder="0" ${dis}></div>
         <div class="field"><label for="salRate">${L('سعر الدولار للحساب','Dollar rate')}</label><input id="salRate" class="num" inputmode="decimal" value="${S.rate}" ${dis}></div>
       </div>
+      ${prevP(p)?`<div class="field"><label for="salCarry">${L('باقي من الشهر اللي فات (اتضاف على المرتب)','Left from last month (added to salary)')}</label><input id="salCarry" class="num" inputmode="decimal" value="${p.carry||''}" placeholder="0" ${dis}></div>`:''}
       ${ro?'':`<div class="btnrow">
         <button class="btn ghost" data-step="-100">− 100</button>
         <button class="btn ghost" data-step="100">+ 100</button>
@@ -783,16 +785,6 @@ function settings(){
     </div>
   </section>
   <section>
-    <h2>${L('أنواع المصروفات اليومية','Daily expense types')} <span class="sub">${L('تقدر تضيف أو تمسح','Add or remove')}</span></h2>
-    <div class="card list">${S.cats.map((c,i)=>`<div class="item"><div class="ic">${esc(initial(catN(c)))}</div><div class="txt tap" data-editcat="cats:${i}"><b>${esc(catN(c))}</b><span class="hint">${L('اضغط عشان تغيّر الاسم','Tap to rename')}</span></div><button class="x" data-delcat="cats:${i}" aria-label="${L('امسح','Delete')}">×</button></div>`).join('')}</div>
-    <div class="btnrow"><div class="field" style="flex:2"><input id="newCat" placeholder="${L('نوع جديد، مثلاً: مصاريف البيت','New type, e.g. Household')}"></div><button class="btn" data-act="addCat" data-list="cats" style="flex:1">${L('أضف','Add')}</button></div>
-  </section>
-  <section>
-    <h2>${L('أنواع المصروفات الأساسية','Bill types')}</h2>
-    <div class="card list">${S.fixedCats.map((c,i)=>`<div class="item"><div class="ic usd">${esc(initial(catN(c)))}</div><div class="txt tap" data-editcat="fixedCats:${i}"><b>${esc(catN(c))}</b><span class="hint">${L('اضغط عشان تغيّر الاسم','Tap to rename')}</span></div><button class="x" data-delcat="fixedCats:${i}" aria-label="${L('امسح','Delete')}">×</button></div>`).join('')}</div>
-    <div class="btnrow"><div class="field" style="flex:2"><input id="newFixedCat" placeholder="${L('نوع جديد، مثلاً: تأمين','New type, e.g. Insurance')}"></div><button class="btn" data-act="addCat" data-list="fixedCats" style="flex:1">${L('أضف','Add')}</button></div>
-  </section>
-  <section>
     <h2>${L('شارك البرنامج','Share the app')}</h2>
     <div class="card" style="display:flex;flex-direction:column;gap:8px">
       <p class="note" style="margin:0">${L('ابعت البرنامج لحد تاني (زي مراتك). هيبدأ عنده فاضي، وأرقامه تبقى خاصة بيه.','Send the app to someone else (like your wife). It starts empty for them and their numbers stay private.')}</p>
@@ -818,7 +810,7 @@ function settings(){
 
 /* ---------- sheets ---------- */
 let EDIT=null, CATMODE=null, PHOTO=null;
-function catTools(list){return `<div class="btnrow" style="margin-top:6px"><button class="chip" data-act="catAdd" data-list="${list}">${L('+ نوع جديد','+ New type')}</button><button class="chip" data-act="catRen" data-list="${list}">${L('✎ غيّر اسم النوع المختار','✎ Rename selected type')}</button></div>
+function catTools(list){return `<div class="btnrow" style="margin-top:6px"><button class="chip" data-act="catAdd" data-list="${list}">${L('+ نوع جديد','+ New type')}</button><button class="chip" data-act="catRen" data-list="${list}">${L('✎ غيّر اسم النوع المختار','✎ Rename selected type')}</button><button class="chip" data-act="catDel" data-list="${list}">${L('× امسح النوع المختار','× Delete selected type')}</button></div>
   <div class="btnrow" id="catBox" hidden style="align-items:center"><input id="catIn" style="flex:2;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:9px 12px;font-size:16px;min-width:0"><button class="btn" data-act="catOk" data-list="${list}" style="flex:1">${L('تمام','OK')}</button></div>`}
 function selCat(list){return list==='cats'?(($('#fCats .chip.on')||{}).dataset||{}).pick:($('#fCat')||{}).value}
 function renameCat(list,old,nw){
@@ -900,7 +892,8 @@ function openSheet(kind,o){
     <div class="grid2"><div class="field"><label for="nAmt">${L('المبلغ','Amount')}</label><input id="nAmt" class="num" inputmode="decimal" value="${sal.amount||''}" placeholder="0"></div>
     <div class="field"><label for="nRate">${L('سعر الدولار النهارده','Today\'s dollar rate')}</label><input id="nRate" class="num" inputmode="decimal" value="${S.rate}"></div></div>
     ${op?`<div class="conv" style="display:block"><span>${L('هيتقفل','Closing')} <b style="font-size:inherit;color:inherit">${pname(op)}</b> ${L('يوم','on')} <span id="nClose">${dshort(addDays(date,-1))}</span>. ${L('إجمالي مصروفاته لحد دلوقتي','Spent so far')} <b class="num" style="font-size:inherit">${fmt(cs.daily+cs.fixedPaid)} ${CUR()}</b>${L('، وتقدر ترجعله في أي وقت من «الشهور».','; you can reopen it any time from "Months".')}</span></div>
-    <label class="note" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="nCopy" class="chk" checked> ${L('انقل المصروفات الأساسية (إيجار، كهرباء…) للشهر الجديد','Carry bills (rent, electricity…) to the new month')}</label>`
+    <label class="note" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="nCopy" class="chk" checked> ${L('انقل المصروفات الأساسية (إيجار، كهرباء…) للشهر الجديد','Carry bills (rent, electricity…) to the new month')}</label>
+    ${cs.cash>0?`<label class="note" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="nCarry" class="chk"> <span>${L(`ضيف الباقي من ${pname(op)} (<b class="num">${fmt(cs.cash)}</b> ${CUR()}) على المرتب الجديد`,`Add what is left from ${pname(op)} (<b class="num">${fmt(cs.cash)}</b> ${CUR()}) to the new salary`)}</span></label>`:''}`
     :`<p class="note" style="margin:0">${L('اليوم ده هيبقى بداية الحساب. أي حاجة قبله مش هتتحسب.','This day starts the account. Nothing before it is counted.')}</p>`}
     <p class="note" style="margin:0">${L('لو المرتب نزل آخر الشهر (مثلاً 28 نوفمبر)، اختار إنه مرتب ديسمبر.','If the salary arrives late in a month (e.g. 28 November), pick December.')}</p>
     <button class="btn full" data-act="savePeriod">${L('ابدأ الشهر الجديد','Start the new month')}</button>`;
@@ -931,7 +924,6 @@ function openSheet(kind,o){
     html=`<h3>${L('شارك «مصروفات البيت»','Share Home Expenses')}</h3>
     <p class="note" style="margin:0">${L('خلّي اللي عايز تبعتله يصوّر الكود بكاميرا موبايله، وهيفتح له البرنامج ويطلب منه يثبّته. كل واحد أرقامه بتبقى على موبايله ومحدش بيشوفها غيره.','Let them scan the code with their phone camera; the app opens and offers to install. Everyone keeps their own numbers.')}</p>
     <div class="qrbox"><img src="qr.png" alt="QR"></div>
-    <div class="conv" style="justify-content:center"><span class="num" style="font-size:14px">ahmed-elbaz84.github.io</span></div>
     <div class="btnrow"><button class="btn" data-act="shareSend">${L('ابعته (واتساب وغيره)','Send (WhatsApp etc.)')}</button><button class="btn ghost" data-act="shareCopy">${L('انسخ الرابط','Copy link')}</button></div>`;
     EDIT=null;
   } else if(kind==='install'){
@@ -1058,7 +1050,6 @@ document.addEventListener('click',e=>{
   if(t.dataset.pick){t.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===t));if(t.parentNode.id==='pType')$('#pTurnF').hidden=t.dataset.pick!=='جمعية';return}
   if(t.dataset.delplan){S.plans=S.plans.filter(x=>x.id!==t.dataset.delplan);save();render();toast(L('اتمسح','Deleted'));return}
   if(t.dataset.del){const [list,id]=t.dataset.del.split(':');const p=P();p[list]=p[list].filter(x=>x.id!==id);save();render();toast(L('اتمسح','Deleted'));return}
-  if(t.dataset.delcat){const [list,i]=t.dataset.delcat.split(':');S[list].splice(+i,1);save();render();return}
   const a=t.dataset.act;
   if(a==='close') closeSheet();
   if(a==='refresh'){save(true);toast(L('بيتحدّث…','Updating…'));const go2=()=>{try{location.reload()}catch(e){}};
@@ -1109,7 +1100,9 @@ document.addEventListener('click',e=>{
       const moved=op.daily.filter(d=>d.date>=date); op.daily=op.daily.filter(d=>d.date<date); np.daily.push(...moved);
       const mt=op.transfers.filter(d=>d.date>=date); op.transfers=op.transfers.filter(d=>d.date<date); np.transfers.push(...mt);
       if($('#nCopy')&&$('#nCopy').checked) np.fixed=op.fixed.map(f=>({id:uid(),name:f.name,cat:f.cat,amount:f.amount,paid:false}));
-      const c=calc(op); msg=L(`اتقفل ${pname(op)}: إجمالي المصروفات ${fmt(c.spent)} ج.م · وبدأ ${keyLabel(key)}`,`Closed ${pname(op)}: spent ${fmt(c.spent)} EGP · started ${keyLabel(key)}`);
+      const c=calc(op);
+      if($('#nCarry')&&$('#nCarry').checked&&c.cash>0) np.carry=Math.round(c.cash*100)/100;
+      msg=L(`اتقفل ${pname(op)}: إجمالي المصروفات ${fmt(c.spent)} ج.م · وبدأ ${keyLabel(key)}`,`Closed ${pname(op)}: spent ${fmt(c.spent)} EGP · started ${keyLabel(key)}`);
     }
     S.periods.push(np); sortP(); curId=np.id; save(); closeSheet(); tab='home'; render(); scrollTo(0,0); toast(msg); return}
   if(a==='saveDaily'){const amount=numv('#fAmt');if(!amount){toast(L('اكتب المبلغ الأول','Enter the amount first'));return}
@@ -1126,6 +1119,10 @@ document.addEventListener('click',e=>{
       if($('#fAll')&&$('#fAll').checked)applyNext(p,old,{name,cat,amount});
       save();closeSheet();render();toast(L('اتعدّل','Updated'));return}
     const nf={id:uid(),name,cat,amount,paid};if(paid)nf.paidOn=paidOn;p.fixed.push(nf);save();closeSheet();render();toast(L('اتضاف','Added'));return}
+  if(a==='catDel'){const list=t.dataset.list,v=selCat(list);if(!v){toast(L('اختار النوع الأول','Pick a type first'));return}
+    if(S[list].length<=1){toast(L('لازم يفضل نوع واحد على الأقل','At least one type must stay'));return}
+    if(!confirm(L(`تمسح نوع «${catN(v)}»؟ المصروفات القديمة اللي عليه هتفضل زي ما هي.`,`Delete type "${catN(v)}"? Old expenses keep it.`)))return;
+    S[list]=S[list].filter(c=>c!==v);save();refreshCatsInSheet(list,S[list][0]);$('#catBox').hidden=true;toast(L('اتمسح «'+catN(v)+'»','Deleted "'+catN(v)+'"'));return}
   if(a==='catAdd'||a==='catRen'){const list=t.dataset.list;CATMODE=a;const inp=$('#catIn');$('#catBox').hidden=false;
     inp.value=a==='catRen'?(selCat(list)||''):'';inp.placeholder=a==='catAdd'?L('اكتب اسم النوع الجديد','New type name'):L('الاسم الجديد','New name');inp.focus();return}
   if(a==='catOk'){const list=t.dataset.list,v=$('#catIn').value.trim();if(!v){toast(L('اكتب الاسم','Enter a name'));return}
@@ -1146,6 +1143,7 @@ document.addEventListener('click',e=>{
     p.start=start; if(p.end)p.end=end; else p.planEnd=end; if(key)p.key=key;
     if(pv)pv.end=addDays(start,-1);
     p.salary={amount:numv('#salAmt'),cur:SALCUR||p.salary.cur};const r=numv('#salRate');if(r)S.rate=r;
+    if($('#salCarry')){const cv=numv('#salCarry');if(cv>0)p.carry=cv;else delete p.carry}
     save();render();toast(L('اتحفظ مرتب ','Saved salary · ')+pname(p));return}
   if(a==='salPrev'){const pv=prevP(P());if(!pv){toast(L('مفيش شهر قبله','No earlier month'));return}$('#salAmt').value=pv.salary.amount;SALCUR=pv.salary.cur;
     document.querySelectorAll('#salCurChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.salcur===SALCUR));updSal();return}
@@ -1163,7 +1161,6 @@ document.addEventListener('click',e=>{
     pv.fixed.forEach(f=>{if(!have.has(f.name))p.fixed.push({id:uid(),name:f.name,cat:f.cat,amount:f.amount,paid:false})});save();render();toast(L('اتنسخت الأساسيات','Bills copied'));return}
   if(a==='saveTransfer'){const u=numv('#cvUsd'),r=numv('#cvRate');if(!u||!r){toast(L('اكتب المبلغ والسعر','Enter amount and rate'));return}
     const p=P();p.transfers.push({id:uid(),date:p.end?p.start:TODAY,usd:u,rate:r});save();render();toast(L('اتسجل تحويل $','Recorded $')+fmt(u));return}
-  if(a==='addCat'){const list=t.dataset.list;const inp=$(list==='cats'?'#newCat':'#newFixedCat');const v=inp.value.trim();if(!v)return;if(!S[list].includes(v))S[list].push(v);save();render();toast(L('اتضاف النوع','Type added'));return}
   if(a==='fresh'){if(!t.dataset.sure){t.dataset.sure='1';t.textContent=L('متأكد؟ اضغط تاني وهيتمسح كل اللي فات','Sure? Tap again to delete everything');return}
     S=keepMine({rate:S.rate,cats:S.cats,fixedCats:S.fixedCats,plans:[],debts:[],periods:[]});curId=null;save();tab='home';render();openSheet('newPeriod');return}
   if(a==='syncIn'||a==='syncNew'){const em=$('#syEmail').value.trim(),pw=$('#syPass').value;
