@@ -250,6 +250,9 @@ body.kb .stick{bottom:0}
 .paper th,.paper td,.paper .n{text-align:center}
 .paper th:nth-child(2),.paper td:nth-child(2){text-align:start}
 .updbar{position:fixed;inset-inline:10px;bottom:calc(68px + env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--bg);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.25)}.updbar span{flex:1}
+[data-inst][hidden],[data-instnote][hidden]{display:none!important}
+.qrbox{background:#fff;border-radius:14px;padding:8px;width:min(230px,66vw);margin:10px auto}.qrbox svg{display:block;width:100%;height:auto}
+.news{margin:8px 0 0;padding-inline-start:20px}.news li{margin:4px 0}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
 .seg button{border:0;background:none;min-height:34px;padding:2px 16px;font-weight:600;font-size:13px;cursor:pointer}
 .seg button.on{background:var(--pri);color:#fff}
@@ -289,7 +292,25 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='18';
+const APP_V='19';
+/* what changed in each version; shown once after an update and from Settings ← «إيه الجديد؟». Add a line here with every new version. */
+const CHANGES=[
+  ['19',['شارك التطبيق مع غيرك بكود QR: «المزيد» ← «شارك التطبيق». الشخص التاني بيبدأ عنده فاضي، وأرقامه وبياناته خاصة بيه.','بعد أي تحديث بيظهرلك اللي اتغيّر، وتقدر تشوفه تاني من الإعدادات ← «إيه الجديد؟».']],
+  ['18',['التحصيل: الفاتورة الجديدة «لسه ما اتحصّلتش»، وتقدر تسجّل إنها اتحصّلت كلها أو جزء منها.','رأس الفاتورة فيه رقم الفاتورة وطريقة الدفع، والتاريخ يوم/شهر/سنة.']],
+  ['17',['الـ PDF بيتقسم على صفحات A4 والكلام العربي بيظهر مظبوط.','سطر «المدفوع» اتشال من الفاتورة ورسالة الواتساب.']],
+  ['14',['نسخة احتياطية يومية لوحدها على الحساب، وزرار «إرسال نسخة على الإيميل».','«نسيت الباسورد» بيبعت لينك تغيير الباسورد على الإيميل.']],
+  ['13',['أي تعديل بيتحفظ على الموبايل الأول وبيترفع للحساب لوحده لما النت يرجع.']]];
+/* sharing + installing (?install=1 is the link inside the QR) */
+const SHARE_URL='https://ahmed-elbaz84.github.io/superclean/?install=1';
+const SHARE_TXT='لو البرنامج ساعدك في مشروعك شاركه مع غيرك. هيبدأ عنده فاضي، وأرقام وبيانات كل واحد خاصة بيه.';
+const QR_SVG='<svg viewBox="0 0 37 37" shape-rendering="crispEdges" role="img" aria-label="QR لتنزيل التطبيق"><rect width="37" height="37" fill="#fff"/><path d="M2 2h7v1h-7zM11 2h2v1h-2zM14 2h1v1h-1zM18 2h1v1h-1zM20 2h2v1h-2zM25 2h2v1h-2zM28 2h7v1h-7zM2 3h1v1h-1zM8 3h1v1h-1zM12 3h2v1h-2zM17 3h1v1h-1zM20 3h1v1h-1zM23 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM34 3h1v1h-1zM2 4h1v1h-1zM4 4h3v1h-3zM8 4h1v1h-1zM10 4h2v1h-2zM13 4h1v1h-1zM16 4h1v1h-1zM18 4h1v1h-1zM22 4h3v1h-3zM28 4h1v1h-1zM30 4h3v1h-3zM34 4h1v1h-1zM2 5h1v1h-1zM4 5h3v1h-3zM8 5h1v1h-1zM10 5h2v1h-2zM13 5h2v1h-2zM20 5h1v1h-1zM22 5h1v1h-1zM24 5h1v1h-1zM26 5h1v1h-1zM28 5h1v1h-1zM30 5h3v1h-3zM34 5h1v1h-1zM2 6h1v1h-1zM4 6h3v1h-3zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h8v1h-8zM25 6h1v1h-1zM28 6h1v1h-1zM30 6h3v1h-3zM34 6h1v1h-1zM2 7h1v1h-1zM8 7h1v1h-1zM10 7h2v1h-2zM14 7h1v1h-1zM19 7h1v1h-1zM22 7h3v1h-3zM28 7h1v1h-1zM34 7h1v1h-1zM2 8h7v1h-7zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM18 8h1v1h-1zM20 8h1v1h-1zM22 8h1v1h-1zM24 8h1v1h-1zM26 8h1v1h-1zM28 8h7v1h-7zM10 9h3v1h-3zM16 9h1v1h-1zM18 9h1v1h-1zM20 9h1v1h-1zM22 9h4v1h-4zM2 10h1v1h-1zM4 10h5v1h-5zM12 10h1v1h-1zM15 10h2v1h-2zM19 10h1v1h-1zM21 10h2v1h-2zM24 10h3v1h-3zM28 10h5v1h-5zM2 11h3v1h-3zM6 11h2v1h-2zM12 11h2v1h-2zM15 11h1v1h-1zM19 11h3v1h-3zM25 11h1v1h-1zM28 11h2v1h-2zM31 11h4v1h-4zM4 12h1v1h-1zM6 12h3v1h-3zM10 12h2v1h-2zM14 12h4v1h-4zM19 12h1v1h-1zM24 12h1v1h-1zM27 12h2v1h-2zM30 12h1v1h-1zM32 12h2v1h-2zM6 13h2v1h-2zM9 13h3v1h-3zM13 13h1v1h-1zM15 13h1v1h-1zM19 13h2v1h-2zM23 13h1v1h-1zM30 13h5v1h-5zM2 14h2v1h-2zM5 14h1v1h-1zM7 14h2v1h-2zM11 14h1v1h-1zM13 14h1v1h-1zM16 14h3v1h-3zM21 14h2v1h-2zM24 14h1v1h-1zM27 14h1v1h-1zM29 14h3v1h-3zM3 15h1v1h-1zM5 15h1v1h-1zM7 15h1v1h-1zM13 15h3v1h-3zM17 15h1v1h-1zM20 15h2v1h-2zM23 15h4v1h-4zM28 15h1v1h-1zM31 15h4v1h-4zM3 16h1v1h-1zM5 16h2v1h-2zM8 16h2v1h-2zM11 16h1v1h-1zM14 16h1v1h-1zM17 16h3v1h-3zM23 16h2v1h-2zM27 16h2v1h-2zM30 16h4v1h-4zM2 17h1v1h-1zM4 17h1v1h-1zM9 17h3v1h-3zM14 17h4v1h-4zM22 17h4v1h-4zM27 17h3v1h-3zM31 17h2v1h-2zM2 18h1v1h-1zM5 18h4v1h-4zM14 18h2v1h-2zM17 18h1v1h-1zM19 18h1v1h-1zM21 18h2v1h-2zM24 18h4v1h-4zM29 18h3v1h-3zM34 18h1v1h-1zM4 19h1v1h-1zM7 19h1v1h-1zM9 19h1v1h-1zM11 19h2v1h-2zM14 19h1v1h-1zM18 19h1v1h-1zM20 19h2v1h-2zM23 19h1v1h-1zM25 19h1v1h-1zM28 19h2v1h-2zM31 19h4v1h-4zM2 20h1v1h-1zM4 20h8v1h-8zM14 20h2v1h-2zM17 20h2v1h-2zM20 20h1v1h-1zM27 20h1v1h-1zM29 20h2v1h-2zM32 20h2v1h-2zM2 21h1v1h-1zM4 21h1v1h-1zM6 21h1v1h-1zM9 21h1v1h-1zM11 21h2v1h-2zM14 21h2v1h-2zM17 21h2v1h-2zM21 21h1v1h-1zM23 21h2v1h-2zM27 21h1v1h-1zM29 21h6v1h-6zM2 22h1v1h-1zM4 22h1v1h-1zM7 22h4v1h-4zM13 22h2v1h-2zM16 22h2v1h-2zM20 22h2v1h-2zM24 22h4v1h-4zM29 22h3v1h-3zM33 22h2v1h-2zM2 23h1v1h-1zM4 23h1v1h-1zM9 23h1v1h-1zM15 23h1v1h-1zM17 23h3v1h-3zM21 23h2v1h-2zM24 23h3v1h-3zM28 23h1v1h-1zM32 23h1v1h-1zM34 23h1v1h-1zM2 24h1v1h-1zM6 24h3v1h-3zM10 24h3v1h-3zM15 24h2v1h-2zM20 24h1v1h-1zM23 24h2v1h-2zM26 24h1v1h-1zM29 24h2v1h-2zM32 24h2v1h-2zM2 25h1v1h-1zM5 25h1v1h-1zM12 25h5v1h-5zM18 25h1v1h-1zM22 25h2v1h-2zM25 25h1v1h-1zM27 25h1v1h-1zM29 25h1v1h-1zM31 25h3v1h-3zM2 26h2v1h-2zM6 26h1v1h-1zM8 26h2v1h-2zM11 26h3v1h-3zM18 26h2v1h-2zM21 26h2v1h-2zM24 26h7v1h-7zM33 26h1v1h-1zM10 27h1v1h-1zM12 27h3v1h-3zM18 27h2v1h-2zM21 27h3v1h-3zM26 27h1v1h-1zM30 27h1v1h-1zM32 27h1v1h-1zM34 27h1v1h-1zM2 28h7v1h-7zM11 28h1v1h-1zM16 28h2v1h-2zM19 28h1v1h-1zM22 28h5v1h-5zM28 28h1v1h-1zM30 28h1v1h-1zM32 28h1v1h-1zM2 29h1v1h-1zM8 29h1v1h-1zM10 29h2v1h-2zM13 29h1v1h-1zM15 29h1v1h-1zM17 29h1v1h-1zM19 29h2v1h-2zM23 29h1v1h-1zM25 29h2v1h-2zM30 29h5v1h-5zM2 30h1v1h-1zM4 30h3v1h-3zM8 30h1v1h-1zM10 30h1v1h-1zM12 30h2v1h-2zM18 30h1v1h-1zM24 30h1v1h-1zM26 30h6v1h-6zM33 30h2v1h-2zM2 31h1v1h-1zM4 31h3v1h-3zM8 31h1v1h-1zM10 31h1v1h-1zM13 31h1v1h-1zM17 31h1v1h-1zM20 31h4v1h-4zM26 31h2v1h-2zM30 31h5v1h-5zM2 32h1v1h-1zM4 32h3v1h-3zM8 32h1v1h-1zM10 32h1v1h-1zM13 32h3v1h-3zM17 32h2v1h-2zM22 32h1v1h-1zM28 32h2v1h-2zM31 32h2v1h-2zM2 33h1v1h-1zM8 33h1v1h-1zM11 33h5v1h-5zM17 33h1v1h-1zM20 33h1v1h-1zM23 33h1v1h-1zM30 33h3v1h-3zM2 34h7v1h-7zM10 34h2v1h-2zM16 34h2v1h-2zM19 34h1v1h-1zM24 34h4v1h-4zM29 34h1v1h-1zM31 34h1v1h-1zM33 34h1v1h-1z" fill="#000"/></svg>';
+let bip=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();bip=e;$$('[data-inst]').forEach(b=>b.hidden=false);$$('[data-instnote]').forEach(b=>b.hidden=true)});
+addEventListener('appinstalled',()=>{bip=null;$$('[data-inst]').forEach(b=>b.hidden=true);toast('اتثبت التطبيق ✓ هتلاقيه على الشاشة الرئيسية')});
+const standalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+/* a phone that opened the app for the first time (nobody's data on it yet): starts empty, no shop name until they type one */
+const fresh=()=>{try{return localStorage.getItem('sc-fresh')==='1'}catch(e){return false}};
 const COLS=['items','customers','invoices','expenses','moves','settings'];
 const S={};COLS.forEach(c=>S[c]={});
 const LS='superclean-v1';
@@ -300,7 +321,7 @@ const EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 const UNITS=['عدد','علبة','لتر','كيلو','عبوة','كرتونة','جركن','دستة','زجاجة','ثمن','ربع'];
 const ECATS=['نقل وتوصيل','إيجار','تغليف وأكياس','دعاية','مشتريات متفرقة','أخرى'];
 
-const st=()=>Object.assign({shop:'Super Clean',tag:'منظفات وأدوات نظافة',phone:'',phone2:'',address:'',footer:'شكراً لتعاملكم معنا'},S.settings.main||{});
+const st=()=>Object.assign({shop:fresh()?'':'Super Clean',tag:fresh()?'':'منظفات وأدوات نظافة',phone:'',phone2:'',address:'',footer:'شكراً لتعاملكم معنا'},S.settings.main||{});
 const list=c=>Object.values(S[c]);
 const items=()=>list('items').sort((a,b)=>(num(a.order)||999)-(num(b.order)||999)||String(a.name).localeCompare(b.name,'ar'));
 const custs=()=>list('customers').sort((a,b)=>String(a.name).localeCompare(b.name,'ar'));
@@ -332,7 +353,7 @@ const setOwner=v=>{try{localStorage.setItem(OW,v)}catch(e){}};
 function saveLocal(){if(!jset(LS,S))toast('مساحة الحفظ على الموبايل مليانة')}
 function readLocal(){return jget(LS,null)}
 function loadLocal(){const d=readLocal();if(d){COLS.forEach(c=>S[c]=d[c]||{});return}
-  COLS.forEach(c=>S[c]={});S.items=seedItems();S.settings={main:{id:'main',seeded:true}};saveLocal()}
+  COLS.forEach(c=>S[c]={});S.settings={main:{id:'main',seeded:true}};try{localStorage.setItem('sc-fresh','1');localStorage.setItem('sc-seenv',APP_V)}catch(e){}saveLocal()}
 const ref=(c,id)=>fs.collection('users').doc(user.uid).collection('sc_'+c).doc(id);
 function queue(c,id,o){saveLocal();if(!user&&!owner())return;outbox[c+'|'+id]={o,t:Date.now()+Math.random()};jset(OB,outbox);flush()}
 async function put(c,id,o){o={...o,id,_t:Date.now()};S[c][id]=o;queue(c,id,o)}
@@ -358,6 +379,7 @@ async function boot(){
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
   loadLocal();setSync(acct()?'loading':'local');
   hpIcon();render();
+  setTimeout(intro,350);
   initFb();
   addEventListener('online',()=>{initFb();trySync();flush()});
   setInterval(()=>{initFb();trySync();flush();autoBackup()},30000);
@@ -379,13 +401,14 @@ async function merge(u){
   const res=await Promise.all(COLS.map(c=>base.collection('sc_'+c).get({source:'server'})));
   const srv={};COLS.forEach((c,k)=>{srv[c]={};res[k].docs.forEach(d=>{srv[c][d.id]=d.data()})});
   const own=owner(),local=readLocal()||{},push=new Set();
+  const had=['items','invoices','customers'].some(c=>Object.keys(srv[c]).length),wasFresh=fresh();
+  if(had)try{localStorage.removeItem('sc-fresh')}catch(e){}
   if(!own){/* typed before signing in: add it to the account; a server record only wins if it was edited later, or is still an untouched blank */
-    for(const c of COLS)for(const [id,r] of Object.entries(local[c]||{})){const v=srv[c][id];
-      if(!v||num(r._t)>num(v._t)||(!v._t&&blank(c,v)&&!blank(c,r))){srv[c][id]={...r,id};push.add(c+'|'+id)}}}
+    for(const c of COLS){if(c==='settings'&&had&&wasFresh)continue;for(const [id,r] of Object.entries(local[c]||{})){const v=srv[c][id];
+      if(!v||num(r._t)>num(v._t)||(!v._t&&blank(c,v)&&!blank(c,r))){srv[c][id]={...r,id};push.add(c+'|'+id)}}}}
   if(!own||own===u.uid)for(const [k,e] of Object.entries(outbox)){const i=k.indexOf('|'),c=k.slice(0,i),id=k.slice(i+1);if(!srv[c])continue;
     if(e.o){const v=srv[c][id];if(!v||num(e.o._t)>=num(v._t))srv[c][id]=e.o}else delete srv[c][id]}
   else outbox={};
-  if(COLS.every(c=>!Object.keys(srv[c]).length)){srv.items=seedItems();srv.settings={main:{id:'main',seeded:true}};for(const c of ['items','settings'])Object.keys(srv[c]).forEach(id=>push.add(c+'|'+id))}
   if(user!==u)return false;
   COLS.forEach(c=>S[c]=srv[c]);
   const t=Date.now();push.forEach(k=>{if(!outbox[k]){const i=k.indexOf('|');outbox[k]={o:S[k.slice(0,i)][k.slice(i+1)],t:t+Math.random()}}});
@@ -422,6 +445,35 @@ async function auth(kind){const fm=$('#authf');if(!fm)return;const d=formData(fm
     if(kind==='up')await fb.auth().createUserWithEmailAndPassword(em,pw);else await fb.auth().signInWithEmailAndPassword(em,pw);
     toast('تم الدخول، البيانات بتتزامن');go('home');
   }catch(e){show(AUTHERR[e.code]||('حصلت مشكلة: '+(e.code||e.message)))}}
+
+/* ---------- first open: install screen (from the QR), welcome for a new person, or what's new after an update ---------- */
+function intro(){
+  if(/[?&]install=1/.test(location.search)&&!standalone()){installModal();onClose=()=>setTimeout(welcome,250);return}
+  if(!welcome())whatsNew()}
+function installModal(){const ios=isIOS();
+  openModal(`<h3>تثبيت Super Clean</h3><p class="mut" style="margin-top:0">برنامج للمخزن والعملاء والفواتير والمكسب. هيبدأ عندك فاضي، وأرقامك وبياناتك خاصة بيك.</p>
+  ${ios?`<div class="note">في آيفون: افتح الصفحة دي من <b>Safari</b>، ودوس على زرار المشاركة <b>⬆︎</b> تحت، وبعدين «إضافة إلى الشاشة الرئيسية» ← «إضافة».</div>`
+  :`<button class="btn p" style="width:100%;font-size:17px;padding:14px" data-act="install" data-inst ${bip?'':'hidden'}>تثبيت التطبيق</button>
+  <div class="note" data-instnote ${bip?'hidden':''}>لو زرار «تثبيت التطبيق» ما ظهرش خلال ثواني: افتح قايمة المتصفح (⋮) واختار «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».</div>`}
+  <div class="acts"><button class="btn grow" data-act="close">استخدمه من المتصفح</button></div>`)}
+function welcome(){if(!fresh()||user||acct()||(S.settings.main||{}).shop!==undefined)return false;
+  openModal(`<h3>أهلاً بيك 👋</h3><p class="mut" style="margin-top:0">البرنامج بيبدأ فاضي: ضيف أصنافك من «المخزن» وعملاءك. بياناتك محفوظة على موبايلك وخاصة بيك.</p>
+  <form id="wf">${f('shop','اسم نشاطك (بيظهر على الفاتورة)','')}${f('phone','رقم التواصل (اختياري)','','tel','dir="ltr"')}
+  <div class="acts"><button class="btn p grow" type="submit">ابدأ</button></div></form>
+  <p class="mut" style="font-size:13px;margin-bottom:0">عندك حساب قبل كده؟ <button class="btn sm" data-act="wlogin">ادخل بحسابك</button></p>`,s=>{
+    s.querySelector('#wf').onsubmit=async e=>{e.preventDefault();const d=formData(e.target);closeModal();await put('settings','main',{...st(),shop:String(d.shop||'').trim(),phone:String(d.phone||'').trim()});toast('تمام، ابدأ بإضافة أصنافك من المخزن');render()}});
+  return true}
+function whatsNew(all){let seen;try{const v=localStorage.getItem('sc-seenv');seen=v==null?num(APP_V)-1:num(v);localStorage.setItem('sc-seenv',APP_V)}catch(e){seen=num(APP_V)}
+  const L=all?CHANGES:CHANGES.filter(c=>num(c[0])>seen);if(!L.length)return false;
+  openModal(`<h3>${all?'إيه الجديد في التطبيق':'اتحدّث التطبيق ✓ الجديد في إصدار '+APP_V}</h3>
+  ${L.map(([v,a])=>`<div class="box" style="margin:8px 0"><b>إصدار ${v}</b><ul class="news">${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}
+  <div class="acts"><button class="btn p grow" data-act="close">تمام</button></div>`);return true}
+function shareModal(){openModal(`<h3>شارك التطبيق</h3><p style="margin-top:0">${esc(SHARE_TXT)}</p><div class="qrbox">${QR_SVG}</div>
+  <p class="mut" style="text-align:center;font-size:13px;margin-top:0">الشخص التاني يفتح كاميرا الموبايل ويوجّهها على الكود، هيفتحله التطبيق وزرار «تثبيت».</p>
+  <div class="acts"><button class="btn p grow" data-act="sharelink">ابعت اللينك (واتساب…)</button><button class="btn" data-act="close">قفل</button></div>`)}
+async function shareLink(){const text=SHARE_TXT+'\nحمّله من هنا:';
+  try{if(navigator.share){await navigator.share({title:'Super Clean',text,url:SHARE_URL});return}}catch(e){if(e&&e.name==='AbortError')return}
+  location.href='https://wa.me/?text='+encodeURIComponent(text+' '+SHARE_URL)}
 
 /* ---------- ui helpers ---------- */
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
@@ -618,7 +670,7 @@ function invRowsHtml(){
   const hid=new Set(d.hid||[]);
   if(invSel==='sel')r=r.filter(i=>ids.has(i.id));else if(invSel==='hid')r=r.filter(i=>hid.has(i.id)&&!ids.has(i.id));else r=r.filter(i=>!hid.has(i.id)||ids.has(i.id));
   if(q)r=r.filter(i=>String(i.name).includes(q));
-  if(!r.length)return `<tr><td colspan="4" class="empty">${invSel==='sel'?'لسه ما اخترتش أصناف — اكتب الكمية قدام الصنف':invSel==='hid'?'مفيش أصناف مشالة':'لا توجد نتائج'}</td></tr>`;
+  if(!r.length)return `<tr><td colspan="4" class="empty">${invSel==='sel'?'لسه ما اخترتش أصناف — اكتب الكمية قدام الصنف':invSel==='hid'?'مفيش أصناف مشالة':list('items').length?'لا توجد نتائج':'مفيش أصناف لسه — دوس «+ صنف جديد»'}</td></tr>`;
   return r.map(i=>{const qq=d.q[i.id]??'';return `<tr data-id="${i.id}" class="${num(qq)>0?'sel':''}">
   <td class="nm"><b ${i.gone?'':`data-act="item:${i.id}"`}>${esc(i.name)}</b><small>${esc(i.unit)} · متاح ${fmt(i.qty)}</small><div class="lwarn"></div></td>
   <td class="n"><input class="iqt" inputmode="decimal" placeholder="0" value="${esc(qq)}" aria-label="كمية ${esc(i.name)}"></td>
@@ -767,6 +819,7 @@ function vMore(){const T=(v,t,s,ic)=>`<button class="tile" data-act="go:${v}"><s
   ${T('customers','العملاء',`${list('customers').length} عميل · الحسابات والباقي`,'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>')}
   ${T('expenses','المصروفات','نقل، أكياس، دعاية… تُخصم من المكسب','<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/>')}
   ${T('moves','حركة المخزن','كل إضافة وبيع وتعديل','<path d="M7 4v16M7 4l-3 3M7 4l3 3M17 20V4M17 20l-3-3M17 20l3-3"/>')}
+  <button class="tile" data-act="shareapp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h3M21 18v3h-3"/></svg><b>شارك التطبيق</b><small>كود QR لأي حد عنده مشروع</small></button>
   ${T('settings','الإعدادات','اسم المحل، رقم التواصل، النسخ الاحتياطي','<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>')}
   </div></section>`}
 function vExpenses(){
@@ -807,8 +860,8 @@ function vSettings(){const s=st();
   ${f('bkTo','الإيميلات اللي تستلم النسخة (افصل بينهم بمسافة)',s.bkTo,'text','dir="ltr" placeholder="her@gmail.com him@gmail.com"')}
   ${f('bkUrl','رابط الإرسال (Web app URL)',s.bkUrl,'url','dir="ltr" placeholder="https://script.google.com/macros/s/…/exec"')}
   <div class="acts"><button class="btn p grow" type="submit">حفظ</button><button class="btn grow" type="button" data-act="copyscript">نسخ كود الإرسال</button></div></form>`:''}
-  <div class="card"><h2>التحديث</h2><p class="mut" style="margin-top:0">إنت على إصدار ${APP_V}. لو اتعمل تعديل جديد ومش ظاهر، اضغط هنا. البيانات مش هتتمسح.</p><button class="btn p" style="width:100%" data-act="forceupdate">تحديث لآخر نسخة</button></div>
-  <div class="card"><h2>تثبيت التطبيق على الموبايل <span class="tag">إصدار ${APP_V}</span></h2><p style="margin:0" class="mut">افتح <b dir="ltr">ahmed-elbaz84.github.io/superclean</b> في المتصفح ثم: <b>أندرويد</b>: القائمة ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». <b>آيفون (سفاري)</b>: زر المشاركة ← «إضافة إلى الشاشة الرئيسية». أي تحديث جديد بيوصل لوحده لما تفتح التطبيق والنت شغال.</p></div></section>`}
+  <div class="card"><h2>التحديث</h2><p class="mut" style="margin-top:0">إنت على إصدار ${APP_V}. لو اتعمل تعديل جديد ومش ظاهر، اضغط هنا. البيانات مش هتتمسح.</p><div class="acts"><button class="btn p grow" data-act="forceupdate">تحديث لآخر نسخة</button><button class="btn grow" data-act="whatsnew">إيه الجديد؟</button></div></div>
+  <div class="card"><h2>تثبيت التطبيق على الموبايل <span class="tag">إصدار ${APP_V}</span></h2><p style="margin:0" class="mut">افتح <b dir="ltr">ahmed-elbaz84.github.io/superclean</b> في المتصفح ثم: <b>أندرويد</b>: القائمة ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». <b>آيفون (سفاري)</b>: زر المشاركة ← «إضافة إلى الشاشة الرئيسية». أي تحديث جديد بيوصل لوحده لما تفتح التطبيق والنت شغال.</p>${standalone()?'':`<button class="btn p" style="width:100%;margin-top:10px" data-act="install" data-inst ${bip?'':'hidden'}>تثبيت التطبيق</button>`}<button class="btn" style="width:100%;margin-top:8px" data-act="shareapp">شارك التطبيق مع حد تاني (QR)</button></div></section>`}
 async function exportData(){const data=JSON.stringify({app:'superclean',at:new Date().toISOString(),data:Object.fromEntries(COLS.map(c=>[c,S[c]]))});
   saveBlob(new Blob([data],{type:'application/json'}),`superclean-backup-${today()}.json`);toast('تم تنزيل النسخة الاحتياطية')}
 async function restoreObj(d){toast('جاري الاسترجاع…');for(const c of COLS)for(const [id,o] of Object.entries(d[c]||{}))await put(c,id,o);toast('تم الاسترجاع');render()}
@@ -880,7 +933,9 @@ const A={
     for(const l of i.lines||[]){const it=S.items[l.itemId];if(!it)continue;await put('items',it.id,{...S.items[it.id],qty:r2(num(S.items[it.id].qty)+num(l.qty))});await put('moves',uid(),{date:today(),ts:Date.now(),itemId:it.id,name:it.name,unit:it.unit,qty:r2(l.qty),type:'إلغاء فاتورة',ref:`فاتورة #${i.no}`})}
     await del('invoices',id);toast('تم حذف الفاتورة وإرجاع الكميات');render()},
   exp:id=>expModal(id||null),
-  forceupdate:()=>forceUpdate(),
+  forceupdate:()=>forceUpdate(),whatsnew:()=>whatsNew(true),shareapp:()=>shareModal(),sharelink:()=>shareLink(),
+  install:async()=>{if(!bip)return;const e=bip;bip=null;e.prompt();const r=await e.userChoice.catch(()=>null);if(r&&r.outcome==='accepted')closeModal()},
+  wlogin:()=>{onClose=null;closeModal();go('settings');setTimeout(()=>{const x=document.querySelector('#authf input');x&&x.focus()},100)},
   export:()=>exportData(),import:()=>$('#impfile').click(),mailbk:()=>mailBackup(),cloudbk:()=>cloudList(),
   copyscript:async()=>{try{await navigator.clipboard.writeText(mailScript());toast('اتنسخ الكود')}catch(e){openModal(`<h3>كود الإرسال</h3><textarea class="in" style="height:260px;direction:ltr" readonly>${esc(mailScript())}</textarea><div class="acts"><button class="btn" data-act="close">قفل</button></div>`)}}
 };
