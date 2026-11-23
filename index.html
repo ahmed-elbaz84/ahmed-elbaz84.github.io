@@ -251,7 +251,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-23 · 8';
+const VER='2026-11-23 · 9';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -811,7 +811,10 @@ function settings(){
 /* ---------- sheets ---------- */
 let EDIT=null, CATMODE=null, PHOTO=null;
 function catTools(list){return `<div class="btnrow" style="margin-top:6px"><button class="chip" data-act="catAdd" data-list="${list}">${L('+ نوع جديد','+ New type')}</button><button class="chip" data-act="catRen" data-list="${list}">${L('✎ غيّر اسم النوع المختار','✎ Rename selected type')}</button><button class="chip" data-act="catDel" data-list="${list}">${L('× امسح النوع المختار','× Delete selected type')}</button></div>
+  <div id="catBack">${catBackHtml(list)}</div>
   <div class="btnrow" id="catBox" hidden style="align-items:center"><input id="catIn" style="flex:2;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:9px 12px;font-size:16px;min-width:0"><button class="btn" data-act="catOk" data-list="${list}" style="flex:1">${L('تمام','OK')}</button></div>`}
+function lostCats(list){const key=list==='cats'?'daily':'fixed',seen=[];S.periods.forEach(p=>(p[key]||[]).forEach(x=>{if(x.cat&&!S[list].includes(x.cat)&&!seen.includes(x.cat))seen.push(x.cat)}));return seen}
+function catBackHtml(list){const l=lostCats(list);return l.length?`<div class="btnrow" style="margin-top:6px;flex-wrap:wrap;align-items:center"><span class="hint">${L('أنواع اتمسحت وعليها مصروفات:','Deleted types with expenses:')}</span>${l.map(c=>`<button class="chip" data-act="catBack" data-list="${list}" data-v="${esc(c)}">${L('↺ رجّع «','↺ Restore "')}${esc(catN(c))}${L('»','"')}</button>`).join('')}</div>`:''}
 function selCat(list){return list==='cats'?(($('#fCats .chip.on')||{}).dataset||{}).pick:($('#fCat')||{}).value}
 function renameCat(list,old,nw){
   if(!nw||old===nw)return false; if(S[list].includes(nw)){toast(L('الاسم ده موجود','That name exists'));return false}
@@ -821,6 +824,7 @@ function renameCat(list,old,nw){
   save(); return true;
 }
 function refreshCatsInSheet(list,pick){
+  if($('#catBack'))$('#catBack').innerHTML=catBackHtml(list);
   if(list==='cats')$('#fCats').innerHTML=S.cats.map(c=>`<button class="chip ${c===pick?'on':''}" data-pick="${esc(c)}">${esc(catN(c))}</button>`).join('');
   else $('#fCat').innerHTML=S.fixedCats.map(c=>`<option value="${esc(c)}" ${c===pick?'selected':''}>${esc(catN(c))}</option>`).join('');
 }
@@ -1123,6 +1127,7 @@ document.addEventListener('click',e=>{
     if(S[list].length<=1){toast(L('لازم يفضل نوع واحد على الأقل','At least one type must stay'));return}
     if(!confirm(L(`تمسح نوع «${catN(v)}»؟ المصروفات القديمة اللي عليه هتفضل زي ما هي.`,`Delete type "${catN(v)}"? Old expenses keep it.`)))return;
     S[list]=S[list].filter(c=>c!==v);save();refreshCatsInSheet(list,S[list][0]);$('#catBox').hidden=true;toast(L('اتمسح «'+catN(v)+'»','Deleted "'+catN(v)+'"'));return}
+  if(a==='catBack'){const list=t.dataset.list,v=t.dataset.v;if(!S[list].includes(v))S[list].push(v);save();refreshCatsInSheet(list,v);if(list==='cats')render();toast(L('رجع «'+catN(v)+'» بكل مصروفاته','Restored "'+catN(v)+'" with its expenses'));return}
   if(a==='catAdd'||a==='catRen'){const list=t.dataset.list;CATMODE=a;const inp=$('#catIn');$('#catBox').hidden=false;
     inp.value=a==='catRen'?(selCat(list)||''):'';inp.placeholder=a==='catAdd'?L('اكتب اسم النوع الجديد','New type name'):L('الاسم الجديد','New name');inp.focus();return}
   if(a==='catOk'){const list=t.dataset.list,v=$('#catIn').value.trim();if(!v){toast(L('اكتب الاسم','Enter a name'));return}
