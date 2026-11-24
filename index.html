@@ -169,8 +169,8 @@ h2 .sub{font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--mut
 
 .fab{position:fixed;bottom:calc(76px + env(safe-area-inset-bottom,0px));inset-inline-end:max(calc(50% - 214px),calc(16px + env(safe-area-inset-left,0px)));width:56px;height:56px;border-radius:18px;border:0;background:var(--accent);color:var(--accent-ink);font-size:30px;font-weight:700;box-shadow:var(--shadow);z-index:6}
 nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:6;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-nav.tabs div{max-width:460px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
-nav.tabs button{border:0;background:none;padding:8px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;color:var(--muted);min-height:56px}
+nav.tabs div{max-width:460px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+nav.tabs button{border:0;background:none;padding:8px 2px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;line-height:1.2;text-align:center;color:var(--muted);min-height:56px}
 nav.tabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
 nav.tabs button.on{color:var(--accent-text);font-weight:700}
 
@@ -247,7 +247,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-24 · 15';
+const VER='2026-11-24 · 16';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -598,7 +598,6 @@ function home(){
       ${closed?'':`<button class="btn" data-open="newPeriod">${L('نزل المرتب الجديد؟ ابدأ شهر جديد','New salary in? Start a new month')}</button>`}
     </div>
   </section>
-  ${walletsSection()}
   ${unpaid>0&&!closed?`<section><div class="lock" style="background:var(--accent-soft)"><span>${L('أساسيات لسه ما اتدفعتش','Bills not paid yet')}: <b>${fmt(unpaid)}</b> ${CUR()}</span><button class="chip" data-go="fixed">${L('ادفع / عدّل','Pay / edit')}</button></div></section>`:''}
   <section>
     <h2>${L('معدل الصرف','Spending pace')} <span class="sub">${closed?L(`الشهر كان ${c.D} يوم`,`Month was ${c.D} days`):L(`عدّى ${c.el} يوم من ${c.D}`,`Day ${c.el} of ${c.D}`)}</span></h2>
@@ -640,15 +639,20 @@ function home(){
     <div class="card list">${recent.length?recent.map(dailyItem).join(''):`<div class="empty">${closed?L('مفيش مصروفات','No expenses'):L('اضغط + تحت عشان تسجل أول مصروف','Tap + below to add your first expense')}</div>`}</div>
   </section>`;
 }
-function walletsSection(){
-  const op=openP(), tot=wTotal();
-  if(!S.wallets.length)return `<section><h2>${L('الفلوس المحفوظة','Saved money')} <span class="sub">${L('للطوارئ','For emergencies')}</span></h2>
-    <div class="card" style="display:flex;flex-direction:column;gap:10px"><p class="note" style="margin:0">${L('لو بتحوّش فلوس في محفظة (فودافون كاش، اتصالات كاش…) ضيفها هنا، وهتعرف كل محفظة فيها كام. الفلوس دي مش بتدخل في اللي بتصرف منه.','If you keep savings in a wallet (Vodafone Cash, Etisalat Cash…), add it here to see what each holds. This money is kept apart from what you spend.')}</p>
-    <button class="btn ghost" data-open="walletEdit">${L('+ ضيف محفظة','+ Add a wallet')}</button></div></section>`;
-  return `<section><h2>${L('الفلوس المحفوظة','Saved money')} <button class="chip" data-open="walletEdit">${L('+ محفظة','+ Wallet')}</button></h2>
-    <div class="card list">${S.wallets.map(w=>{const m=wMoves(w)[0];return `<div class="item tap" data-wallet="${w.id}"><div class="ic usd">${esc(initial(w.name))}</div><div class="txt"><b>${esc(w.name)}</b><span>${m?L('آخر حركة ','Last move ')+dshort(m.date):L('اضغط عشان تضيف أو تسحب','Tap to add or withdraw')}</span></div><div class="amt">${fmt(wBal(w))}<small>${CUR()}</small></div></div>`}).join('')}
-    ${S.wallets.length>1?`<div class="grouphead" style="border:0;border-top:1px solid var(--line);padding-top:10px"><span>${L('إجمالي المحفوظ','Total saved')}</span><span class="num">${fmt(tot)} ${CUR()}</span></div>`:''}</div>
-    ${op?`<div class="card" style="display:flex;justify-content:space-between;gap:8px;font-weight:700"><span>${L('إجمالي المبلغ (معاك + المحفوظ)','Total (cash + saved)')}</span><span class="num">${fmt(calc(op).cash+tot)} ${CUR()}</span></div>`:''}
+const walletRow=w=>{const m=wMoves(w)[0];return `<div class="item tap" data-wallet="${w.id}"><div class="ic usd">${esc(initial(w.name))}</div><div class="txt"><b>${esc(w.name)}</b><span>${m?L('آخر حركة ','Last move ')+dshort(m.date):L('اضغط عشان تضيف أو تسحب','Tap to add or withdraw')}</span></div><div class="amt">${fmt(wBal(w))}<small>${CUR()}</small></div></div>`};
+function wallets(){
+  const op=openP(), cash=op?calc(op).cash:0, tot=wTotal(), n=S.wallets.length;
+  return `<section>
+    <h2>${L('المحافظ','Wallets')} <span class="sub">${L('الفلوس المحفوظة للطوارئ','Savings kept for emergencies')}</span></h2>
+    <div class="stats">
+      <div class="stat"><span>${L('عدد المحافظ','Wallets')}</span><b class="num">${n}</b></div>
+      <div class="stat"><span>${L('المبلغ المحفوظ','Saved')}</span><b>${egp(tot)}</b><em class="muted">${L('في المحافظ','In the wallets')}</em></div>
+      <div class="stat"><span>${L('المبلغ المتوفر','Available')}</span><b>${egp(cash)}</b><em class="muted">${L('اللي معاك تصرف منه','Your spending cash')}</em></div>
+      <div class="stat"><span>${L('إجمالي المبلغ','Total')}</span><b>${egp(cash+tot)}</b><em class="muted">${L('المحفوظ + المتوفر','Saved + available')}</em></div>
+    </div>
+    <div class="card list">${n?S.wallets.map(walletRow).join(''):`<div class="empty">${L('لو بتحوّش فلوس في محفظة (فودافون كاش، اتصالات كاش…) ضيفها هنا، وهتعرف كل محفظة فيها كام. الفلوس دي مش بتدخل في اللي بتصرف منه.','If you keep savings in a wallet (Vodafone Cash, Etisalat Cash…), add it here to see what each holds. This money is kept apart from what you spend.')}</div>`}</div>
+    <button class="btn ghost full" data-open="walletEdit">${L('+ إضافة محفظة','+ Add a wallet')}</button>
+    ${n?`<p class="note" style="margin:0">${L('اضغط على أي محفظة عشان تضيف مبلغ أو تسحب أو تشوف حركاتها.','Tap a wallet to add, withdraw or see its moves.')}</p>`:''}
   </section>`;
 }
 function histRow(p){
@@ -761,11 +765,12 @@ function money(){
     <h2>${L('حاسبة التحويل','Conversion calculator')} <span class="sub">${L('دولار ⇠ جنيه','USD → EGP')}</span></h2>
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <div class="grid2">
-        <div class="field"><label for="cvUsd">${L('المبلغ بالدولار','Amount in USD')}</label><input id="cvUsd" class="num" inputmode="decimal" value="800"></div>
+        <div class="field"><label for="cvUsd">${L('هحوّل كام دولار؟','How many dollars to convert?')}</label><input id="cvUsd" class="num" inputmode="decimal" placeholder="0" value=""></div>
         <div class="field"><label for="cvRate">${L('سعر الدولار','Dollar rate')}</label><input id="cvRate" class="num" inputmode="decimal" value="${S.rate}"></div>
       </div>
       <div class="conv"><span>${L('هتستلم','You get')}</span><b class="num" id="cvOut"></b></div>
       ${RATE.buy?`<p class="note" style="margin:0">${L('سعر CIB: ','CIB rate: ')}<span class="num">${RATE.buy}</span> ${L('شراء','buy')} · <span class="num">${RATE.sell}</span> ${L('بيع','sell')}${RATE.at?' · '+rateTime(RATE.at):''}</p>`:''}
+      ${p.salary.cur==='USD'?`<p class="note" style="margin:0">${c.usdLeft>0?L(`باقي معاك بالدولار <b class="num">${usd(c.usdLeft)}</b>. حوّل اللي محتاج تصرفه بس، والباقي يفضل بالدولار لحد ما تحوّله بسعر يومها.`,`You still have <b class="num">${usd(c.usdLeft)}</b>. Convert only what you need; the rest stays in dollars until you convert it at that day's rate.`):L('اتحوّل المرتب كله.','The whole salary is converted.')}</p>`:''}
       <button class="btn usd full" data-act="saveTransfer">${L('سجّل التحويل ده','Record this conversion')}</button>
     </div>
   </section>`}
@@ -1071,7 +1076,8 @@ const TABS=[
   ['home','<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',()=>L('الرئيسية','Home')],
   ['daily','<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>',()=>L('اليومي','Daily')],
   ['fixed','<path d="M5 4h14v17l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 9h6M9 13h6"/>',()=>L('الأساسية','Bills')],
-  ['money','<path d="M4 8h13l-3-3M20 16H7l3 3"/>',()=>L('المرتب والتحويل','Salary')],
+  ['money','<path d="M4 8h13l-3-3M20 16H7l3 3"/>',()=>L('المرتب والإضافات','Salary & extras')],
+  ['wallets','<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M16 15h2M6 6l9-3 2 3"/>',()=>L('المحافظ','Wallets')],
   ['settings','<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',()=>L('الإعدادات','Settings')]
 ];
 function render(){
@@ -1095,10 +1101,10 @@ function render(){
     $('#view').innerHTML=installBanner()+(tab==='settings'?settings():onboarding());
   } else {
     $('#mLabel').innerHTML=`${pname(p)}<small>${dshort(p.start)} ${L('←','→')} ${p.end?dshort(p.end):L('دلوقتي','now')}</small>`;
-    $('#view').innerHTML=(tab==='home'||tab==='settings'?installBanner():'')+{home,daily,fixed,money,settings}[tab]();
+    $('#view').innerHTML=(tab==='home'||tab==='settings'?installBanner():'')+{home,daily,fixed,money,wallets,settings}[tab]();
   }
   $('#mPrev').disabled=!p||!prevP(p); $('#mNext').disabled=!p||!nextP(p);
-  $('#fab').hidden=tab==='settings'||!p||isRO();
+  $('#fab').hidden=tab==='settings'||tab==='wallets'||!p||isRO();
   saveNav();
   if(tab==='money'&&p){updConv();updSal()}
 }
@@ -1273,6 +1279,7 @@ document.addEventListener('click',e=>{
   if(a==='copyFixed'){const pv=prevP(P());const p=P();const have=new Set(p.fixed.map(f=>f.name));
     pv.fixed.forEach(f=>{if(!have.has(f.name))p.fixed.push({id:uid(),name:f.name,cat:f.cat,amount:f.amount,paid:false})});save();render();toast(L('اتنسخت الأساسيات','Bills copied'));return}
   if(a==='saveTransfer'){const u=numv('#cvUsd'),r=numv('#cvRate');if(!u||!r){toast(L('اكتب المبلغ والسعر','Enter amount and rate'));return}
+    {const c=calc();if(c.p.salary.cur==='USD'&&u>c.usdLeft+0.001){toast(L(`باقي بالدولار ${fmt(c.usdLeft)}$ بس`,`Only $${fmt(c.usdLeft)} left`));return}}
     const p=P();p.transfers.push({id:uid(),date:p.end?p.start:TODAY,usd:u,rate:r});save();render();toast(L('اتسجل تحويل $','Recorded $')+fmt(u));return}
   if(a==='fresh'){if(!t.dataset.sure){t.dataset.sure='1';t.textContent=L('متأكد؟ اضغط تاني وهيتمسح كل اللي فات','Sure? Tap again to delete everything');return}
     S=keepMine({rate:S.rate,cats:S.cats,fixedCats:S.fixedCats,plans:[],debts:[],periods:[]});fill();curId=null;save();tab='home';render();openSheet('newPeriod');return}
@@ -1326,7 +1333,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setInterval(()=>{if(document.visibilityState==='visible')fetchRate(false)},30*60e3);
 if(/[?&]install=1/.test(location.search)&&!isStandalone()){history.replaceState(null,'',location.pathname);setTimeout(()=>{if(!sheetOpen())openSheet('install')},1500)}
 let NAV0=null, REOPEN=false;try{NAV0=JSON.parse(sessionStorage.getItem('masrofat_nav')||'null')}catch(e){}
-if(NAV0&&['home','daily','fixed','money','settings'].includes(NAV0.tab)){tab=NAV0.tab;if(NAV0.curId&&S.periods.find(x=>x.id===NAV0.curId))curId=NAV0.curId}
+if(NAV0&&['home','daily','fixed','money','wallets','settings'].includes(NAV0.tab)){tab=NAV0.tab;if(NAV0.curId&&S.periods.find(x=>x.id===NAV0.curId))curId=NAV0.curId}
 try{const st=history.state;
   if(st&&st.app){ // refreshed: keep the history we already have
     if(st.sheet&&NAV0&&NAV0.sheet){history.replaceState({app:1,tab,sheet:1},'');REOPEN=true}
