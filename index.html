@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="مصروفات البيت">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon2-192.png">
+<link rel="apple-touch-icon" href="icon2-180.png">
 <title>مصروفات البيت</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
@@ -79,7 +79,7 @@ h2 .sub{font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--mut
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
 
 .hero{background:var(--hero);color:var(--hero-ink);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
-.hero .house{position:absolute;inset-inline-end:-18px;bottom:-14px;width:150px;height:150px;opacity:.13;pointer-events:none}
+.hero .house{position:absolute;inset-inline-end:-14px;bottom:-10px;width:140px;height:auto;opacity:.16;pointer-events:none}
 .hero .lbl{font-size:13px;color:var(--hero-muted)}
 .hero .big{font-size:36px;font-weight:800;line-height:1.1;color:var(--accent)}
 .hero .big small{font-size:15px;font-weight:500;color:var(--hero-ink)}
@@ -225,17 +225,6 @@ header.top .who{flex:1 1 100%}
 <body>
 <div id="launch" hidden><img src="logo.png" alt=""></div>
 <script>(function(){var l=document.getElementById('launch');try{if(!matchMedia('(display-mode: standalone)').matches&&!navigator.standalone)return;if(sessionStorage.getItem('masrofat_launched'))return;sessionStorage.setItem('masrofat_launched','1')}catch(e){}l.hidden=false;setTimeout(function(){l.classList.add('out');setTimeout(function(){l.remove()},400)},1100)})()</script>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="house" viewBox="0 0 64 64">
-    <path d="M32 7 5 29h7v27h40V29h7z" fill="#D9AA28"/>
-    <path d="M32 7 5 29h7l20-16 20 16h7z" fill="#94700F"/>
-    <rect x="44" y="12" width="6" height="11" fill="#94700F"/>
-    <rect x="26" y="38" width="12" height="18" rx="1.5" fill="#1F1D19"/>
-    <rect x="16" y="34" width="8" height="8" rx="1" fill="#FEF2CE"/>
-    <rect x="40" y="34" width="8" height="8" rx="1" fill="#FEF2CE"/>
-    <circle cx="35" cy="47.5" r="1.2" fill="#D9AA28"/>
-  </symbol>
-</svg>
 
 <div class="app" id="app">
   <header class="top">
@@ -257,7 +246,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-24 · 10';
+const VER='2026-11-24 · 11';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -450,7 +439,7 @@ addEventListener('appinstalled',()=>{INSTALL_EVT=null;closeSheet();render();toas
 function deviceKind(){const u=navigator.userAgent;if(/iPhone|iPad|iPod/.test(u))return 'ios';if(/SamsungBrowser/.test(u))return 'samsung';if(/Android/.test(u))return 'android';return 'pc'}
 function installBanner(){
   if(isStandalone()||INSTALL_HIDE)return '';
-  return `<div class="install"><img src="icon-192.png" alt=""><div><b>${L('ثبّت البرنامج على موبايلك','Install the app on your phone')}</b>${L('يفتح من أيقونة على الشاشة زي أي تطبيق','Opens from a home-screen icon like any app')}</div><button class="btn" data-act="install">${L('ثبّت','Install')}</button><button class="x" data-act="installHide" aria-label="${L('اقفل','Close')}">×</button></div>`;
+  return `<div class="install"><img src="icon2-192.png" alt=""><div><b>${L('ثبّت البرنامج على موبايلك','Install the app on your phone')}</b>${L('يفتح من أيقونة على الشاشة زي أي تطبيق','Opens from a home-screen icon like any app')}</div><button class="btn" data-act="install">${L('ثبّت','Install')}</button><button class="x" data-act="installHide" aria-label="${L('اقفل','Close')}">×</button></div>`;
 }
 function installSteps(){
   const k=deviceKind();
@@ -542,7 +531,6 @@ function debtsSection(full){
 }
 
 /* ---------- views ---------- */
-const HOUSE=cls=>`<svg class="${cls}" viewBox="0 0 64 64" aria-hidden="true"><use href="#house"/></svg>`;
 function onboarding(){
   if(SYNC.on&&!SYNC.user&&!ACC_SKIP){
     if(!SYNC.ready) return `<div class="onb card"><img class="logo" src="logo.png" alt=""><h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2><p class="note" style="margin:0">${esc(SYNC.status)||L('لحظة…','One moment…')}</p><button class="chip" data-act="accSkip">${L('كمّل من غير حساب','Continue without an account')}</button></div>`;
@@ -579,7 +567,7 @@ function home(){
   <section>
     ${lockBanner(c)}
     <div class="hero">
-      ${HOUSE('house')}
+      <img class="house" src="logo.png" alt="">
       <div><div class="lbl">${closed?L('فاضل معاك في آخر الشهر','Left at the end of the month'):L('الفلوس اللي معاك دلوقتي','Cash you have now')}</div>
       <div class="big"><span class="num">${fmt(c.cash)}</span> <small>${CUR()}</small></div>
       <div class="lbl" style="margin-top:4px">${L('من','From')} ${dshort(p.start)} ${L('لحد','to')} ${dshort(c.end)}${closed?'':L(' (متوقع)',' (expected)')}</div>${c.carry?`<div class="lbl" style="margin-top:2px">${L('منهم','Includes')} <span class="num">${fmt(c.carry)}</span> ${CUR()} ${L('باقي من الشهر اللي فات','left from last month')}</div>`:''}</div>
@@ -938,7 +926,7 @@ function openSheet(kind,o){
     EDIT=null;
   } else if(kind==='install'){
     html=`<h3>${L('ثبّت «مصروفات البيت»','Install Home Expenses')}</h3>
-    <div style="display:flex;gap:12px;align-items:center"><img src="icon-192.png" alt="" style="width:56px;height:56px;border-radius:14px"><p class="note" style="margin:0">${L('هتلاقي له أيقونة على شاشة الموبايل، ويفتح على الشاشة كلها، ويشتغل حتى من غير نت.','You get a home-screen icon; it opens full screen and works offline.')}</p></div>
+    <div style="display:flex;gap:12px;align-items:center"><img src="icon2-192.png" alt="" style="width:56px;height:56px;border-radius:14px"><p class="note" style="margin:0">${L('هتلاقي له أيقونة على شاشة الموبايل، ويفتح على الشاشة كلها، ويشتغل حتى من غير نت.','You get a home-screen icon; it opens full screen and works offline.')}</p></div>
     ${INSTALL_EVT?`<button class="btn full" data-act="installNow">${L('ثبّت دلوقتي','Install now')}</button>`:installSteps()}`;
     EDIT=null;
   } else if(kind==='plan'){
