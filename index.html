@@ -247,7 +247,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-24 · 14';
+const VER='2026-11-24 · 15';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -409,7 +409,10 @@ let RATE={buy:0,sell:0,at:null,busy:false,err:false};
 try{const r=JSON.parse(localStorage.getItem('masrofat_cib_rate')||'null');if(r&&r.buy)Object.assign(RATE,r)}catch(e){}
 function readRate(j){if(j&&Array.isArray(j.rates)){const u=j.rates.find(x=>x.currencyID==='USD');return u?{buy:+u.buyRate,sell:+u.sellRate}:null}
   return j&&j.buy?{buy:+j.buy,sell:+j.sell}:null}
+/* most people are paid in pounds: the dollar parts only show for someone paid in dollars */
+const usesUSD=()=>S.periods.some(p=>p.salary.cur==='USD'||p.transfers.length);
 async function fetchRate(manual){
+  if(!manual&&!usesUSD())return;
   if(RATE.busy)return;RATE.busy=true;RATE.err=false;if(manual)rerenderRate();
   let got=null;
   for(const u of RATE_SRC){try{const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),5000);
@@ -643,9 +646,9 @@ function walletsSection(){
     <div class="card" style="display:flex;flex-direction:column;gap:10px"><p class="note" style="margin:0">${L('لو بتحوّش فلوس في محفظة (فودافون كاش، اتصالات كاش…) ضيفها هنا، وهتعرف كل محفظة فيها كام. الفلوس دي مش بتدخل في اللي بتصرف منه.','If you keep savings in a wallet (Vodafone Cash, Etisalat Cash…), add it here to see what each holds. This money is kept apart from what you spend.')}</p>
     <button class="btn ghost" data-open="walletEdit">${L('+ ضيف محفظة','+ Add a wallet')}</button></div></section>`;
   return `<section><h2>${L('الفلوس المحفوظة','Saved money')} <button class="chip" data-open="walletEdit">${L('+ محفظة','+ Wallet')}</button></h2>
-    <div class="card list">${S.wallets.map(w=>{const m=wMoves(w)[0];return `<div class="item tap" data-wallet="${w.id}"><div class="ic usd">${esc(initial(w.name))}</div><div class="txt"><b>${esc(w.name)}</b><span>${m?L('آخر حركة ','Last move ')+dshort(m.date):L('اضغط عشان تحط أو تسحب','Tap to add or withdraw')}</span></div><div class="amt">${fmt(wBal(w))}<small>${CUR()}</small></div></div>`}).join('')}
+    <div class="card list">${S.wallets.map(w=>{const m=wMoves(w)[0];return `<div class="item tap" data-wallet="${w.id}"><div class="ic usd">${esc(initial(w.name))}</div><div class="txt"><b>${esc(w.name)}</b><span>${m?L('آخر حركة ','Last move ')+dshort(m.date):L('اضغط عشان تضيف أو تسحب','Tap to add or withdraw')}</span></div><div class="amt">${fmt(wBal(w))}<small>${CUR()}</small></div></div>`}).join('')}
     ${S.wallets.length>1?`<div class="grouphead" style="border:0;border-top:1px solid var(--line);padding-top:10px"><span>${L('إجمالي المحفوظ','Total saved')}</span><span class="num">${fmt(tot)} ${CUR()}</span></div>`:''}</div>
-    ${op?`<div class="card" style="display:flex;justify-content:space-between;gap:8px;font-weight:700"><span>${L('كل فلوسك (معاك + المحفوظ)','All your money (cash + saved)')}</span><span class="num">${fmt(calc(op).cash+tot)} ${CUR()}</span></div>`:''}
+    ${op?`<div class="card" style="display:flex;justify-content:space-between;gap:8px;font-weight:700"><span>${L('إجمالي المبلغ (معاك + المحفوظ)','Total (cash + saved)')}</span><span class="num">${fmt(calc(op).cash+tot)} ${CUR()}</span></div>`:''}
   </section>`;
 }
 function histRow(p){
@@ -741,7 +744,7 @@ function money(){
       </div>
       <div class="grid2">
         <div class="field"><label for="salAmt" id="salAmtL">${p.salary.cur==='USD'?L('المرتب بالدولار','Salary in USD'):L('المرتب بالجنيه','Salary in EGP')}</label><input id="salAmt" class="num" inputmode="decimal" value="${p.salary.amount||''}" placeholder="0" ${dis}></div>
-        <div class="field"><label for="salRate">${L('سعر الدولار للحساب','Dollar rate')}</label><input id="salRate" class="num" inputmode="decimal" value="${S.rate}" ${dis}></div>
+        <div class="field usdonly" ${p.salary.cur==='USD'?'':'hidden'}><label for="salRate">${L('سعر الدولار للحساب','Dollar rate')}</label><input id="salRate" class="num" inputmode="decimal" value="${S.rate}" ${dis}></div>
       </div>
       ${prevP(p)?`<div class="field"><label for="salCarry">${L('باقي من الشهر اللي فات (اتضاف على المرتب)','Left from last month (added to salary)')}</label><input id="salCarry" class="num" inputmode="decimal" value="${p.carry||''}" placeholder="0" ${dis}></div>`:''}
       ${ro?'':`<div class="btnrow">
@@ -749,12 +752,12 @@ function money(){
         <button class="btn ghost" data-step="100">+ 100</button>
         <button class="btn ghost" data-act="salPrev">${L('زي الشهر اللي فات','Same as last month')}</button>
       </div>`}
-      <div class="conv"><span id="salConvL">${p.salary.cur==='USD'?L('يساوي تقريباً بالجنيه','About, in EGP'):L('يساوي تقريباً بالدولار','About, in USD')}</span><b class="num" id="salConv"></b></div>
+      <div class="conv usdonly" ${p.salary.cur==='USD'?'':'hidden'}><span id="salConvL">${p.salary.cur==='USD'?L('يساوي تقريباً بالجنيه','About, in EGP'):L('يساوي تقريباً بالدولار','About, in USD')}</span><b class="num" id="salConv"></b></div>
       ${ro?'':`<button class="btn full" data-act="saveSalary">${L('احفظ مرتب ','Save salary · ')}${pname(p)}</button>`}
       <p class="note" style="margin:0">${L('الشهر بيبدأ يوم ما المرتب ينزل. لما تسجّل المرتب الجديد من الرئيسية، الشهر ده بيتقفل لوحده في اليوم اللي قبله.','A month starts the day the salary arrives. When you enter the next salary from Home, this month closes the day before.')}</p>
     </div>
   </section>
-  ${ro?'':`<section>
+  ${!(p.salary.cur==='USD'||p.transfers.length)?'':ro?'':`<section>
     <h2>${L('حاسبة التحويل','Conversion calculator')} <span class="sub">${L('دولار ⇠ جنيه','USD → EGP')}</span></h2>
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <div class="grid2">
@@ -766,15 +769,15 @@ function money(){
       <button class="btn usd full" data-act="saveTransfer">${L('سجّل التحويل ده','Record this conversion')}</button>
     </div>
   </section>`}
-  <section>
+  ${!(p.salary.cur==='USD'||p.transfers.length)?'':`<section>
     <h2>${L('التحويلات','Conversions')} <span class="sub">${usd(c.transUSD)} = ${egp(c.transEGP)}</span></h2>
     <div class="card list">${p.transfers.length?p.transfers.map(t=>`<div class="item"><div class="ic usd">$</div><div class="txt"><b>${L('حوّلت','Converted')} ${usd(t.usd)}</b><span>${L('بسعر','at')} <span class="num">${t.rate}</span> · ${dshort(t.date)}</span></div><div class="amt">${fmt(t.usd*t.rate)}<small>${CUR()}</small></div>${ro?'':`<button class="x" data-del="transfers:${t.id}" aria-label="${L('امسح','Delete')}">×</button>`}</div>`).join(''):`<div class="empty">${L('ما حوّلتش حاجة الشهر ده','No conversions this month')}</div>`}</div>
     ${p.salary.cur==='USD'&&c.usdLeft?`<p class="note">${L('باقي من المرتب','Still unconverted:')} ${usd(c.usdLeft)} ${L('ما اتحوّلش، يساوي حوالي','≈')} ${egp(c.usdLeft*S.rate)} ${L('بسعر النهارده.','at today\'s rate.')}</p>`:''}
-  </section>
+  </section>`}
   <section>
     <h2>${L('فلوس زيادة غير المرتب','Extra money besides salary')} <span class="sub">${egp(c.extra)}</span></h2>
     <div class="card list">${(p.extra||[]).length?[...p.extra].sort((a,b)=>b.date.localeCompare(a.date)).map(x=>`<div class="item"><div class="ic">+</div><div class="txt ${ro?'':'tap'}" ${ro?'':`data-edit="extra:${x.id}"`}><b>${esc(x.src)}${x.note?' · '+esc(x.note):''}</b><span>${dshort(x.date)}${W(x.to)?' · '+L('اتحط في ','put in ')+esc(W(x.to).name):''}</span></div><div class="amt">${fmt(x.amount)}<small>${CUR()}</small></div>${ro?'':`<button class="x" data-del="extra:${x.id}" aria-label="${L('امسح','Delete')}">×</button>`}</div>`).join(''):`<div class="empty">${L('مكافأة، شغل عملته لحد، هدية… سجّلها هنا','A bonus, side work, a gift… record it here')}</div>`}</div>
-    ${ro?'':`<button class="btn ghost full" data-open="extra">${L('+ ضيف مبلغ زيادة','+ Add extra money')}</button>`}
+    ${ro?'':`<button class="btn ghost full" data-open="extra">${L('+ إضافة مبلغ','+ Add money')}</button>`}
   </section>`;
 }
 function avatar(cls){const pf=S.profile;return pf.photo?`<img src="${pf.photo}" alt="">`:esc(initial(pf.name))||'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>'}
@@ -799,7 +802,7 @@ function settings(){
     <h2>${L('اللغة','Language')} <span class="sub">Language · اللغة</span></h2>
     <div class="seg"><button class="${LANG==='ar'?'on':''}" data-lang="ar">عربي</button><button class="${LANG==='en'?'on':''}" data-lang="en">English</button></div>
   </section>
-  <section>
+  ${!usesUSD()?'':`<section>
     <h2>${L('سعر الدولار','Dollar rate')}</h2>
     <div class="card" style="display:flex;flex-direction:column;gap:8px">
       ${rateBox()}
@@ -808,7 +811,7 @@ function settings(){
       <div class="field"><label for="rate">${L('السعر اللي البرنامج بيحسب بيه (ج.م لكل دولار)','Rate the app uses (EGP per USD)')}</label><input id="rate" class="num" inputmode="decimal" value="${S.rate}"></div>
       <p class="note" style="margin:0">${S.rateAuto?L('بيتحدّث لوحده من CIB كل ما تفتح البرنامج. لو كتبت سعر بإيدك، التحديث التلقائي هيتقفل.','Updates from CIB whenever you open the app. Typing a rate yourself turns automatic updates off.'):L('التحديث التلقائي مقفول، والبرنامج بيحسب بالسعر اللي كتبته.','Automatic updates are off; the app uses the rate you typed.')}</p>
     </div>
-  </section>
+  </section>`}
   <section>
     <h2>${L('شارك البرنامج','Share the app')}</h2>
     <div class="card" style="display:flex;flex-direction:column;gap:8px">
@@ -911,16 +914,16 @@ function openSheet(kind,o){
   } else if(kind==='newPeriod'){
     const op=openP(), last=S.periods[S.periods.length-1];
     const date=TODAY, key=keyFor(date);
-    const sal=last?last.salary:{amount:'',cur:'USD'};
+    const sal=last?last.salary:{amount:'',cur:'EGP'};
     const cs=op?calc(op):null;
     html=`<h3>${S.periods.length?L('نزل المرتب الجديد','New salary arrived'):L('سجّل المرتب وابدأ','Enter salary and start')}</h3>
     <div class="grid2">
       <div class="field"><label for="nDate">${L('المرتب نزل يوم','Salary arrived on')}</label><input id="nDate" type="date" value="${date}"></div>
       <div class="field"><label for="nKey">${L('ده مرتب شهر','Salary for month')}</label><input id="nKey" type="month" value="${key}"></div>
     </div>
-    <div class="chips" id="nCur"><button class="chip ${sal.cur==='USD'?'on':''}" data-pick="USD">${L('بالدولار $','In dollars $')}</button><button class="chip ${sal.cur==='EGP'?'on':''}" data-pick="EGP">${L('بالجنيه ج.م','In pounds EGP')}</button></div>
+    <div class="field"><label>${L('مرتبك بتقبضه بأنهي عملة؟','Which currency is your salary paid in?')}</label><div class="chips" id="nCur"><button class="chip ${sal.cur==='USD'?'on':''}" data-pick="USD">${L('بالدولار $','In dollars $')}</button><button class="chip ${sal.cur==='EGP'?'on':''}" data-pick="EGP">${L('بالجنيه ج.م','In pounds EGP')}</button></div></div>
     <div class="grid2"><div class="field"><label for="nAmt">${L('المبلغ','Amount')}</label><input id="nAmt" class="num" inputmode="decimal" value="${sal.amount||''}" placeholder="0"></div>
-    <div class="field"><label for="nRate">${L('سعر الدولار النهارده','Today\'s dollar rate')}</label><input id="nRate" class="num" inputmode="decimal" value="${S.rate}"></div></div>
+    <div class="field" id="nRateF" ${sal.cur==='USD'?'':'hidden'}><label for="nRate">${L('سعر الدولار النهارده','Today\'s dollar rate')}</label><input id="nRate" class="num" inputmode="decimal" value="${S.rate}"></div></div>
     ${op?`<div class="conv" style="display:block"><span>${L('هيتقفل','Closing')} <b style="font-size:inherit;color:inherit">${pname(op)}</b> ${L('يوم','on')} <span id="nClose">${dshort(addDays(date,-1))}</span>. ${L('إجمالي مصروفاته لحد دلوقتي','Spent so far')} <b class="num" style="font-size:inherit">${fmt(cs.daily+cs.fixedPaid)} ${CUR()}</b>${L('، وتقدر ترجعله في أي وقت من «الشهور».','; you can reopen it any time from "Months".')}</span></div>
     <label class="note" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="nCopy" class="chk" checked> ${L('انقل المصروفات الأساسية (إيجار، كهرباء…) للشهر الجديد','Carry bills (rent, electricity…) to the new month')}</label>
     ${cs.cash>0?`<div class="conv" style="display:block;background:var(--accent-soft)">${L(`فاضل معاك من ${pname(op)}`,`Left from ${pname(op)}`)} <b class="num" style="font-size:18px;color:var(--accent-text)">${fmt(cs.cash)} ${CUR()}</b>${S.wallets.length?L('. تعمل فيهم إيه؟','. What to do with it?'):''}</div>
@@ -933,7 +936,7 @@ function openSheet(kind,o){
     <button class="btn full" data-act="savePeriod">${L('ابدأ الشهر الجديد','Start the new month')}</button>`;
   } else if(kind==='extra'){
     const src=o?o.src:S.extraSrc[0], to=o&&W(o.to)?o.to:'cash', srcs=o&&!S.extraSrc.includes(o.src)?[o.src,...S.extraSrc]:S.extraSrc;
-    html=`<h3>${o?L('تعديل مبلغ زيادة','Edit extra money'):L('ضيف مبلغ زيادة','Add extra money')}</h3>
+    html=`<h3>${o?L('تعديل مبلغ','Edit amount'):L('إضافة مبلغ','Add money')}</h3>
     <div class="field"><label for="exAmt">${L('المبلغ بالجنيه','Amount in EGP')}</label><input id="exAmt" class="num" inputmode="decimal" placeholder="0" value="${o?o.amount:''}"></div>
     <div class="field"><label>${L('جه منين؟','Where from?')}</label><div class="chips" id="exSrc" style="flex-wrap:wrap">${srcs.map(s=>`<button class="chip ${s===src?'on':''}" data-pick="${esc(s)}">${esc(s)}</button>`).join('')}</div>
     <input id="exSrcNew" placeholder="${L('أو اكتب مصدر تاني','Or type another source')}" style="margin-top:6px"></div>
@@ -942,10 +945,10 @@ function openSheet(kind,o){
     <div class="btnrow"><button class="btn" data-act="saveExtra" style="flex:2">${L('احفظ','Save')}</button>${del}</div>`;
   } else if(kind==='wallet'){
     const ms=wMoves(o), b=wBal(o);
-    const ttl=m=>m.type==='in'?L('حطّيت فيها من الفلوس اللي معايا','Added from my cash'):m.type==='out'?L('سحبت منها للفلوس اللي معايا','Withdrawn to my cash'):m.type==='extra'?L('فلوس زيادة: ','Extra money: ')+esc(m.note):L('صرفت منها: ','Spent from it: ')+esc(m.note);
+    const ttl=m=>m.type==='in'?L('إضافة مبلغ من الفلوس اللي معايا','Added from my cash'):m.type==='out'?L('سحب للفلوس اللي معايا','Withdrawn to my cash'):m.type==='extra'?L('فلوس زيادة: ','Extra money: ')+esc(m.note):L('صرفت منها: ','Spent from it: ')+esc(m.note);
     html=`<h3>${esc(o.name)}</h3>
     <div class="conv"><span>${L('رصيدها دلوقتي','Balance now')}</span><b class="num">${fmt(b)} ${CUR()}</b></div>
-    <div class="btnrow"><button class="btn" data-act="wIn" data-id="${o.id}">${L('+ حطّيت فيها','+ Put money in')}</button><button class="btn ghost" data-act="wOut" data-id="${o.id}">${L('− سحبت منها','− Take money out')}</button></div>
+    <div class="btnrow"><button class="btn" data-act="wIn" data-id="${o.id}">${L('+ إضافة مبلغ','+ Add money')}</button><button class="btn ghost" data-act="wOut" data-id="${o.id}">${L('− سيتم سحب','− Withdraw')}</button></div>
     <div class="card list">${ms.map(m=>`<div class="item"><div class="ic ${m.amount<0?'usd':''}">${m.amount<0?'−':'+'}</div><div class="txt"><b>${ttl(m)}</b><span>${dayName(m.date)} ${dshort(m.date)} ${m.date.slice(0,4)}</span></div><div class="amt" dir="ltr">${m.amount<0?'−':'+'}${fmt(Math.abs(m.amount))}<small>${CUR()}</small></div>${m.id?`<button class="x" data-act="wDelMove" data-id="${o.id}" data-mid="${m.id}" aria-label="${L('امسح','Delete')}">×</button>`:''}</div>`).join('')}
     <div class="item"><div class="ic">◷</div><div class="txt"><b>${L('الرصيد لما بدأت','Starting balance')}</b><span>${o.startDate?dshort(o.startDate)+' '+o.startDate.slice(0,4):''}</span></div><div class="amt">${fmt(+o.start||0)}<small>${CUR()}</small></div></div></div>
     <p class="note" style="margin:0">${L('المصروفات اللي دفعتها من المحفظة والفلوس الزيادة اللي حطّيتها فيها بتتعدّل أو تتمسح من مكانها (اليومي أو المرتب).','Expenses paid from the wallet and extra money put in are edited or deleted where they were recorded (Daily or Salary).')}</p>
@@ -960,7 +963,7 @@ function openSheet(kind,o){
     <div class="btnrow"><button class="btn" data-act="wSave" style="flex:2">${L('احفظ','Save')}</button>${o?`<button class="btn danger" data-act="wDel" data-id="${o.id}">${L('امسح','Delete')}</button>`:''}</div>`;
   } else if(kind==='wMove'){
     const w=W(o.wid), dirIn=o.dir==='in', tp=P()&&!P().end?P():openP();
-    html=`<h3>${dirIn?L('حطّيت فلوس في ','Money into '):L('سحبت فلوس من ','Money out of ')}${esc(w.name)}</h3>
+    html=`<h3>${dirIn?L('إضافة مبلغ في ','Add money to '):L('سيتم سحب مبلغ من ','Withdraw from ')}${esc(w.name)}</h3>
     <div class="field"><label for="wmAmt">${L('المبلغ بالجنيه','Amount in EGP')}</label><input id="wmAmt" class="num" inputmode="decimal" placeholder="0"></div>
     ${dirIn?`<div class="field"><label>${L('الفلوس دي جت منين؟','Where did it come from?')}</label><div class="chips" id="wmFrom" style="flex-wrap:wrap"><button class="chip on" data-pick="cash">${L('من الفلوس اللي معايا','From my cash')}</button><button class="chip" data-pick="ext">${L('من بره (مبلغ زيادة)','From outside (extra money)')}</button></div></div>
     <div class="field" id="wmSrcF" hidden><label>${L('جه منين؟','Where from?')}</label><div class="chips" id="wmSrc" style="flex-wrap:wrap">${S.extraSrc.map((s,i)=>`<button class="chip ${i?'':'on'}" data-pick="${esc(s)}">${esc(s)}</button>`).join('')}</div><input id="wmNote" placeholder="${L('تفاصيل (اختياري)','Details (optional)')}" style="margin-top:6px"></div>`
@@ -1119,13 +1122,13 @@ document.addEventListener('click',e=>{
   if(t.dataset.editplan){const o=S.plans.find(x=>x.id===t.dataset.editplan);if(o)openSheet('plan',o);return}
   if(t.dataset.editcat){const [list,i]=t.dataset.editcat.split(':');openSheet('cat',{list,name:S[list][+i]});return}
   if(t.dataset.lang){LANG=S.lang=t.dataset.lang;save();render();return}
-  if(t.dataset.salcur){SALCUR=t.dataset.salcur;t.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===t));$('#salAmtL').textContent=SALCUR==='USD'?L('المرتب بالدولار','Salary in USD'):L('المرتب بالجنيه','Salary in EGP');$('#salConvL').textContent=SALCUR==='USD'?L('يساوي تقريباً بالجنيه','About, in EGP'):L('يساوي تقريباً بالدولار','About, in USD');updSal();return}
+  if(t.dataset.salcur){SALCUR=t.dataset.salcur;document.querySelectorAll('.usdonly').forEach(x=>x.hidden=SALCUR!=='USD');t.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===t));$('#salAmtL').textContent=SALCUR==='USD'?L('المرتب بالدولار','Salary in USD'):L('المرتب بالجنيه','Salary in EGP');$('#salConvL').textContent=SALCUR==='USD'?L('يساوي تقريباً بالجنيه','About, in EGP'):L('يساوي تقريباً بالدولار','About, in USD');updSal();return}
   if(t.dataset.step){$('#salAmt').value=Math.max(0,numv('#salAmt')+ +t.dataset.step);updSal();return}
   if(t.dataset.tab){go(t.dataset.tab);return}
   if(t.dataset.go){go(t.dataset.go);return}
   if(t.dataset.filter){filter=t.dataset.filter;render();return}
   if(t.dataset.open){if(isRO()&&!['plan','newPeriod','walletEdit'].includes(t.dataset.open)){toast(RO_MSG());return}openSheet(t.dataset.open);return}
-  if(t.dataset.pick){t.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===t));if(t.parentNode.id==='pType')$('#pTurnF').hidden=t.dataset.pick!=='جمعية';if(t.parentNode.id==='wmFrom'){$('#wmSrcF').hidden=t.dataset.pick!=='ext';updWm()}return}
+  if(t.dataset.pick){t.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===t));if(t.parentNode.id==='pType')$('#pTurnF').hidden=t.dataset.pick!=='جمعية';if(t.parentNode.id==='nCur')$('#nRateF').hidden=t.dataset.pick!=='USD';if(t.parentNode.id==='wmFrom'){$('#wmSrcF').hidden=t.dataset.pick!=='ext';updWm()}return}
   if(t.dataset.delplan){S.plans=S.plans.filter(x=>x.id!==t.dataset.delplan);save();render();toast(L('اتمسح','Deleted'));return}
   if(t.dataset.del){const [list,id]=t.dataset.del.split(':');const p=P();p[list]=(p[list]||[]).filter(x=>x.id!==id);save();render();toast(L('اتمسح','Deleted'));return}
   const a=t.dataset.act;
@@ -1244,7 +1247,7 @@ document.addEventListener('click',e=>{
     if(isRO(target)){toast(L('التاريخ ده في ','That date is in ')+pname(target)+L(' وهو مقفول',' which is closed'));return}
     if(ext){(target.extra=target.extra||[]).push({id:uid(),date,amount,src:(($('#wmSrc .chip.on')||{}).dataset||{}).pick||S.extraSrc[0],note:$('#wmNote').value.trim(),to:w.id})}
     else w.moves.push({id:uid(),kind:inn?'in':'out',pid:target.id,date,amount});
-    save();render();openSheet('wallet',w);toast(inn?L(`اتحط ${fmt(amount)} ج.م في ${w.name}`,`${fmt(amount)} EGP put in ${w.name}`):L(`اتسحب ${fmt(amount)} ج.م من ${w.name}`,`${fmt(amount)} EGP taken from ${w.name}`));return}
+    save();render();openSheet('wallet',w);toast(inn?L(`اتضاف ${fmt(amount)} ج.م في ${w.name}`,`${fmt(amount)} EGP put in ${w.name}`):L(`اتسحب ${fmt(amount)} ج.م من ${w.name}`,`${fmt(amount)} EGP taken from ${w.name}`));return}
   if(a==='saveSalary'){const p=P();const start=$('#salStart').value,end=$('#salEnd').value,key=$('#salKey').value;
     const pv=prevP(p),nx=nextP(p);
     if(!start||!end||end<start){toast(L('آخر يوم لازم يكون بعد أول يوم','Last day must be after the first'));return}
