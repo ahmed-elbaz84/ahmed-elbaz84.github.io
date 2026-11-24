@@ -247,7 +247,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-24 · 16';
+const VER='2026-11-24 · 17';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -761,7 +761,7 @@ function money(){
       <p class="note" style="margin:0">${L('الشهر بيبدأ يوم ما المرتب ينزل. لما تسجّل المرتب الجديد من الرئيسية، الشهر ده بيتقفل لوحده في اليوم اللي قبله.','A month starts the day the salary arrives. When you enter the next salary from Home, this month closes the day before.')}</p>
     </div>
   </section>
-  ${!(p.salary.cur==='USD'||p.transfers.length)?'':ro?'':`<section>
+  ${ro?'':`<section class="usdonly" ${p.salary.cur==='USD'||p.transfers.length?'':'hidden'} ${p.transfers.length?'data-keep="1"':''}>
     <h2>${L('حاسبة التحويل','Conversion calculator')} <span class="sub">${L('دولار ⇠ جنيه','USD → EGP')}</span></h2>
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
       <div class="grid2">
@@ -774,7 +774,7 @@ function money(){
       <button class="btn usd full" data-act="saveTransfer">${L('سجّل التحويل ده','Record this conversion')}</button>
     </div>
   </section>`}
-  ${!(p.salary.cur==='USD'||p.transfers.length)?'':`<section>
+  ${`<section class="usdonly" ${p.salary.cur==='USD'||p.transfers.length?'':'hidden'} ${p.transfers.length?'data-keep="1"':''}>
     <h2>${L('التحويلات','Conversions')} <span class="sub">${usd(c.transUSD)} = ${egp(c.transEGP)}</span></h2>
     <div class="card list">${p.transfers.length?p.transfers.map(t=>`<div class="item"><div class="ic usd">$</div><div class="txt"><b>${L('حوّلت','Converted')} ${usd(t.usd)}</b><span>${L('بسعر','at')} <span class="num">${t.rate}</span> · ${dshort(t.date)}</span></div><div class="amt">${fmt(t.usd*t.rate)}<small>${CUR()}</small></div>${ro?'':`<button class="x" data-del="transfers:${t.id}" aria-label="${L('امسح','Delete')}">×</button>`}</div>`).join(''):`<div class="empty">${L('ما حوّلتش حاجة الشهر ده','No conversions this month')}</div>`}</div>
     ${p.salary.cur==='USD'&&c.usdLeft?`<p class="note">${L('باقي من المرتب','Still unconverted:')} ${usd(c.usdLeft)} ${L('ما اتحوّلش، يساوي حوالي','≈')} ${egp(c.usdLeft*S.rate)} ${L('بسعر النهارده.','at today\'s rate.')}</p>`:''}
@@ -1128,7 +1128,7 @@ document.addEventListener('click',e=>{
   if(t.dataset.editplan){const o=S.plans.find(x=>x.id===t.dataset.editplan);if(o)openSheet('plan',o);return}
   if(t.dataset.editcat){const [list,i]=t.dataset.editcat.split(':');openSheet('cat',{list,name:S[list][+i]});return}
   if(t.dataset.lang){LANG=S.lang=t.dataset.lang;save();render();return}
-  if(t.dataset.salcur){SALCUR=t.dataset.salcur;document.querySelectorAll('.usdonly').forEach(x=>x.hidden=SALCUR!=='USD');t.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===t));$('#salAmtL').textContent=SALCUR==='USD'?L('المرتب بالدولار','Salary in USD'):L('المرتب بالجنيه','Salary in EGP');$('#salConvL').textContent=SALCUR==='USD'?L('يساوي تقريباً بالجنيه','About, in EGP'):L('يساوي تقريباً بالدولار','About, in USD');updSal();return}
+  if(t.dataset.salcur){SALCUR=t.dataset.salcur;document.querySelectorAll('.usdonly').forEach(x=>x.hidden=SALCUR!=='USD'&&!x.dataset.keep);t.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===t));$('#salAmtL').textContent=SALCUR==='USD'?L('المرتب بالدولار','Salary in USD'):L('المرتب بالجنيه','Salary in EGP');$('#salConvL').textContent=SALCUR==='USD'?L('يساوي تقريباً بالجنيه','About, in EGP'):L('يساوي تقريباً بالدولار','About, in USD');updSal();return}
   if(t.dataset.step){$('#salAmt').value=Math.max(0,numv('#salAmt')+ +t.dataset.step);updSal();return}
   if(t.dataset.tab){go(t.dataset.tab);return}
   if(t.dataset.go){go(t.dataset.go);return}
@@ -1263,7 +1263,7 @@ document.addEventListener('click',e=>{
     if(pv)pv.end=addDays(start,-1);
     p.salary={amount:numv('#salAmt'),cur:SALCUR||p.salary.cur};const r=numv('#salRate');if(r)S.rate=r;
     if($('#salCarry')){const cv=numv('#salCarry');if(cv>0)p.carry=cv;else delete p.carry}
-    save();render();toast(L('اتحفظ مرتب ','Saved salary · ')+pname(p));return}
+    save();render();toast(L('اتحفظ مرتب ','Saved salary · ')+pname(p));if(p.salary.cur==='USD'&&!RATE.at)fetchRate(false);return}
   if(a==='salPrev'){const pv=prevP(P());if(!pv){toast(L('مفيش شهر قبله','No earlier month'));return}$('#salAmt').value=pv.salary.amount;SALCUR=pv.salary.cur;
     document.querySelectorAll('#salCurChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.salcur===SALCUR));updSal();return}
   if(a==='savePlan'){const name=$('#pName').value.trim(),monthly=numv('#pAmt'),count=Math.round(numv('#pCount')),start=$('#pStart').value||TODAY.slice(0,7);
