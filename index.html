@@ -196,6 +196,10 @@ nav.tabs button.on{color:var(--accent-text);font-weight:700}
 .onb{display:flex;flex-direction:column;gap:14px;align-items:stretch;text-align:center;padding-block:30px}
 .onb h2{justify-content:center;font-size:20px}
 .onb .house{width:120px;height:120px;margin:0 auto}
+.onb .logo{width:150px;height:auto;margin:0 auto;display:block}
+#launch{position:fixed;inset:0;z-index:999;background:var(--bg);display:grid;place-items:center;transition:opacity .35s}
+#launch img{width:min(46vw,210px);height:auto}
+#launch.out{opacity:0;pointer-events:none}
 .back{border:1px solid var(--line);background:var(--card);color:var(--ink);width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;padding:0}
 .back svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2}
 [dir=ltr] .back svg{transform:scaleX(-1)}
@@ -219,6 +223,8 @@ header.top .who{flex:1 1 100%}
 </style>
 </head>
 <body>
+<div id="launch" hidden><img src="logo.png" alt=""></div>
+<script>(function(){var l=document.getElementById('launch');try{if(!matchMedia('(display-mode: standalone)').matches&&!navigator.standalone)return;if(sessionStorage.getItem('masrofat_launched'))return;sessionStorage.setItem('masrofat_launched','1')}catch(e){}l.hidden=false;setTimeout(function(){l.classList.add('out');setTimeout(function(){l.remove()},400)},1100)})()</script>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="house" viewBox="0 0 64 64">
     <path d="M32 7 5 29h7v27h40V29h7z" fill="#D9AA28"/>
@@ -251,7 +257,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-23 · 9';
+const VER='2026-11-24 · 10';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -539,11 +545,11 @@ function debtsSection(full){
 const HOUSE=cls=>`<svg class="${cls}" viewBox="0 0 64 64" aria-hidden="true"><use href="#house"/></svg>`;
 function onboarding(){
   if(SYNC.on&&!SYNC.user&&!ACC_SKIP){
-    if(!SYNC.ready) return `<div class="onb card">${HOUSE('house')}<h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2><p class="note" style="margin:0">${esc(SYNC.status)||L('لحظة…','One moment…')}</p><button class="chip" data-act="accSkip">${L('كمّل من غير حساب','Continue without an account')}</button></div>`;
-    return `<div class="onb">${HOUSE('house')}<h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2>${authForm(L('احفظ أرقامك على إيميلك','Keep your numbers on your email'),L('اعمل حساب بإيميلك وباسورد تختاره. أرقامك هتبقى خاصة بيك انت بس، ولو غيّرت الموبايل أو فتحت من جهاز تاني، تدخل بنفس الإيميل والباسورد وتلاقي أرقامك.','Create an account with your email and a password. Your numbers stay private to you, and on a new phone or another device you sign in and find them.'),true)}</div>`;
+    if(!SYNC.ready) return `<div class="onb card"><img class="logo" src="logo.png" alt=""><h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2><p class="note" style="margin:0">${esc(SYNC.status)||L('لحظة…','One moment…')}</p><button class="chip" data-act="accSkip">${L('كمّل من غير حساب','Continue without an account')}</button></div>`;
+    return `<div class="onb"><img class="logo" src="logo.png" alt=""><h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2>${authForm(L('احفظ أرقامك على إيميلك','Keep your numbers on your email'),L('اعمل حساب بإيميلك وباسورد تختاره. أرقامك هتبقى خاصة بيك انت بس، ولو غيّرت الموبايل أو فتحت من جهاز تاني، تدخل بنفس الإيميل والباسورد وتلاقي أرقامك.','Create an account with your email and a password. Your numbers stay private to you, and on a new phone or another device you sign in and find them.'),true)}</div>`;
   }
   return `<div class="onb card">
-    ${HOUSE('house')}
+    <img class="logo" src="logo.png" alt="">
     <h2>${L('ابدأ حسابك من النهارده','Start your account today')}</h2>
     <p class="note" style="margin:0">${L('سجّل المرتب ويوم ما نزل، واليوم ده هيبقى بداية الشهر. لما المرتب الجاي ينزل، الشهر ده بيتقفل لوحده وتقدر ترجعله في أي وقت.','Enter your salary and the day it arrived; that day starts the month. When the next salary arrives, this month closes by itself and you can come back to it any time.')}</p>
     <button class="btn full" data-open="newPeriod">${L('سجّل المرتب وابدأ','Enter salary and start')}</button>
