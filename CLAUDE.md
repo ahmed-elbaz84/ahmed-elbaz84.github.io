@@ -9,10 +9,10 @@ Read `HANDOVER.md` first. It has the full status, the data model, the sync and e
 
 ## Essentials
 - Single file app: `index.html` (+ `manifest.webmanifest`, `sw.js`, icons, `qr.png`). There is no build step.
-- Live at https://ahmed-elbaz84.github.io via GitHub Pages from `main`. The owner expects every change to be committed and pushed to `main`.
+- This old copy is still served at https://ahmed-elbaz84.github.io via GitHub Pages from `main`. The owner expects every change to be committed and pushed to `main`.
 - Bump `CACHE` in `sw.js` on every change so phones pick up the new version.
 - Never change the localStorage key `masrofat_elbeit_app_v1` or the data shape without a migration. Real user data lives there.
-- Sync is off until `FB_CONFIG` is filled in with the owner's own Firebase project. Synced data is encrypted on the device with a key derived from each user's password, so the owner cannot read other users' data. Keep it that way.
+- Firebase (email/password) sync here loads only for people who already signed in on this device (`FB_USED`). Synced data is encrypted on the device with a key derived from each user's password, so the owner cannot read other users' data. Keep it that way.
 - Test over http://localhost with Playwright at phone size. Don't create accounts on the real Firebase while testing.
 
 ## Other app in this repo
