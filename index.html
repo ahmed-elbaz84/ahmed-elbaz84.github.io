@@ -250,7 +250,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-25 · 21';
+const VER='2026-11-25 · 22';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -342,7 +342,10 @@ const CRYPT={
   async dec(key,d){const t=await crypto.subtle.decrypt({name:'AES-GCM',iv:this.unb64(d.iv)},key,this.unb64(d.enc));return new TextDecoder().decode(t)}
 };
 let PENDING_PW=null;
-const SYNC={on:!!FB_CONFIG,ready:false,loading:false,user:null,key:null,status:'',last:0,timer:null,pending:null,doc:null,unsub:null,locked:false,
+/* Email/password accounts (Firebase) are the old way. New people use their own Google Drive instead.
+   Firebase loads only for people who already signed in on this device, or who say they have an old account. */
+const FB_USED=(()=>{try{return localStorage.getItem('masrofat_store')==='account'||Object.keys(localStorage).some(k=>k.startsWith('masrofat_key_'))}catch(e){return false}})();
+const SYNC={on:!!FB_CONFIG&&FB_USED,ready:false,loading:false,user:null,key:null,status:'',last:0,timer:null,pending:null,doc:null,unsub:null,locked:false,
   load(){if(!this.on||this.ready||this.loading)return;this.loading=true;const urls=['app','auth','firestore'].map(n=>`https://www.gstatic.com/firebasejs/${FB_V}/firebase-${n}-compat.js`);
     const next=()=>{const u=urls.shift();if(!u){this.loading=false;return this.init()}if(u.includes('firebase-app')&&typeof firebase!=='undefined'&&firebase.initializeApp)return next();if(typeof firebase!=='undefined'&&((u.includes('-auth-')&&firebase.auth)||(u.includes('-firestore-')&&firebase.firestore)))return next();const sc=document.createElement('script');sc.src=u;sc.onload=next;sc.onerror=()=>{this.loading=false;sc.remove();this.status=L('مفيش نت، هتتزامن لما النت يرجع','No internet; will sync when it is back');rerenderSettings()};document.head.appendChild(sc)};next()},
   init(){if(typeof firebase==='undefined'||!firebase.initializeApp){this.status=L('مفيش نت، هتتزامن لما النت يرجع','No internet; will sync when it is back');rerenderSettings();return}
@@ -387,6 +390,7 @@ function syncCard(){
   if(SYNC.user) return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><b>${L('المزامنة شغالة ✓','Sync is on ✓')}</b>
     <p class="note" style="margin:0">${L('داخل بـ ','Signed in as ')}${esc(SYNC.user.email)} · ${esc(SYNC.status)}${SYNC.last?L(' · آخر مرة ',' · last ')+new Date(SYNC.last).toLocaleTimeString(LANG==='en'?'en-GB':'ar-EG',{hour:'2-digit',minute:'2-digit'}):''}</p>
     <p class="note" style="margin:0">${L('ادخل بنفس الإيميل والباسورد على الجهاز التاني.','Use the same email and password on the other device.')}</p>
+    ${DRIVE.linked()?`<p class="note" style="margin:0">${L('أرقامك بقت محفوظة على Google Drive، فالحساب ده مش لازم. لو عايز، اخرج منه من هنا، وعلى أي جهاز تاني اربط Google Drive بنفس الـ Gmail.','Your numbers are now saved in Google Drive, so this account is no longer needed. You can sign out of it here, and link Google Drive with the same Gmail on other devices.')}</p>`:''}
     <button class="btn ghost full" data-act="syncOut">${L('خروج من المزامنة على الجهاز ده','Sign out of sync on this device')}</button></div>`;
   return authForm(L('المزامنة بين الموبايل واللابتوب','Sync between phone and laptop'),L('ادخل بنفس الإيميل والباسورد على الموبايل واللابتوب، وأي حاجة تكتبها في واحد تظهر في التاني.','Sign in with the same email and password on phone and laptop; whatever you enter on one shows on the other.'));
 }
@@ -481,7 +485,7 @@ function storeChoice(welcome){
     <p class="note" style="margin:0">${L('أرقامك متسجلة على موبايلك. اختار مكان تتحفظ فيه نسخة منها، عشان ما تضيعش لو غيّرت الموبايل أو اتمسح البرنامج.','Your numbers are on your phone. Pick a place to keep a copy, so they are not lost if you change phones or the app is removed.')}</p>
     <button class="opt" data-act="storeDrive">${DRIVE_ICON}<span><b>${L('Google Drive بتاعي','My Google Drive')}</b><small>${L('بحساب الـ Gmail بتاعك. بيتحفظ لوحده، ولو غيّرت الموبايل تلاقي أرقامك.','With your Gmail account. Saves by itself; on a new phone your numbers come back.')}</small><small style="margin-top:4px">${L('هتظهرلك صفحة من Google تختار فيها حسابك وتدوس «Continue». البرنامج بيشوف ملفه هو بس، ومحدش غيرك يقدر يفتحه.','Google will ask you to pick your account and tap "Continue". The app sees only its own file, and nobody but you can open it.')}</small></span></button>
     <button class="opt" data-act="storeLocal"><span style="font-size:20px;flex:none">📱</span><span><b>${L('على الموبايل بس','On this phone only')}</b><small>${L('وتقدر تنزّل نسخة احتياطية بإيدك من الإعدادات.','You can download a backup yourself from Settings.')}</small></span></button>
-    ${welcome&&SYNC.on?`<button class="chip" data-act="storeAccount" style="align-self:flex-start">${L('عندي حساب في البرنامج بإيميل وباسورد','I have an app account with email and password')}</button>`:''}
+    ${welcome&&FB_CONFIG?`<button class="chip" data-act="storeAccount" style="align-self:flex-start">${L('عندي حساب قديم في البرنامج بإيميل وباسورد','I have an old app account with email and password')}</button>`:''}
     <p class="note" style="margin:0">${L('🔒 صاحب البرنامج ما يقدرش يشوف أرقامك في أي حالة. وتقدر تغيّر اختيارك بعدين من الإعدادات.','🔒 The app owner cannot see your numbers either way. You can change this later in Settings.')} <a href="privacy.html" style="color:var(--accent-text)">${L('سياسة الخصوصية','Privacy policy')}</a></p></div>`;
 }
 /* small bar on the home page when changes are waiting for a tap (Google asks again about once an hour) */
@@ -1392,7 +1396,7 @@ document.addEventListener('click',e=>{
     firebase.auth().sendPasswordResetEmail(em).then(()=>toast(L('بعتنالك رسالة على الإيميل تغيّر منها الباسورد','We emailed you a link to change the password'))).catch(e=>{SYNC.status=authErr(e.code);render()});return}
   if(a==='storeDrive'){DRIVE.connect();return}
   if(a==='storeLocal'){setStore('local');render();toast(L('أرقامك هتفضل على الموبايل ده. تقدر تغيّر ده من الإعدادات','Your numbers stay on this phone. You can change this in Settings'));return}
-  if(a==='storeAccount'){setStore('account');render();return}
+  if(a==='storeAccount'){setStore('account');if(!SYNC.on)location.reload();else render();return}
   if(a==='driveNow'){if(DRIVE.ok())DRIVE.sync();else DRIVE.connect();return}
   if(a==='driveOff'){if(!t.dataset.sure){t.dataset.sure='1';t.textContent=L('متأكد؟ دوس تاني','Sure? Tap again');return}DRIVE.unlink();toast(L('اتفصل Google Drive. أرقامك لسه على الموبايل، والملف لسه على الـ Drive بتاعك','Google Drive unlinked. Your numbers are still on the phone, and the file is still in your Drive'));return}
   if(a==='accSkip'){ACC_SKIP=true;try{localStorage.setItem('masrofat_acc_skip','1')}catch(e){}render();return}
