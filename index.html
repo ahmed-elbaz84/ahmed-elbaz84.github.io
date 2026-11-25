@@ -250,7 +250,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-25 · 19';
+const VER='2026-11-25 · 20';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -482,7 +482,7 @@ function storeChoice(welcome){
     <button class="opt" data-act="storeDrive">${DRIVE_ICON}<span><b>${L('Google Drive بتاعي','My Google Drive')}</b><small>${L('بحساب الـ Gmail بتاعك. بيتحفظ لوحده، ولو غيّرت الموبايل تلاقي أرقامك.','With your Gmail account. Saves by itself; on a new phone your numbers come back.')}</small></span></button>
     <button class="opt" data-act="storeLocal"><span style="font-size:20px;flex:none">📱</span><span><b>${L('على الموبايل بس','On this phone only')}</b><small>${L('وتقدر تنزّل نسخة احتياطية بإيدك من الإعدادات.','You can download a backup yourself from Settings.')}</small></span></button>
     ${welcome&&SYNC.on?`<button class="chip" data-act="storeAccount" style="align-self:flex-start">${L('عندي حساب في البرنامج بإيميل وباسورد','I have an app account with email and password')}</button>`:''}
-    <p class="note" style="margin:0">${L('🔒 صاحب البرنامج ما يقدرش يشوف أرقامك في أي حالة. وتقدر تغيّر اختيارك بعدين من الإعدادات.','🔒 The app owner cannot see your numbers either way. You can change this later in Settings.')}</p></div>`;
+    <p class="note" style="margin:0">${L('🔒 صاحب البرنامج ما يقدرش يشوف أرقامك في أي حالة. وتقدر تغيّر اختيارك بعدين من الإعدادات.','🔒 The app owner cannot see your numbers either way. You can change this later in Settings.')} <a href="privacy.html" style="color:var(--accent-text)">${L('سياسة الخصوصية','Privacy policy')}</a></p></div>`;
 }
 /* small bar on the home page when changes are waiting for a tap (Google asks again about once an hour) */
 function driveBar(){
@@ -496,7 +496,7 @@ function driveCard(){
     <p class="note" style="margin:0">${L(`الملف اسمه «${GD_FILE}» على الـ Drive بتاعك. ما تمسحوش. على أي موبايل تاني، اختار Google Drive وادخل بنفس الحساب وأرقامك تنزل.`,`The file is "${GD_FILE}" in your Drive. Do not delete it. On another phone, pick Google Drive with the same account and your numbers come back.`)}</p>
     <div class="btnrow"><button class="btn" data-act="driveNow">${L('احفظ على Drive دلوقتي','Save to Drive now')}</button><button class="btn ghost" data-act="driveOff">${L('افصل Google Drive','Unlink Google Drive')}</button></div></div>`}
   return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><b style="display:flex;gap:8px;align-items:center">${DRIVE_ICON}${L('احفظ أرقامك على Google Drive بتاعك','Keep your numbers in your Google Drive')}</b>
-    <p class="note" style="margin:0">${L('بحساب الـ Gmail بتاعك. البرنامج بيعمل ملف واحد على الـ Drive بتاعك، وما يقدرش يشوف أي حاجة تانية عليه. وصاحب البرنامج ما يقدرش يشوف أرقامك.','With your Gmail account. The app makes one file in your Drive and cannot see anything else there. The app owner cannot see your numbers.')}</p>
+    <p class="note" style="margin:0">${L('بحساب الـ Gmail بتاعك. البرنامج بيعمل ملف واحد على الـ Drive بتاعك، وما يقدرش يشوف أي حاجة تانية عليه. وصاحب البرنامج ما يقدرش يشوف أرقامك.','With your Gmail account. The app makes one file in your Drive and cannot see anything else there. The app owner cannot see your numbers.')} <a href="privacy.html" style="color:var(--accent-text)">${L('سياسة الخصوصية','Privacy policy')}</a></p>
     <button class="btn full" data-act="storeDrive">${L('اربط Google Drive','Link Google Drive')}</button>
     ${DRIVE.status?`<p class="note" style="margin:0">${esc(DRIVE.status)}</p>`:''}</div>`;
 }

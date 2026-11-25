@@ -3,7 +3,7 @@
 آخر تحديث: 25 نوفمبر 2026
 
 ## الحالة باختصار
-- **آخر نسخة:** `VER='2026-11-25 · 19'` و`CACHE='masrofat-v25'`. (نسخة 18 و19 = الحفظ على Google Drive بتاع المستخدم، شوف القسم بتاعها.) التابات 6: الرئيسية، اليومي، الأساسية، المرتب والإضافات، المحافظ، الإعدادات.
+- **آخر نسخة:** `VER='2026-11-25 · 20'` و`CACHE='masrofat-v26'`. (نسخ 18 لحد 20 = الحفظ على Google Drive بتاع المستخدم، شوف القسم بتاعها.) التابات 6: الرئيسية، اليومي، الأساسية، المرتب والإضافات، المحافظ، الإعدادات.
 - **آخر حاجة شافها المالك (24 نوفمبر):** كان بيغيّر مرتب نوفمبر لـ **$1,400 بالدولار** في «المرتب والإضافات» (السعر 54.29)، عشان بيحوّل جزء من الدولار بس على حسب صرفه. اتقاله يدوس «احفظ مرتب نوفمبر 2026» الأول، وبعدها حاسبة التحويل بتظهر. ما أكدش لسه إنه حفظ. (قبل كده كان مكتوب هنا إن مرتبه بالجنيه، وده اتغيّر.)
 - البرنامج **شغال ومنشور** على https://ahmed-elbaz84.github.io (GitHub Pages، فرع `main`).
 - المالك ثبّته على موبايله (Samsung S25 Ultra، متصفح Samsung Internet) وبيسجل أرقامه الحقيقية. اسمه في البرنامج Ahmed، والبيت «Elbaz».
@@ -43,7 +43,8 @@
 
 ## نسخة 18: الحفظ على Google Drive بتاع كل مستخدم (25 نوفمبر 2026، `CACHE='masrofat-v24'`)
 - **طلب المالك:** بيانات كل مستخدم تتحفظ عند المستخدم نفسه، والمالك ومشروعه ما يبقاش ليهم علاقة بيها. اختار Google Drive بس (OneDrive اتأجل). ولسه ما ردّش على سؤال: نشيل حسابات Firebase ولا نسيبها؟ فهي **لسه موجودة**، وهو نفسه بيستخدمها.
-- **نسخة 19 (25 نوفمبر):** المالك عمل مشروع Google Cloud شخصي اسمه «Masrofat» (مش مشروع الشركة «Consultancy Group»)، وفعّل Drive API، وعمل consent screen (External) وWeb client. الـ Client ID اتحط في `GD_CLIENT_ID`، واتأكد إنه صح لأن Google ردّ بـ redirect_uri_mismatch مش invalid_client. الـ Client secret ظهر في صورة في الشات، وهو مش مستخدم في البرنامج، واتقال للمالك يعمله reset. **لسه:** يعمل Publish app (Audience ← In production)، ويجرب الربط بحسابه الحقيقي.
+- **نسخة 19 (25 نوفمبر):** المالك عمل مشروع Google Cloud شخصي اسمه «Masrofat» (مش مشروع الشركة «Consultancy Group»)، وفعّل Drive API، وعمل consent screen (External) وWeb client. الـ Client ID اتحط في `GD_CLIENT_ID`، واتأكد إنه صح لأن Google ردّ بـ redirect_uri_mismatch مش invalid_client. الـ Client secret ظهر في صورة في الشات، وهو مش مستخدم في البرنامج، واتقال للمالك يعمله reset. - **نسخة 20:** اتعملت `privacy.html` (سياسة الخصوصية بالعربي والإنجليزي، وفيها Limited Use)، لأن Publish app كان مقفول لحد ما صفحة Branding تكمل. واتحط لينك ليها في كارت الاختيار وكارت Drive. وفي Branding اتقال للمالك: Home page = الموقع، وPrivacy = `/privacy.html`، و**ما يرفعش لوجو** لأن اللوجو بيطلب مراجعة من Google.
+- **لسه:** يعمل Publish app (Audience ← In production)، ويجرب الربط بحسابه الحقيقي.
 - **الخطوات اللي اتعملت (للرجوع ليها):** يعمل مشروع على Google Cloud بحسابه، ويفعّل Google Drive API، ويعمل OAuth consent screen (External، Production)، ويعمل OAuth Client ID من نوع Web، وAuthorized JavaScript origin بتاعه يبقى `https://ahmed-elbaz84.github.io`، ويبعت الـ Client ID. الرقم ده بيتحط في `const GD_CLIENT_ID=null;` في `index.html`. **طول ما هو `null` مفيش أي حاجة جديدة بتظهر**، والبرنامج بيشتغل زي نسخة 17 بالظبط.
 - **الطريقة:** Google Identity Services (`accounts.google.com/gsi/client`)، token client، والـ scope هو `drive.file` بس. ده non-sensitive، فالبرنامج ما يقدرش يشوف غير الملف اللي هو عامله. ملف واحد ظاهر في Drive المستخدم اسمه `masrofat-elbeit-data.json`، وفيه `S` كـ JSON عادي (من غير تشفير، لأنه في حساب المستخدم نفسه). وفي `appProperties.ts` بيتسجل وقت آخر تعديل، والأحدث هو اللي بيكسب. أول ربط على جهاز عليه أرقام، ولو على Drive أرقام مختلفة، البرنامج بيسأل بـ `confirm()` ياخد أنهي نسخة.
 - **التخزين المحلي:** `masrofat_store` (`drive` / `local` / `account`) = اختيار المستخدم، و`masrofat_gd` (`fileId`، `email`، `sent`، `last`)، و`masrofat_gd_tok` (التوكن ووقت انتهائه).
