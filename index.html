@@ -250,7 +250,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-25 · 18';
+const VER='2026-11-25 · 19';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -409,7 +409,7 @@ const authErr=c=>(LANG==='en'?AUTH_ERR_EN:AUTH_ERR_AR)[c]||L('حصلت مشكل�
 /* ---------- keep each user's numbers in THEIR OWN Google Drive ----------
    The data goes straight from the phone to the user's Drive. Nothing passes through the owner.
    Scope drive.file: the app sees only the one file it made, nothing else in the user's Drive. */
-const GD_CLIENT_ID=null; // the owner's Google Cloud OAuth "Web client" ID (not secret). null = Google Drive option hidden.
+const GD_CLIENT_ID='1048864659214-h8mv9c32f5o9afgi942auvvfj6g90i6j.apps.googleusercontent.com'; // the owner's Google Cloud OAuth "Web client" ID (not secret). null = Google Drive option hidden.
 const GD_FILE='masrofat-elbeit-data.json';
 const GD_API='https://www.googleapis.com/';
 let STORE='';try{STORE=localStorage.getItem('masrofat_store')||''}catch(e){} // where the user chose to keep a copy: 'drive' | 'local' | 'account'
