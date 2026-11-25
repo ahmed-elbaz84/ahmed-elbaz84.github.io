@@ -44,7 +44,8 @@
 ## نسخة 18: الحفظ على Google Drive بتاع كل مستخدم (25 نوفمبر 2026، `CACHE='masrofat-v24'`)
 - **طلب المالك:** بيانات كل مستخدم تتحفظ عند المستخدم نفسه، والمالك ومشروعه ما يبقاش ليهم علاقة بيها. اختار Google Drive بس (OneDrive اتأجل). ولسه ما ردّش على سؤال: نشيل حسابات Firebase ولا نسيبها؟ فهي **لسه موجودة**، وهو نفسه بيستخدمها.
 - **نسخة 19 (25 نوفمبر):** المالك عمل مشروع Google Cloud شخصي اسمه «Masrofat» (مش مشروع الشركة «Consultancy Group»)، وفعّل Drive API، وعمل consent screen (External) وWeb client. الـ Client ID اتحط في `GD_CLIENT_ID`، واتأكد إنه صح لأن Google ردّ بـ redirect_uri_mismatch مش invalid_client. الـ Client secret ظهر في صورة في الشات، وهو مش مستخدم في البرنامج، واتقال للمالك يعمله reset. - **نسخة 20:** اتعملت `privacy.html` (سياسة الخصوصية بالعربي والإنجليزي، وفيها Limited Use)، لأن Publish app كان مقفول لحد ما صفحة Branding تكمل. واتحط لينك ليها في كارت الاختيار وكارت Drive. وفي Branding اتقال للمالك: Home page = الموقع، وPrivacy = `/privacy.html`، و**ما يرفعش لوجو** لأن اللوجو بيطلب مراجعة من Google.
-- **لسه:** يعمل Publish app (Audience ← In production)، ويجرب الربط بحسابه الحقيقي.
+- **25 نوفمبر:** المالك كمّل Branding (من غير لوجو)، والبرنامج بقى **In production** في Google Auth Platform. الـ user cap (100) بيتطبق بس على الـ scopes الحساسة، و`drive.file` مش منهم.
+- **لسه:** يجرب الربط بحسابه الحقيقي.
 - **الخطوات اللي اتعملت (للرجوع ليها):** يعمل مشروع على Google Cloud بحسابه، ويفعّل Google Drive API، ويعمل OAuth consent screen (External، Production)، ويعمل OAuth Client ID من نوع Web، وAuthorized JavaScript origin بتاعه يبقى `https://ahmed-elbaz84.github.io`، ويبعت الـ Client ID. الرقم ده بيتحط في `const GD_CLIENT_ID=null;` في `index.html`. **طول ما هو `null` مفيش أي حاجة جديدة بتظهر**، والبرنامج بيشتغل زي نسخة 17 بالظبط.
 - **الطريقة:** Google Identity Services (`accounts.google.com/gsi/client`)، token client، والـ scope هو `drive.file` بس. ده non-sensitive، فالبرنامج ما يقدرش يشوف غير الملف اللي هو عامله. ملف واحد ظاهر في Drive المستخدم اسمه `masrofat-elbeit-data.json`، وفيه `S` كـ JSON عادي (من غير تشفير، لأنه في حساب المستخدم نفسه). وفي `appProperties.ts` بيتسجل وقت آخر تعديل، والأحدث هو اللي بيكسب. أول ربط على جهاز عليه أرقام، ولو على Drive أرقام مختلفة، البرنامج بيسأل بـ `confirm()` ياخد أنهي نسخة.
 - **التخزين المحلي:** `masrofat_store` (`drive` / `local` / `account`) = اختيار المستخدم، و`masrofat_gd` (`fileId`، `email`، `sent`، `last`)، و`masrofat_gd_tok` (التوكن ووقت انتهائه).
@@ -180,7 +181,7 @@
 - **ما تجربش تعمل حساب على Firebase الحقيقي** وانت بتختبر من غير ما المالك يوافق.
 
 ## اللي فاضل
-**مستني المالك (25 نوفمبر):** يعمل Publish app في Google Auth Platform، ويجرب «Google Drive بتاعي» على موبايله، ويقرر: نشيل حسابات Firebase ولا نسيبها؟
+**مستني المالك (25 نوفمبر):** يعمل reset للـ Client secret اللي ظهر في الشات، ويجرب «Google Drive بتاعي» على موبايله، ويقرر: نشيل حسابات Firebase ولا نسيبها؟
 
 **مستني رد المالك على حاجات اتعملت يوم 24 نوفمبر:**
 - يحذف البرنامج من الشاشة ويثبّته تاني، عشان الأيقونة الفاتحة الجديدة تظهر، ويقول لو لسه شايف أي تبديل وهو بيفتح.
