@@ -250,7 +250,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-25 · 22';
+const VER='2026-11-25 · 23';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -315,6 +315,7 @@ if(!S||!S.periods) S=blank();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 function fill(){['cats','fixedCats','plans','periods','debts','wallets'].forEach(k=>{if(!S[k])S[k]=[]});if(!S.extraSrc)S.extraSrc=['مكافأة','شغل لحد','هدية','بيع حاجة'];if(!S.profile)S.profile={name:'',home:'',email:'',phone:'',photo:''};if(!S.lang)S.lang='ar';if(S.rateAuto===undefined)S.rateAuto=true}
 fill(); LANG=S.lang;
+if(!S.periods.length&&!/[?&]stay=1/.test(location.search)){let any=false;try{any=Object.keys(localStorage).some(k=>/^masrofat_(key_|store|gd)/.test(k))}catch(e){}if(!any)location.replace('https://masrofat-elbeit.github.io/'+location.search)}
 function save(fromCloud){if(!fromCloud)S._ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast(L('مساحة الحفظ مليانة، جرّب صورة أصغر','Storage is full, try a smaller photo'))}if(!fromCloud){SYNC.push();DRIVE.push()}}
 
 /* ---------- sync between phone and laptop (Firebase, the owner's own project) ---------- */
@@ -536,7 +537,17 @@ function rateBox(){
 }
 
 /* install & share */
-const APP_URL='https://ahmed-elbaz84.github.io/?install=1';
+const APP_URL='https://masrofat-elbeit.github.io/?install=1';
+/* the app moved to its own address. This old copy only helps people carry their numbers over. */
+const NEW_URL='https://masrofat-elbeit.github.io/';
+function moveBanner(){
+  return `<div class="card" style="display:flex;flex-direction:column;gap:10px;border-color:var(--accent);text-align:start">
+    <b>📢 ${L('البرنامج اتنقل لعنوان جديد','The app has moved to a new address')}</b>
+    <p class="note" style="margin:0">${L('العنوان الجديد: ','New address: ')}<b dir="ltr">masrofat-elbeit.github.io</b>. ${L('دوس الزرار، وأرقامك هتتنقل معاك. وبعدها ثبّت البرنامج من الصفحة الجديدة، وامسح الأيقونة القديمة من الشاشة.','Tap the button and your numbers move with you. Then install the app from the new page and remove the old icon.')}</p>
+    <button class="btn full" data-act="moveNow">${L('انقل أرقامي وافتح البرنامج الجديد','Move my numbers and open the new app')}</button></div>`;
+}
+function moveLink(){const b=new TextEncoder().encode(JSON.stringify(S));let x='';for(let i=0;i<b.length;i+=8192)x+=String.fromCharCode.apply(null,b.subarray(i,i+8192));
+  return NEW_URL+'#move='+btoa(x).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 let INSTALL_EVT=null, INSTALL_HIDE=false;
 try{INSTALL_HIDE=localStorage.getItem('masrofat_install_hide')==='1'}catch(e){}
@@ -651,6 +662,7 @@ function debtsSection(full){
 
 /* ---------- views ---------- */
 function onboarding(){
+  if(!/[?&]stay=1/.test(location.search)) return moveBanner();
   if(DRIVE.on&&!STORE&&!SYNC.user) return `<div class="onb"><img class="logo" src="logo.png" alt=""><h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2>${storeChoice(true)}</div>`;
   if(SYNC.on&&!SYNC.user&&!ACC_SKIP&&(!DRIVE.on||STORE==='account')){
     if(!SYNC.ready) return `<div class="onb card"><img class="logo" src="logo.png" alt=""><h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2><p class="note" style="margin:0">${esc(SYNC.status)||L('لحظة…','One moment…')}</p><button class="chip" data-act="accSkip">${L('كمّل من غير حساب','Continue without an account')}</button></div>`;
@@ -685,7 +697,7 @@ function home(){
   const v=closed?c.spent:c.projected;
   return `
   <section>
-    ${DRIVE.on&&!STORE&&!SYNC.user?storeChoice(false):''}${driveBar()}
+    ${moveBanner()}${driveBar()}
     ${lockBanner(c)}
     <div class="hero">
       <img class="house" src="logo.png" alt="">
@@ -892,7 +904,7 @@ function money(){
 function avatar(cls){const pf=S.profile;return pf.photo?`<img src="${pf.photo}" alt="">`:esc(initial(pf.name))||'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>'}
 function settings(){
   const pf=S.profile;
-  return `<section>
+  return `<section>${moveBanner()}</section><section>
     <h2>${L('الحساب','Account')}</h2>
     <div class="card profile tap" data-act="profile">
       <div class="av">${avatar()}</div>
@@ -1394,6 +1406,7 @@ document.addEventListener('click',e=>{
     SYNC.status=L('لحظة…','One moment…');fn.then(()=>{if(!S.profile.email){S.profile.email=em;save()}toast(L('دخلت، وأرقامك محفوظة ومقفولة بالباسورد بتاعك','Signed in; your numbers are saved and locked with your password'))}).catch(e=>{PENDING_PW=null;SYNC.status=authErr(e.code);render()});return}
   if(a==='syncForgot'){const em=$('#syEmail').value.trim();if(!em){toast(L('اكتب إيميلك الأول','Enter your email first'));return}
     firebase.auth().sendPasswordResetEmail(em).then(()=>toast(L('بعتنالك رسالة على الإيميل تغيّر منها الباسورد','We emailed you a link to change the password'))).catch(e=>{SYNC.status=authErr(e.code);render()});return}
+  if(a==='moveNow'){const u=moveLink();const w=window.open(u,'_blank');if(!w)location.href=u;return}
   if(a==='storeDrive'){DRIVE.connect();return}
   if(a==='storeLocal'){setStore('local');render();toast(L('أرقامك هتفضل على الموبايل ده. تقدر تغيّر ده من الإعدادات','Your numbers stay on this phone. You can change this in Settings'));return}
   if(a==='storeAccount'){setStore('account');if(!SYNC.on)location.reload();else render();return}

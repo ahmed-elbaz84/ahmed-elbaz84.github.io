@@ -3,6 +3,8 @@
 The owner is not a developer. Reply in Egyptian Arabic, in plain language.
 This is the owner's **personal** project. It has nothing to do with Consultancy Group work: never put it on the company site or the company's Firebase.
 
+**The app moved on 25 Nov 2026 to https://masrofat-elbeit.github.io (repo `masrofat-elbeit/masrofat-elbeit.github.io`). Work on the app there.** This copy only shows a "moved" card that carries each user's numbers to the new address, and sends new visitors there. Keep it working for people who have not moved yet, and keep the CIB rate bot (`rate.json`) here: the new app reads it.
+
 Read `HANDOVER.md` first. It has the full status, the data model, the sync and encryption design, and what is left to do.
 
 ## Essentials
