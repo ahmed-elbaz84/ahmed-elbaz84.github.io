@@ -250,7 +250,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-25 · 20';
+const VER='2026-11-25 · 21';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -479,7 +479,7 @@ function storeChoice(welcome){
   return `<div class="card store" style="display:flex;flex-direction:column;gap:10px;text-align:start">
     <b>${L('فين تحب تتحفظ بياناتك؟','Where should your data be kept?')}</b>
     <p class="note" style="margin:0">${L('أرقامك متسجلة على موبايلك. اختار مكان تتحفظ فيه نسخة منها، عشان ما تضيعش لو غيّرت الموبايل أو اتمسح البرنامج.','Your numbers are on your phone. Pick a place to keep a copy, so they are not lost if you change phones or the app is removed.')}</p>
-    <button class="opt" data-act="storeDrive">${DRIVE_ICON}<span><b>${L('Google Drive بتاعي','My Google Drive')}</b><small>${L('بحساب الـ Gmail بتاعك. بيتحفظ لوحده، ولو غيّرت الموبايل تلاقي أرقامك.','With your Gmail account. Saves by itself; on a new phone your numbers come back.')}</small></span></button>
+    <button class="opt" data-act="storeDrive">${DRIVE_ICON}<span><b>${L('Google Drive بتاعي','My Google Drive')}</b><small>${L('بحساب الـ Gmail بتاعك. بيتحفظ لوحده، ولو غيّرت الموبايل تلاقي أرقامك.','With your Gmail account. Saves by itself; on a new phone your numbers come back.')}</small><small style="margin-top:4px">${L('هتظهرلك صفحة من Google تختار فيها حسابك وتدوس «Continue». البرنامج بيشوف ملفه هو بس، ومحدش غيرك يقدر يفتحه.','Google will ask you to pick your account and tap "Continue". The app sees only its own file, and nobody but you can open it.')}</small></span></button>
     <button class="opt" data-act="storeLocal"><span style="font-size:20px;flex:none">📱</span><span><b>${L('على الموبايل بس','On this phone only')}</b><small>${L('وتقدر تنزّل نسخة احتياطية بإيدك من الإعدادات.','You can download a backup yourself from Settings.')}</small></span></button>
     ${welcome&&SYNC.on?`<button class="chip" data-act="storeAccount" style="align-self:flex-start">${L('عندي حساب في البرنامج بإيميل وباسورد','I have an app account with email and password')}</button>`:''}
     <p class="note" style="margin:0">${L('🔒 صاحب البرنامج ما يقدرش يشوف أرقامك في أي حالة. وتقدر تغيّر اختيارك بعدين من الإعدادات.','🔒 The app owner cannot see your numbers either way. You can change this later in Settings.')} <a href="privacy.html" style="color:var(--accent-text)">${L('سياسة الخصوصية','Privacy policy')}</a></p></div>`;
