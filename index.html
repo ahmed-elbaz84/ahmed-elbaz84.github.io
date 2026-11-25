@@ -184,6 +184,9 @@ nav.tabs button.on{color:var(--accent-text);font-weight:700}
 @media (prefers-reduced-motion:no-preference){.sheet>div{animation:up .22s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.4}}}
 .lock{background:var(--usd-soft);border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13.5px}
 .lock b{font-family:var(--f-num)}
+.opt{display:flex;gap:12px;align-items:center;text-align:start;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;color:inherit;font:inherit;cursor:pointer}
+.opt:hover,.opt:focus-visible{border-color:var(--accent)}
+.opt b{display:block;font-size:15px}.opt small{display:block;color:var(--muted);font-size:12.5px;line-height:1.45}
 .badge{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;margin-inline-start:6px;vertical-align:middle;font-family:var(--f-body)}
 .badge.open{background:var(--accent-soft);color:var(--accent-text)}
 .badge.closed{background:var(--usd-soft);color:var(--usd)}
@@ -247,7 +250,7 @@ header.top .who{flex:1 1 100%}
 <script>
 (function(){
 const KEY='masrofat_elbeit_app_v1';
-const VER='2026-11-24 · 17';
+const VER='2026-11-25 · 18';
 const TODAY=(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
 const MONTHS_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -312,7 +315,7 @@ if(!S||!S.periods) S=blank();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 function fill(){['cats','fixedCats','plans','periods','debts','wallets'].forEach(k=>{if(!S[k])S[k]=[]});if(!S.extraSrc)S.extraSrc=['مكافأة','شغل لحد','هدية','بيع حاجة'];if(!S.profile)S.profile={name:'',home:'',email:'',phone:'',photo:''};if(!S.lang)S.lang='ar';if(S.rateAuto===undefined)S.rateAuto=true}
 fill(); LANG=S.lang;
-function save(fromCloud){if(!fromCloud)S._ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast(L('مساحة الحفظ مليانة، جرّب صورة أصغر','Storage is full, try a smaller photo'))}if(!fromCloud)SYNC.push()}
+function save(fromCloud){if(!fromCloud)S._ts=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast(L('مساحة الحفظ مليانة، جرّب صورة أصغر','Storage is full, try a smaller photo'))}if(!fromCloud){SYNC.push();DRIVE.push()}}
 
 /* ---------- sync between phone and laptop (Firebase, the owner's own project) ---------- */
 const FB_CONFIG={ // the owner's own Firebase project "Family budget" (not secret; data is protected by Firestore rules + on-device encryption)
@@ -402,6 +405,101 @@ let ACC_SKIP=false; try{ACC_SKIP=localStorage.getItem('masrofat_acc_skip')==='1'
 const AUTH_ERR_AR={'auth/invalid-email':'الإيميل مكتوب غلط','auth/missing-password':'اكتب الباسورد','auth/weak-password':'الباسورد لازم 6 حروف أو أرقام على الأقل','auth/email-already-in-use':'الإيميل ده عامل حساب قبل كده، دوس «دخول»','auth/invalid-credential':'الإيميل أو الباسورد غلط','auth/wrong-password':'الباسورد غلط','auth/user-not-found':'مفيش حساب بالإيميل ده، دوس «أول مرة؟»','auth/network-request-failed':'مفيش نت','auth/too-many-requests':'محاولات كتير، استنى شوية وجرّب تاني'};
 const AUTH_ERR_EN={'auth/invalid-email':'Email looks wrong','auth/missing-password':'Enter the password','auth/weak-password':'Password needs at least 6 characters','auth/email-already-in-use':'This email already has an account; sign in','auth/invalid-credential':'Wrong email or password','auth/wrong-password':'Wrong password','auth/user-not-found':'No account with this email','auth/network-request-failed':'No internet','auth/too-many-requests':'Too many tries, wait a bit'};
 const authErr=c=>(LANG==='en'?AUTH_ERR_EN:AUTH_ERR_AR)[c]||L('حصلت مشكلة: ','Problem: ')+c;
+
+/* ---------- keep each user's numbers in THEIR OWN Google Drive ----------
+   The data goes straight from the phone to the user's Drive. Nothing passes through the owner.
+   Scope drive.file: the app sees only the one file it made, nothing else in the user's Drive. */
+const GD_CLIENT_ID=null; // the owner's Google Cloud OAuth "Web client" ID (not secret). null = Google Drive option hidden.
+const GD_FILE='masrofat-elbeit-data.json';
+const GD_API='https://www.googleapis.com/';
+let STORE='';try{STORE=localStorage.getItem('masrofat_store')||''}catch(e){} // where the user chose to keep a copy: 'drive' | 'local' | 'account'
+function setStore(v){STORE=v;try{localStorage.setItem('masrofat_store',v)}catch(e){}}
+const DRIVE={on:!!GD_CLIENT_ID,lib:false,libLoading:false,client:null,token:null,exp:0,st:{},status:'',busy:false,timer:null,
+  init(){try{this.st=JSON.parse(localStorage.getItem('masrofat_gd')||'{}')||{}}catch(e){this.st={}}
+    try{const t=JSON.parse(localStorage.getItem('masrofat_gd_tok')||'null');if(t&&t.exp>Date.now()){this.token=t.tok;this.exp=t.exp}}catch(e){}
+    if(!this.on)return;if(STORE!=='local'&&STORE!=='account')this.loadLib();if(this.linked()&&this.ok())this.sync()},
+  keep(){try{localStorage.setItem('masrofat_gd',JSON.stringify(this.st))}catch(e){}},
+  linked(){return this.on&&STORE==='drive'&&!!this.st.email},
+  ok(){return !!this.token&&Date.now()<this.exp},
+  dirty(){return (S._ts||0)>(this.st.sent||0)},
+  loadLib(){if(this.lib||this.libLoading)return;this.libLoading=true;const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.async=true;
+    sc.onload=()=>{this.libLoading=false;this.lib=true};sc.onerror=()=>{this.libLoading=false;sc.remove()};document.head.appendChild(sc)},
+  /* must run straight from a tap, or the browser blocks Google's window */
+  connect(){if(!this.lib||typeof google==='undefined'||!google.accounts){this.loadLib();toast(navigator.onLine?L('لحظة، وجرّب تاني','One moment, then try again'):L('محتاج نت عشان تربط Google Drive','You need internet to link Google Drive'));return}
+    if(!this.client)this.client=google.accounts.oauth2.initTokenClient({client_id:GD_CLIENT_ID,scope:'https://www.googleapis.com/auth/drive.file',
+      callback:r=>this.onToken(r),error_callback:()=>{this.status=L('ما اتربطش. جرّب تاني','Not linked. Try again');rerenderDrive()}});
+    this.status=L('لحظة…','One moment…');rerenderDrive();
+    this.client.requestAccessToken(this.st.email?{prompt:'',hint:this.st.email}:{prompt:'consent'})},
+  onToken(r){if(!r||r.error||!r.access_token){this.status=L('ما اتربطش. جرّب تاني','Not linked. Try again');rerenderDrive();return}
+    if(google.accounts.oauth2.hasGrantedAllScopes&&!google.accounts.oauth2.hasGrantedAllScopes(r,'https://www.googleapis.com/auth/drive.file')){this.status=L('لازم توافق إن البرنامج يحفظ ملفه على Drive','Please allow the app to save its file in Drive');rerenderDrive();return}
+    this.token=r.access_token;this.exp=Date.now()+((+r.expires_in||3600)-120)*1000;
+    try{localStorage.setItem('masrofat_gd_tok',JSON.stringify({tok:this.token,exp:this.exp}))}catch(e){}
+    setStore('drive');this.sync()},
+  async api(url,opt={}){const r=await fetch(url,{...opt,headers:{...(opt.headers||{}),Authorization:'Bearer '+this.token}});
+    if(r.status===401){this.token=null;this.exp=0;try{localStorage.removeItem('masrofat_gd_tok')}catch(e){}throw {auth:1}}
+    if(!r.ok)throw {code:r.status};return r},
+  async upload(){const ts=S._ts||Date.now();S._ts=ts;const meta={appProperties:{ts:String(ts)}};
+    if(!this.st.fileId){meta.name=GD_FILE;meta.mimeType='application/json';meta.description=L('أرقام برنامج «مصروفات البيت». ما تمسحوش.','Numbers of the Home Expenses app. Do not delete.')}
+    const b='masrofat'+Math.random().toString(36).slice(2);
+    const body=`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(meta)}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify(S)}\r\n--${b}--`;
+    const r=await this.api(GD_API+'upload/drive/v3/files'+(this.st.fileId?'/'+this.st.fileId:'')+'?uploadType=multipart&fields=id',{method:this.st.fileId?'PATCH':'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body});
+    const j=await r.json();this.st.fileId=j.id;this.st.sent=ts;this.st.last=Date.now();this.keep()},
+  /* compare with the copy on Drive: newer one wins (like the phone-laptop sync) */
+  async sync(){if(!this.ok()||this.busy)return;this.busy=true;this.status=L('بيحفظ على Drive…','Saving to Drive…');rerenderDrive();
+    try{
+      if(!this.st.email){const u=await (await this.api(GD_API+'drive/v3/about?fields=user(emailAddress)')).json();this.st.email=(u.user&&u.user.emailAddress)||'Google';this.keep()}
+      let f=null;
+      if(this.st.fileId){try{f=await (await this.api(GD_API+'drive/v3/files/'+this.st.fileId+'?fields=id,trashed,appProperties')).json();if(f.trashed)f=null}catch(e){if(e.auth)throw e;f=null}}
+      if(!f){const q=encodeURIComponent(`name='${GD_FILE}' and trashed=false`);const l=await (await this.api(GD_API+'drive/v3/files?q='+q+'&orderBy=modifiedTime desc&fields=files(id,appProperties)')).json();f=(l.files||[])[0]||null}
+      const first=!this.st.fileId;this.st.fileId=f?f.id:null;this.keep();
+      const rts=f&&f.appProperties?+f.appProperties.ts||0:0,lts=S._ts||0;
+      if(f&&rts>lts||f&&first&&rts&&rts!==lts){
+        let take=!S.periods.length||!first;
+        if(!take)take=confirm(L('لقينا أرقام محفوظة قبل كده على Google Drive بتاعك.\n\nتحب تجيبها على الموبايل ده؟\n«موافق» = هات اللي على Drive (أرقام الموبايل ده هتتشال)\n«إلغاء» = خلي أرقام الموبايل ده، وهي اللي تتحفظ على Drive','We found numbers saved before in your Google Drive.\n\nBring them to this phone?\nOK = use the Drive copy (this phone\'s numbers are replaced)\nCancel = keep this phone\'s numbers and save them to Drive'));
+        if(take){const nd=await (await this.api(GD_API+'drive/v3/files/'+f.id+'?alt=media')).json();
+          if(!nd||!nd.periods)throw {code:'bad'};
+          if(sheetOpen()||typing()){this.pendingData=nd}else this.apply(nd);this.st.sent=nd._ts||rts;this.st.last=Date.now();this.keep()}
+        else{S._ts=Date.now();await this.upload()}}
+      else if(!f||lts>rts||this.dirty())await this.upload();
+      else{this.st.sent=Math.max(this.st.sent||0,rts);this.st.last=Date.now();this.keep()}
+      this.status=L('محفوظ على Drive','Saved to Drive')}
+    catch(e){this.status=e&&e.auth?L('دوس «احفظ على Drive» عشان تكمّل','Tap "Save to Drive" to continue'):!navigator.onLine?L('مفيش نت، هيتحفظ لما النت يرجع','No internet; will save when it is back'):L('ما اتحفظش على Drive دلوقتي، هيحاول تاني','Not saved to Drive now; will try again')}
+    this.busy=false;rerenderDrive();
+    if(this.ok()&&this.dirty()&&!this.timer)this.push()},
+  apply(nd){S=nd;fill();LANG=S.lang;if(!S.periods.find(p=>p.id===curId))curId=(S.periods[S.periods.length-1]||{}).id;save(true);render()},
+  flush(){if(this.pendingData){const nd=this.pendingData;this.pendingData=null;this.apply(nd)}},
+  push(){if(!this.linked())return;clearTimeout(this.timer);this.timer=setTimeout(()=>{this.timer=null;if(this.ok())this.sync();else{this.status=L('في تعديلات لسه ما اتحفظتش على Drive','Some changes are not in Drive yet');rerenderDrive()}},1500)},
+  unlink(){try{if(this.token&&typeof google!=='undefined'&&google.accounts)google.accounts.oauth2.revoke(this.token,()=>{})}catch(e){}
+    this.token=null;this.exp=0;this.st={};this.status='';this.keep();try{localStorage.removeItem('masrofat_gd_tok')}catch(e){}setStore('local');render()}
+};
+function rerenderDrive(){if(!typing()&&!sheetOpen())render()}
+const DRIVE_ICON=`<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" style="flex:none"><path fill="#0F9D58" d="M8 3h8l6 10.5h-8z"/><path fill="#4285F4" d="M22 13.5 18 21H6l4-7.5z"/><path fill="#F4B400" d="M8 3 2 13.5 6 21l6-10.5z"/></svg>`;
+/* "where do you want your numbers kept?" (first open, and once for people who already use the app) */
+function storeChoice(welcome){
+  return `<div class="card store" style="display:flex;flex-direction:column;gap:10px;text-align:start">
+    <b>${L('فين تحب تتحفظ بياناتك؟','Where should your data be kept?')}</b>
+    <p class="note" style="margin:0">${L('أرقامك متسجلة على موبايلك. اختار مكان تتحفظ فيه نسخة منها، عشان ما تضيعش لو غيّرت الموبايل أو اتمسح البرنامج.','Your numbers are on your phone. Pick a place to keep a copy, so they are not lost if you change phones or the app is removed.')}</p>
+    <button class="opt" data-act="storeDrive">${DRIVE_ICON}<span><b>${L('Google Drive بتاعي','My Google Drive')}</b><small>${L('بحساب الـ Gmail بتاعك. بيتحفظ لوحده، ولو غيّرت الموبايل تلاقي أرقامك.','With your Gmail account. Saves by itself; on a new phone your numbers come back.')}</small></span></button>
+    <button class="opt" data-act="storeLocal"><span style="font-size:20px;flex:none">📱</span><span><b>${L('على الموبايل بس','On this phone only')}</b><small>${L('وتقدر تنزّل نسخة احتياطية بإيدك من الإعدادات.','You can download a backup yourself from Settings.')}</small></span></button>
+    ${welcome&&SYNC.on?`<button class="chip" data-act="storeAccount" style="align-self:flex-start">${L('عندي حساب في البرنامج بإيميل وباسورد','I have an app account with email and password')}</button>`:''}
+    <p class="note" style="margin:0">${L('🔒 صاحب البرنامج ما يقدرش يشوف أرقامك في أي حالة. وتقدر تغيّر اختيارك بعدين من الإعدادات.','🔒 The app owner cannot see your numbers either way. You can change this later in Settings.')}</p></div>`;
+}
+/* small bar on the home page when changes are waiting for a tap (Google asks again about once an hour) */
+function driveBar(){
+  if(!DRIVE.linked()||DRIVE.ok()||!DRIVE.dirty())return '';
+  return `<div class="lock"><span>${DRIVE_ICON.replace('style="flex:none"','style="vertical-align:-5px"')} ${L('في تعديلات لسه ما اتحفظتش على Google Drive','Some changes are not saved to Google Drive yet')}</span><button class="chip" data-act="driveNow">${L('احفظ دلوقتي','Save now')}</button></div>`;
+}
+function driveCard(){
+  if(DRIVE.linked()){const t=DRIVE.st.last?new Date(DRIVE.st.last).toLocaleString(LANG==='en'?'en-GB':'ar-EG-u-nu-latn',{weekday:'short',hour:'2-digit',minute:'2-digit'}):'';
+    return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><b style="display:flex;gap:8px;align-items:center">${DRIVE_ICON}${L('أرقامك بتتحفظ على Google Drive بتاعك ✓','Your numbers are saved to your Google Drive ✓')}</b>
+    <p class="note" style="margin:0"><span dir="ltr">${esc(DRIVE.st.email)}</span>${DRIVE.status?' · '+esc(DRIVE.status):''}${t?L(' · آخر حفظ ',' · last saved ')+t:''}</p>
+    <p class="note" style="margin:0">${L(`الملف اسمه «${GD_FILE}» على الـ Drive بتاعك. ما تمسحوش. على أي موبايل تاني، اختار Google Drive وادخل بنفس الحساب وأرقامك تنزل.`,`The file is "${GD_FILE}" in your Drive. Do not delete it. On another phone, pick Google Drive with the same account and your numbers come back.`)}</p>
+    <div class="btnrow"><button class="btn" data-act="driveNow">${L('احفظ على Drive دلوقتي','Save to Drive now')}</button><button class="btn ghost" data-act="driveOff">${L('افصل Google Drive','Unlink Google Drive')}</button></div></div>`}
+  return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><b style="display:flex;gap:8px;align-items:center">${DRIVE_ICON}${L('احفظ أرقامك على Google Drive بتاعك','Keep your numbers in your Google Drive')}</b>
+    <p class="note" style="margin:0">${L('بحساب الـ Gmail بتاعك. البرنامج بيعمل ملف واحد على الـ Drive بتاعك، وما يقدرش يشوف أي حاجة تانية عليه. وصاحب البرنامج ما يقدرش يشوف أرقامك.','With your Gmail account. The app makes one file in your Drive and cannot see anything else there. The app owner cannot see your numbers.')}</p>
+    <button class="btn full" data-act="storeDrive">${L('اربط Google Drive','Link Google Drive')}</button>
+    ${DRIVE.status?`<p class="note" style="margin:0">${esc(DRIVE.status)}</p>`:''}</div>`;
+}
 
 /* live dollar rate from CIB (the owner's salary bank) */
 const RATE_SRC=['https://www.cibeg.com/api/currency/rates','https://raw.githubusercontent.com/ahmed-elbaz84/ahmed-elbaz84.github.io/main/rate.json','rate.json'];
@@ -549,7 +647,8 @@ function debtsSection(full){
 
 /* ---------- views ---------- */
 function onboarding(){
-  if(SYNC.on&&!SYNC.user&&!ACC_SKIP){
+  if(DRIVE.on&&!STORE&&!SYNC.user) return `<div class="onb"><img class="logo" src="logo.png" alt=""><h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2>${storeChoice(true)}</div>`;
+  if(SYNC.on&&!SYNC.user&&!ACC_SKIP&&(!DRIVE.on||STORE==='account')){
     if(!SYNC.ready) return `<div class="onb card"><img class="logo" src="logo.png" alt=""><h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2><p class="note" style="margin:0">${esc(SYNC.status)||L('لحظة…','One moment…')}</p><button class="chip" data-act="accSkip">${L('كمّل من غير حساب','Continue without an account')}</button></div>`;
     return `<div class="onb"><img class="logo" src="logo.png" alt=""><h2>${L('أهلاً بيك في «مصروفات البيت»','Welcome to Home Expenses')}</h2>${authForm(L('احفظ أرقامك على إيميلك','Keep your numbers on your email'),L('اعمل حساب بإيميلك وباسورد تختاره. أرقامك هتبقى خاصة بيك انت بس، ولو غيّرت الموبايل أو فتحت من جهاز تاني، تدخل بنفس الإيميل والباسورد وتلاقي أرقامك.','Create an account with your email and a password. Your numbers stay private to you, and on a new phone or another device you sign in and find them.'),true)}</div>`;
   }
@@ -582,6 +681,7 @@ function home(){
   const v=closed?c.spent:c.projected;
   return `
   <section>
+    ${DRIVE.on&&!STORE&&!SYNC.user?storeChoice(false):''}${driveBar()}
     ${lockBanner(c)}
     <div class="hero">
       <img class="house" src="logo.png" alt="">
@@ -826,12 +926,13 @@ function settings(){
   </section>
   <section>
     <h2>${L('المزامنة','Sync')}</h2>
-    ${syncCard()}
+    ${DRIVE.on?driveCard():''}
+    ${!DRIVE.on||SYNC.user||STORE==='account'?syncCard():''}
   </section>
   <section>
     <h2>${L('البيانات','Data')}</h2>
     <div class="card" style="display:flex;flex-direction:column;gap:8px">
-      <p class="note" style="margin:0">${L('أرقامك وبيانات حسابك متسجلة على الجهاز ده بس. اعمل نسخة احتياطية كل فترة واحفظها عندك، وتقدر ترجّعها على أي جهاز.','Your numbers and profile are saved on this device only. Make a backup now and then; you can restore it on any device.')}</p>
+      <p class="note" style="margin:0">${DRIVE.linked()?L('أرقامك متسجلة على الجهاز ده، ونسخة منها على Google Drive بتاعك. وتقدر كمان تنزّل نسخة احتياطية كملف.','Your numbers are on this device, with a copy in your Google Drive. You can also download a backup file.'):L('أرقامك وبيانات حسابك متسجلة على الجهاز ده بس. اعمل نسخة احتياطية كل فترة واحفظها عندك، وتقدر ترجّعها على أي جهاز.','Your numbers and profile are saved on this device only. Make a backup now and then; you can restore it on any device.')}</p>
       <div class="btnrow"><button class="btn" data-act="backup">${L('نزّل نسخة احتياطية','Download backup')}</button><button class="btn ghost" data-act="restore">${L('رجّع نسخة احتياطية','Restore backup')}</button></div>
       <input type="file" id="restoreFile" accept=".json,application/json" hidden>
       <p class="note" style="margin:0">${L('«ابدأ من النهارده» بيمسح الشهور والأقساط والديون كلها، ويسيب أنواع المصروفات وبيانات حسابك.','"Start from today" deletes all months, installments and debts, and keeps expense types and your profile.')}</p>
@@ -1033,7 +1134,7 @@ function openSheet(kind,o){
   NAVSHEET=['cat','wMove'].includes(kind)?null:{kind,id:o&&o.id||null};saveNav();
   if(kind==='wMove')updWm();
 }
-function closeSheet(fromBack){if(!sheetOpen())return;$('#overlay').innerHTML='';setTimeout(()=>SYNC.flush(),50);
+function closeSheet(fromBack){if(!sheetOpen())return;$('#overlay').innerHTML='';setTimeout(()=>{SYNC.flush();DRIVE.flush()},50);
   document.documentElement.classList.remove('modal');NAVSHEET=null;saveNav();
   if(!fromBack&&history.state&&history.state.sheet){SKIP_POP=true;try{history.back()}catch(e){SKIP_POP=false}}}
 let SKIP_POP=false, NAVSHEET=null, EXIT_AT=0;
@@ -1289,6 +1390,11 @@ document.addEventListener('click',e=>{
     SYNC.status=L('لحظة…','One moment…');fn.then(()=>{if(!S.profile.email){S.profile.email=em;save()}toast(L('دخلت، وأرقامك محفوظة ومقفولة بالباسورد بتاعك','Signed in; your numbers are saved and locked with your password'))}).catch(e=>{PENDING_PW=null;SYNC.status=authErr(e.code);render()});return}
   if(a==='syncForgot'){const em=$('#syEmail').value.trim();if(!em){toast(L('اكتب إيميلك الأول','Enter your email first'));return}
     firebase.auth().sendPasswordResetEmail(em).then(()=>toast(L('بعتنالك رسالة على الإيميل تغيّر منها الباسورد','We emailed you a link to change the password'))).catch(e=>{SYNC.status=authErr(e.code);render()});return}
+  if(a==='storeDrive'){DRIVE.connect();return}
+  if(a==='storeLocal'){setStore('local');render();toast(L('أرقامك هتفضل على الموبايل ده. تقدر تغيّر ده من الإعدادات','Your numbers stay on this phone. You can change this in Settings'));return}
+  if(a==='storeAccount'){setStore('account');render();return}
+  if(a==='driveNow'){if(DRIVE.ok())DRIVE.sync();else DRIVE.connect();return}
+  if(a==='driveOff'){if(!t.dataset.sure){t.dataset.sure='1';t.textContent=L('متأكد؟ دوس تاني','Sure? Tap again');return}DRIVE.unlink();toast(L('اتفصل Google Drive. أرقامك لسه على الموبايل، والملف لسه على الـ Drive بتاعك','Google Drive unlinked. Your numbers are still on the phone, and the file is still in your Drive'));return}
   if(a==='accSkip'){ACC_SKIP=true;try{localStorage.setItem('masrofat_acc_skip','1')}catch(e){}render();return}
   if(a==='syncOut'){if(SYNC.user)CRYPT.forget(SYNC.user.uid);firebase.auth().signOut().then(()=>toast(L('خرجت من المزامنة على الجهاز ده','Signed out of sync on this device')));return}
   if(a==='install'){if(INSTALL_EVT){INSTALL_EVT.prompt();INSTALL_EVT.userChoice.finally(()=>{INSTALL_EVT=null;render()});return}openSheet('install');return}
@@ -1322,11 +1428,13 @@ document.addEventListener('input',e=>{const id=e.target.id;
   if(id==='pfName'&&!PHOTO){$('#pfAv').innerHTML=esc(initial(e.target.value))||'—'}
   if(id==='pAmt'||id==='pCount'){const n=Math.round(numv('#pCount')),st=$('#pStart').value||TODAY.slice(0,7);$('#pSum').innerHTML=`<span>${L('الإجمالي','Total')}${n?L(' · آخر شهر ',' · last month ')+keyLabel(shift(st,n-1)):''}</span><b class="num">${fmt(numv('#pAmt')*n)} ${CUR()}</b>`}
 });
-document.addEventListener('focusout',()=>setTimeout(()=>{if(!typing()&&!sheetOpen())SYNC.flush()},300));
-SYNC.load();
+document.addEventListener('focusout',()=>setTimeout(()=>{if(!typing()&&!sheetOpen()){SYNC.flush();DRIVE.flush()}},300));
+SYNC.load();DRIVE.init();
 /* offline: everything is kept on the phone; as soon as the internet is back, send what was added */
 const syncBack=()=>{if(!navigator.onLine)return;if(!SYNC.ready)SYNC.load();else if(SYNC.user)SYNC.pushNow()};
 addEventListener('online',syncBack);
+addEventListener('online',()=>{if(DRIVE.linked()&&DRIVE.ok())DRIVE.sync()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&DRIVE.linked()&&DRIVE.ok())DRIVE.sync()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&SYNC.ready&&SYNC.user&&(S._ts||0)>(SYNC.sent||0))SYNC.pushNow()});
 setTimeout(()=>fetchRate(false),800);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(!RATE.at||Date.now()-RATE.at>10*60e3))fetchRate(false)});
