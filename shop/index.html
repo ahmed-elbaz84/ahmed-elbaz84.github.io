@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f6efe3">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6efe3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110d" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -308,6 +310,51 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .receipt .stamp.ok{color:#2f7d55}.receipt .stamp.no{color:#b3412f}
 .receipt .thanks{text-align:center;color:#7a6a55;font-size:12.5px;margin-top:14px;border-top:1px dashed #d9c9a6;padding-top:10px}
 #printArea{display:none}
+/* dark mode: black and gold */
+:root{--hero-bg:linear-gradient(135deg,var(--accent),var(--hero2));--hero-ink:var(--accent-ink);color-scheme:light}
+.kpi.hero{background:var(--hero-bg);color:var(--hero-ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]):not([data-mode="light"]){
+  --surface:#1c1814;--ink:#f4ede3;--muted:#b3a693;--line:#352d24;--bg:#100d0a;
+  --hero-bg:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 34%,transparent),transparent 60%),linear-gradient(135deg,#2b2114,#16120d);--hero-ink:#f6e7c4;
+  --glow:color-mix(in srgb,var(--accent) 16%,transparent);color-scheme:dark}
+:root:not([data-theme="light"]):not([data-mode="light"]) body{background:radial-gradient(900px 420px at 100% -8%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 65%),radial-gradient(700px 380px at -10% 110%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 60%),var(--bg)}
+:root:not([data-theme="light"]):not([data-mode="light"]) .kpi,:root:not([data-theme="light"]):not([data-mode="light"]) .row,:root:not([data-theme="light"]):not([data-mode="light"]) .panel,:root:not([data-theme="light"]):not([data-mode="light"]) .chart,:root:not([data-theme="light"]):not([data-mode="light"]) .bars,:root:not([data-theme="light"]):not([data-mode="light"]) .todo .ti,:root:not([data-theme="light"]):not([data-mode="light"]) nav.tabs{background:linear-gradient(180deg,#221d17,#1a1612);border-color:#2e271f}
+:root:not([data-theme="light"]):not([data-mode="light"]) .kpi.hero{background:var(--hero-bg);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);box-shadow:0 18px 40px -20px color-mix(in srgb,var(--accent) 45%,transparent)}
+:root:not([data-theme="light"]):not([data-mode="light"]) .kpi.hero .v{color:var(--accent)}
+:root:not([data-theme="light"]):not([data-mode="light"]) .kpi.hero::before{border-color:color-mix(in srgb,var(--accent) 12%,transparent)}
+:root:not([data-theme="light"]):not([data-mode="light"]) .brand .latin{background:linear-gradient(100deg,#c99a45,#f6e3b4 50%,#c99a45);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root:not([data-theme="light"]):not([data-mode="light"]) .mark{box-shadow:0 0 0 3px #1c1814,0 0 0 4px color-mix(in srgb,var(--accent) 55%,transparent),0 6px 18px rgba(0,0,0,.5)}
+:root:not([data-theme="light"]):not([data-mode="light"]) .icon-btn,:root:not([data-theme="light"]):not([data-mode="light"]) .btn,:root:not([data-theme="light"]):not([data-mode="light"]) .seg,:root:not([data-theme="light"]):not([data-mode="light"]) .monthnav,:root:not([data-theme="light"]):not([data-mode="light"]) input,:root:not([data-theme="light"]):not([data-mode="light"]) select,:root:not([data-theme="light"]):not([data-mode="light"]) textarea{background:#221d17;border-color:#3a3127}
+:root:not([data-theme="light"]):not([data-mode="light"]) .btn.pri,:root:not([data-theme="light"]):not([data-mode="light"]) .seg button[aria-pressed="true"]{background:linear-gradient(135deg,#e2bd72,#b8893a);color:#1a130a;border-color:transparent}
+:root:not([data-theme="light"]):not([data-mode="light"]) .tab[aria-current="true"],:root:not([data-theme="light"]):not([data-mode="light"]) .tab[aria-current="true"]:hover{background:linear-gradient(135deg,#e2bd72,#b8893a);color:#1a130a}
+:root:not([data-theme="light"]):not([data-mode="light"]) .fab{background:linear-gradient(135deg,#e2bd72,#b8893a);color:#1a130a}
+:root:not([data-theme="light"]):not([data-mode="light"]) .fab.alt{background:rgba(34,29,23,.85);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 60%,transparent)}
+:root:not([data-theme="light"]):not([data-mode="light"]) h3::before{background:linear-gradient(#e2bd72,#8a6420)}
+:root:not([data-theme="light"]):not([data-mode="light"]) .sheet{background:#1c1814}
+:root:not([data-theme="light"]):not([data-mode="light"]) #splash{background:#14110d}
+:root:not([data-theme="light"]):not([data-mode="light"]) #splash p{color:#d9b36b}
+}
+:root[data-mode="dark"]{
+  --surface:#1c1814;--ink:#f4ede3;--muted:#b3a693;--line:#352d24;--bg:#100d0a;
+  --hero-bg:radial-gradient(120% 140% at 100% 0%,color-mix(in srgb,var(--accent) 34%,transparent),transparent 60%),linear-gradient(135deg,#2b2114,#16120d);--hero-ink:#f6e7c4;
+  --glow:color-mix(in srgb,var(--accent) 16%,transparent);color-scheme:dark}
+:root[data-mode="dark"] body{background:radial-gradient(900px 420px at 100% -8%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 65%),radial-gradient(700px 380px at -10% 110%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 60%),var(--bg)}
+:root[data-mode="dark"] .kpi,:root[data-mode="dark"] .row,:root[data-mode="dark"] .panel,:root[data-mode="dark"] .chart,:root[data-mode="dark"] .bars,:root[data-mode="dark"] .todo .ti,:root[data-mode="dark"] nav.tabs{background:linear-gradient(180deg,#221d17,#1a1612);border-color:#2e271f}
+:root[data-mode="dark"] .kpi.hero{background:var(--hero-bg);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);box-shadow:0 18px 40px -20px color-mix(in srgb,var(--accent) 45%,transparent)}
+:root[data-mode="dark"] .kpi.hero .v{color:var(--accent)}
+:root[data-mode="dark"] .kpi.hero::before{border-color:color-mix(in srgb,var(--accent) 12%,transparent)}
+:root[data-mode="dark"] .brand .latin{background:linear-gradient(100deg,#c99a45,#f6e3b4 50%,#c99a45);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-mode="dark"] .mark{box-shadow:0 0 0 3px #1c1814,0 0 0 4px color-mix(in srgb,var(--accent) 55%,transparent),0 6px 18px rgba(0,0,0,.5)}
+:root[data-mode="dark"] .icon-btn,:root[data-mode="dark"] .btn,:root[data-mode="dark"] .seg,:root[data-mode="dark"] .monthnav,:root[data-mode="dark"] input,:root[data-mode="dark"] select,:root[data-mode="dark"] textarea{background:#221d17;border-color:#3a3127}
+:root[data-mode="dark"] .btn.pri,:root[data-mode="dark"] .seg button[aria-pressed="true"]{background:linear-gradient(135deg,#e2bd72,#b8893a);color:#1a130a;border-color:transparent}
+:root[data-mode="dark"] .tab[aria-current="true"],:root[data-mode="dark"] .tab[aria-current="true"]:hover{background:linear-gradient(135deg,#e2bd72,#b8893a);color:#1a130a}
+:root[data-mode="dark"] .fab{background:linear-gradient(135deg,#e2bd72,#b8893a);color:#1a130a}
+:root[data-mode="dark"] .fab.alt{background:rgba(34,29,23,.85);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 60%,transparent)}
+:root[data-mode="dark"] h3::before{background:linear-gradient(#e2bd72,#8a6420)}
+:root[data-mode="dark"] .sheet{background:#1c1814}
+:root[data-mode="dark"] #splash{background:#14110d}
+:root[data-mode="dark"] #splash p{color:#d9b36b}
+
 @media print{
   @page{margin:12mm}
   body{background:#fff!important;color:#000}
@@ -896,7 +943,7 @@ function parseCmd(raw){
   return {type,preset:{itemId:best.id,qty,cost:total??best.cost,paid:paid??''}};
 }
 const APP_URL='https://ahmed-elbaz84.github.io/shop/';
-const APP_VERSION=2;   // keep equal to the number in sw.js CACHE ('shopdemo-v2')
+const APP_VERSION=3;   // keep equal to the number in sw.js CACHE ('shopdemo-v3')
 function openPerms(id){
   const u=REAL?MEM.find(m=>m.id===id):S.users.find(x=>x.id===id);if(!u)return;const p=normPerms(u.perms);
   $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><form class="sheet" id="frm" aria-label="صلاحيات ${esc(u.name)}"><h2>صلاحيات ${esc(u.name)}</h2>
@@ -930,12 +977,9 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setInterval(()=>{if(navigator.onLine)checkUpdate(false)},30*60*1000);
 function openShare(){
   $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><div class="sheet" role="dialog" aria-label="مشاركة التطبيق"><h2>مشاركة التطبيق</h2>
-  <div class="qrbox"><img src="qr.png" alt="كود QR لفتح حور" width="260" height="260"><p class="hint" style="margin:0">البياع يصوّر الكود بكاميرا الموبايل، أو يفتح اللينك ده:</p><div class="url" id="shareUrl">${APP_URL}</div></div>
-  <div class="btns" style="justify-content:center;margin-top:12px">${navigator.share?'<button class="btn pri" id="shNative">مشاركة…</button>':''}<a class="btn pri" id="shWa" href="https://wa.me/?text=${encodeURIComponent('تطبيق حور: '+APP_URL)}" target="_blank" rel="noopener">ابعت على واتساب</a><button class="btn" id="shCopy">انسخ اللينك</button><button class="btn" id="cancel">قفل</button></div>
-  <p class="hint" style="text-align:center;margin-top:10px">البياع بيدخل باسم الدخول والباسورد اللي المدير عمله له من الإعدادات.</p></div></div>`;
+  <div class="qrbox"><img src="qr.png" alt="كود QR لفتح التطبيق" width="260" height="260"><p class="hint" style="margin:0">صوّر الكود بكاميرا الموبايل علشان تفتح التطبيق.</p></div>
+  <div class="btns" style="justify-content:center;margin-top:12px"><button class="btn" id="cancel">قفل</button></div></div></div>`;
   $('#cancel').onclick=closeForm;$('#bg').onclick=e=>{if(e.target.id==='bg')closeForm()};
-  $('#shCopy').onclick=()=>navigator.clipboard.writeText(APP_URL).then(()=>toast('اتنسخ اللينك'),()=>{const r=document.createRange();r.selectNodeContents($('#shareUrl'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);toast('اللينك متحدد، اعمل نسخ')});
-  const sn=$('#shNative');if(sn)sn.onclick=()=>navigator.share({title:'حور',text:'تطبيق حور',url:APP_URL}).catch(()=>{});
 }
 function openVoice(){
   const ex=['تم إيجار فستان سهرة ستان لمدام دعاء بـ 800 دفعت 300 والباقي 500','بعت 2 عباية كريب للعميلة هبة بـ 750 دفعت 1000','مصروف كهرباء 450','حجز فستان زفاف ملكي للعروسة سلمى بـ 4500 عربون 1500'];
