@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#7b2d5b">
+<meta name="theme-color" content="#f6efe3">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Logy Fashion</title>
+<title>أتيليه لوجي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Reem+Kufi:wght@500;700&family=Lalezar&family=Amiri:wght@700&family=Marcellus&display=swap">
 <style>
@@ -25,6 +25,7 @@
   --f-body:"IBM Plex Sans Arabic",system-ui,"Segoe UI",Tahoma,sans-serif;
   --f-latin:"Marcellus",Georgia,serif;
 }
+:root[data-skin="champagne"]{--a-l:#8a6420;--as-l:#f3e9d6;--bg-l:#fbf7f0;--a-d:#d9b36b;--as-d:#3a3020;--bg-d:#15120d}
 :root[data-skin="gold"]{--a-l:#86661c;--as-l:#f3ecd9;--bg-l:#f8f6f1;--a-d:#d9b36b;--as-d:#3a3020;--bg-d:#131210}
 :root[data-skin="rose"]{--a-l:#b0436a;--as-l:#fbe7ee;--bg-l:#fdf7f9;--a-d:#f29bb9;--as-d:#3d1f2a;--bg-d:#1a1114}
 :root[data-skin="sage"]{--a-l:#4f6b3a;--as-l:#e8efe0;--bg-l:#f6f8f3;--a-d:#a8c98a;--as-d:#263222;--bg-d:#121510}
@@ -45,7 +46,15 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .wrap{max-width:780px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 120px}
 header.top{padding-block:16px 6px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .brand{display:flex;flex-direction:column;line-height:1.1}
-.brand .latin{font-family:var(--f-latin);font-size:28px;letter-spacing:.06em;color:var(--accent)}
+.brand .latin{font-family:var(--f-latin);font-size:26px;letter-spacing:.08em;color:var(--accent)}
+.brand-row{display:flex;align-items:center;gap:10px}
+.mark{width:52px;height:52px;border-radius:50%;box-shadow:0 2px 10px rgba(120,85,30,.25);flex:0 0 auto}
+.banner{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:1600/595;object-fit:cover;border-radius:var(--r);margin-top:14px;border:1px solid var(--line)}
+#splash{position:fixed;inset:0;z-index:50;background:#f6efe3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;transition:opacity .5s ease}
+#splash img{width:min(68vw,340px);height:auto;border-radius:50%;box-shadow:0 10px 40px rgba(120,85,30,.25)}
+#splash p{margin:0;font-family:var(--f-display);color:#7a5a1f;font-size:18px}
+#splash.bye{opacity:0;pointer-events:none}
+@media (prefers-reduced-motion:no-preference){#splash img{animation:glow 1.4s ease-out}@keyframes glow{from{transform:scale(.92);opacity:0}}}
 .brand .ar{font-size:12px;color:var(--muted)}
 .who{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
 .who select{width:auto;padding:4px 8px;font-size:13px}
@@ -123,9 +132,10 @@ input,select,textarea{font:inherit;font-size:15px;width:100%;padding:9px 10px;bo
 <body>
 
 
+<div id="splash" role="img" aria-label="أتيليه لوجي"><img src="logo.jpg" alt="Atelier Logy" width="340" height="340"><p>لكل المناسبات.. بإطلالة تليق بك</p></div>
 <div class="wrap">
   <header class="top">
-    <div class="brand"><span class="latin">Logy Fashion</span><span class="ar">لوجي فاشون · أطفال · حريمي · عبايات · فساتين</span></div>
+    <div class="brand-row"><img class="mark" src="logo-round.png" alt="" width="52" height="52"><div class="brand"><span class="latin">Atelier Logy</span><span class="ar">أتيليه لوجي · فساتين · عبايات · حريمي · أطفال</span></div></div>
     <div class="who"><span id="sync" class="sync">أونلاين</span><label for="meSel">شغال دلوقتي:</label><select id="meSel"></select></div>
   </header>
   <nav class="tabs" id="tabs"></nav>
@@ -137,12 +147,13 @@ input,select,textarea{font:inherit;font-size:15px;width:100%;padding:9px 10px;bo
 
 <script>
 const KEY='logy_fashion_demo_v2';
+const LOOK_KEY='atelier_logy_look_v1';
 const CATS=['أطفال','حريمي بيتي','حريمي خروج','عبايات','فساتين زفاف','فساتين خطوبة','فساتين حفلات'];
 const EXP_TYPES=['إيجار المحل','كهرباء ومياه','مرتبات','نقل بضاعة','شنط وتغليف','دعاية','صيانة','أخرى'];
 const MODES={cash:'كاش',credit:'آجل',inst:'تقسيط'};
 const ALL_TABS=[['home','الرئيسية'],['customers','حسابات العملاء'],['sales','البيع'],['rentals','التأجير'],['purchases','الوارد'],['suppliers','الموردين'],['expenses','المصروفات'],['items','الأصناف'],['log','اللي حصل'],['settings','الشكل والمستخدمين']];
 const SELLER_TABS=['sales','rentals','customers','items','expenses'];
-const SKINS=[['plum','برقوقي','#7b2d5b'],['gold','أسود وذهبي','#86661c'],['rose','وردي','#b0436a'],['sage','زيتي','#4f6b3a'],['navy','كحلي','#23427a']];
+const SKINS=[['champagne','شامبين وذهبي (لون اللوجو)','#b8893a'],['plum','برقوقي','#7b2d5b'],['gold','أسود وذهبي','#86661c'],['rose','وردي','#b0436a'],['sage','زيتي','#4f6b3a'],['navy','كحلي','#23427a']];
 const SHAPES=[['soft','ناعم'],['sharp','حاد'],['round','دائري']];
 const FONTS=[['kufi','كوفي','Reem Kufi'],['lalezar','عريض','Lalezar'],['amiri','نسخ كلاسيك','Amiri']];
 const MODES_UI=[['auto','تلقائي'],['light','فاتح'],['dark','غامق']];
@@ -202,8 +213,8 @@ let meId=ls.get(KEY+'_me')||'u1';
 const me=()=>S.users.find(u=>u.id===meId)||S.users[0];
 const isMgr=()=>me().role==='مدير';
 let tab=ls.get(KEY+'_tab')||'home',period='month',itemQ='',itemCat='',logUser='';
-const look=Object.assign({skin:'plum',shape:'soft',font:'kufi',mode:'auto'},(()=>{try{return JSON.parse(ls.get(KEY+'_look'))||{}}catch(e){return{}}})());
-function applyLook(){const r=document.documentElement;r.dataset.skin=look.skin;r.dataset.shape=look.shape;r.dataset.font=look.font;if(look.mode==='auto')delete r.dataset.mode;else r.dataset.mode=look.mode;ls.set(KEY+'_look',JSON.stringify(look))}
+const look=Object.assign({skin:'champagne',shape:'soft',font:'kufi',mode:'auto'},(()=>{try{return JSON.parse(ls.get(LOOK_KEY))||{}}catch(e){return{}}})());
+function applyLook(){const r=document.documentElement;r.dataset.skin=look.skin;r.dataset.shape=look.shape;r.dataset.font=look.font;if(look.mode==='auto')delete r.dataset.mode;else r.dataset.mode=look.mode;ls.set(LOOK_KEY,JSON.stringify(look))}
 applyLook();
 function logA(txt){S.log.push({t:new Date().toISOString(),by:me().name,txt})}
 
@@ -248,7 +259,7 @@ home(){
   const out=S.rentals.filter(r=>r.status!=='back').sort((a,b)=>a.from.localeCompare(b.from));
   const byType={};t.ex.forEach(e=>byType[e.type]=(byType[e.type]||0)+e.amount);
   const types=Object.entries(byType).sort((a,b)=>b[1]-a[1]);const mx=Math.max(1,...types.map(x=>x[1]));
-  return `<h2>الحساب في نظرة</h2>${periodSeg()}
+  return `<img class="banner" src="banner.jpg" alt="أتيليه لوجي: فساتين زفاف وخطوبة وسهرة ومناسبات" width="1600" height="595"><h2>الحساب في نظرة</h2>${periodSeg()}
   <div class="kpis">
     <div class="kpi hero"><div><div class="l">المتبقي في الخزنة</div><small>رأس المال ${money(S.capital)} + كل اللي اتقبض − اللي اتدفع للموردين − المصروفات</small></div><div class="v num">${money(t.cash)}</div></div>
     <div class="kpi"><div class="l">المبيعات</div><div class="v">${money(t.salesRev)}</div></div>
@@ -555,6 +566,7 @@ const syncUI=()=>{const on=navigator.onLine;const s=$('#sync');s.className='sync
 addEventListener('online',syncUI);addEventListener('offline',syncUI);syncUI();
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeForm()});
 render();
+(()=>{const sp=document.getElementById('splash');const bye=()=>{sp.classList.add('bye');setTimeout(()=>sp.remove(),600)};sp.onclick=bye;setTimeout(bye,1800)})();
 </script>
 
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update();let reloaded=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloaded)return;reloaded=true;location.reload()})}).catch(()=>{});</script>
