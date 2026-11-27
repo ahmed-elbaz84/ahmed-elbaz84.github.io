@@ -1,0 +1,18 @@
+{
+  "name": "بوتيك الأناقة - نسخة عرض",
+  "short_name": "بوتيك الأناقة",
+  "description": "برنامج حسابات محل ملابس وفساتين: بيع وتأجير وموردين ومصروفات (نسخة عرض بأمثلة)",
+  "lang": "ar",
+  "dir": "rtl",
+  "id": "/shop/",
+  "start_url": "/shop/",
+  "scope": "/shop/",
+  "display": "standalone",
+  "background_color": "#f6efe3",
+  "theme_color": "#f6efe3",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
