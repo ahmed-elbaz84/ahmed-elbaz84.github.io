@@ -54,6 +54,13 @@ header.top{padding-block:16px 6px;display:flex;align-items:center;justify-conten
 #splash img{width:min(68vw,340px);height:auto;border-radius:50%;box-shadow:0 10px 40px rgba(120,85,30,.25)}
 #splash p{margin:0;font-family:var(--f-display);color:#7a5a1f;font-size:18px}
 #splash.bye{opacity:0;pointer-events:none}
+#gate{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 24px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(16px,env(safe-area-inset-left,0px))}
+#gate .box{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:6px}
+#gate img{width:150px;height:150px;border-radius:50%;margin:0 auto 6px;box-shadow:0 6px 24px rgba(120,85,30,.22)}
+#gate h2{text-align:center;margin:4px 0 8px}
+#gate .link{background:none;border:0;color:var(--accent);font:inherit;font-size:14px;text-decoration:underline;cursor:pointer;padding:6px 0}
+.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;direction:ltr;word-break:break-all;background:var(--accent-soft);padding:10px;border-radius:calc(var(--r)*.6);user-select:all}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}.check input{width:auto}
 @media (prefers-reduced-motion:no-preference){#splash img{animation:glow 1.4s ease-out}@keyframes glow{from{transform:scale(.92);opacity:0}}}
 .brand .ar{font-size:12px;color:var(--muted)}
 .who{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
@@ -136,11 +143,11 @@ input,select,textarea{font:inherit;font-size:15px;width:100%;padding:9px 10px;bo
 <div class="wrap">
   <header class="top">
     <div class="brand-row"><img class="mark" src="logo-round.png" alt="" width="52" height="52"><div class="brand"><span class="latin">Atelier Logy</span><span class="ar">أتيليه لوجي · فساتين · عبايات · حريمي · أطفال</span></div></div>
-    <div class="who"><span id="sync" class="sync">أونلاين</span><label for="meSel">شغال دلوقتي:</label><select id="meSel"></select></div>
+    <div class="who"><span id="sync" class="sync">أونلاين</span><span id="demoWho"><label for="meSel">شغال دلوقتي:</label><select id="meSel"></select></span><span id="realWho" hidden></span></div>
   </header>
   <nav class="tabs" id="tabs"></nav>
   <main id="view"></main>
-  <div class="foot"><span>نسخة تجربة: البيانات أمثلة ومتسجلة على الجهاز ده بس.</span></div>
+  <div class="foot"><span id="footNote">نسخة تجربة: البيانات أمثلة ومتسجلة على الجهاز ده بس.</span></div>
 </div>
 <div class="fabs"><button class="fab alt" id="voiceBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>أمر بالصوت</button><button class="fab" id="fab">+ إضافة</button></div>
 <div id="sheetRoot"></div>
@@ -206,17 +213,29 @@ function seed(){
     L(-1,12,'كريم','سلّم فستان خطوبة سواريه لمنة أحمد، استلم 1,000 + تأمين 2,000'),L(-1,18,'منى','بيع بيجامة حريمي شتوي × 2 لأم مريم، دفع كامل'),L(0,11,'كريم','بيع عباية كريب سادة لمدام هبة، دفع كامل')];
   return {v:2,demo:true,capital:60000,users,suppliers:[s1,s2,s3,s4],items:i,purchases,sales,rentals,expenses,log};
 }
-let S;try{S=JSON.parse(ls.get(KEY))}catch(e){S=null}
-if(!S||S.v!==2)S=seed();
-function save(){ls.set(KEY,JSON.stringify(S))}
+/* ---------- cloud settings ----------
+   FB_CONFIG: إعدادات مشروع Firebase بتاع المحل. طول ما هي null التطبيق بيشتغل كنسخة تجربة بأمثلة. */
+const FB_CONFIG=null;
+const FB_V='10.12.2';
+const EMU=['localhost','127.0.0.1'].includes(location.hostname)&&/[?&]emu\b/.test(location.search);
+const CFG=EMU?{apiKey:'demo-key',authDomain:'demo-logy.firebaseapp.com',projectId:'demo-logy',appId:'demo-app'}:FB_CONFIG;
+const REAL=!!CFG;
+const RK=EMU?'atelier_logy_emu_':'atelier_logy_';   // keys for real-mode data on this device
+const blankShop=()=>({v:2,demo:false,capital:0,users:[],suppliers:[],items:[],purchases:[],sales:[],rentals:[],expenses:[],log:[]});
+let SESSION=null;try{SESSION=JSON.parse(ls.get(RK+'session'))}catch(e){}
+let S;
+if(REAL){try{S=JSON.parse(ls.get(RK+'cache'))}catch(e){S=null}if(!S||S.v!==2)S=blankShop()}
+else{try{S=JSON.parse(ls.get(KEY))}catch(e){S=null}if(!S||S.v!==2)S=seed()}
+S.log.forEach(l=>{if(!l.id)l.id=uid()});
+function save(){if(REAL){ls.set(RK+'cache',JSON.stringify(S));SYNC.push()}else ls.set(KEY,JSON.stringify(S))}
 let meId=ls.get(KEY+'_me')||'u1';
-const me=()=>S.users.find(u=>u.id===meId)||S.users[0];
+const me=()=>REAL?(SESSION?{id:SESSION.uid,name:SESSION.name,role:SESSION.role==='manager'?'مدير':'بياع'}:{id:'',name:'',role:'بياع'}):(S.users.find(u=>u.id===meId)||S.users[0]);
 const isMgr=()=>me().role==='مدير';
 let tab=ls.get(KEY+'_tab')||'home',period='month',itemQ='',itemCat='',logUser='';
 const look=Object.assign({skin:'champagne',shape:'soft',font:'kufi',mode:'auto'},(()=>{try{return JSON.parse(ls.get(LOOK_KEY))||{}}catch(e){return{}}})());
 function applyLook(){const r=document.documentElement;r.dataset.skin=look.skin;r.dataset.shape=look.shape;r.dataset.font=look.font;if(look.mode==='auto')delete r.dataset.mode;else r.dataset.mode=look.mode;ls.set(LOOK_KEY,JSON.stringify(look))}
 applyLook();
-function logA(txt){S.log.push({t:new Date().toISOString(),by:me().name,txt})}
+function logA(txt){S.log.push({id:uid(),t:new Date().toISOString(),by:me().name,uid:me().id,txt})}
 
 /* ---------- money logic ---------- */
 const item=id=>S.items.find(x=>x.id===id)||{name:'(صنف اتمسح)',cost:0,price:0,rent:0};
@@ -351,11 +370,25 @@ settings(){
   <h3>خط العناوين</h3><div class="panel">${ch('font',FONTS,look.font,x=>`<span style="font-family:'${x[2]}';font-size:17px">لوجي</span>`)}</div>
   <h3>الوضع</h3><div class="panel">${ch('mode',MODES_UI,look.mode)}</div>
   <h3>المستخدمين</h3><p class="hint">المدير بيشوف كل حاجة. البياع بيسجّل بيع وإيجار ومصروف، ومش بيشوف سعر الشراء والمكسب ومش بيقدر يمسح.</p>
-  <div class="list">${S.users.map(u=>`<div class="row"><div><div class="t">${esc(u.name)}<span class="pill ${u.role==='مدير'?'':'warn'}">${u.role}</span></div><div class="s">${S.log.filter(l=>l.by===u.name).length} عملية متسجلة</div></div><div class="a"></div>
-  <div class="acts">${u.id!==me().id?`<button class="btn danger" data-deluser="${u.id}">حذف</button>`:''}</div></div>`).join('')}</div>
-  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-open="users">+ مستخدم جديد</button><button class="btn" data-open="capital">رأس المال: ${money(S.capital)}</button></div>
-  <h3>بيانات التجربة</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn danger" id="resetBtn">امسح الأمثلة وابدأ من الصفر</button><button class="btn" id="sampleBtn">رجّع بيانات الأمثلة</button></div>`;
+  ${REAL?usersReal():usersDemo()}
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" data-open="${REAL?'member':'users'}">+ مستخدم جديد</button><button class="btn" data-open="capital">رأس المال: ${money(S.capital)}</button></div>
+  ${backupPanel()}
+  ${REAL?accountPanel():`<h3>بيانات التجربة</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn danger" id="resetBtn">امسح الأمثلة وابدأ من الصفر</button><button class="btn" id="sampleBtn">رجّع بيانات الأمثلة</button></div>`}`;
 }};
+const usersDemo=()=>`<div class="list">${S.users.map(u=>`<div class="row"><div><div class="t">${esc(u.name)}<span class="pill ${u.role==='مدير'?'':'warn'}">${u.role}</span></div><div class="s">${S.log.filter(l=>l.by===u.name).length} عملية متسجلة</div></div><div class="a"></div>
+  <div class="acts">${u.id!==me().id?`<button class="btn danger" data-deluser="${u.id}">حذف</button>`:''}</div></div>`).join('')}</div>`;
+const usersReal=()=>`<div class="list">${MEM.length?MEM.map(m=>`<div class="row"><div><div class="t">${esc(m.name)}<span class="pill ${m.role==='manager'?'':'warn'}">${m.role==='manager'?'مدير':'بياع'}</span>${m.active?'':'<span class="pill bad">مقفول</span>'}</div>
+  <div class="s">اسم الدخول: <span class="num">${esc(m.username)}</span> · ${S.log.filter(l=>l.uid===m.id).length} عملية</div></div><div class="a"></div>
+  <div class="acts">${m.id!==me().id?`<button class="btn ${m.active?'danger':''}" data-active="${m.id}:${m.active?0:1}">${m.active?'اقفل الحساب':'افتح الحساب'}</button>`:'<span class="pill good">إنت</span>'}</div></div>`).join(''):empty('بيحمّل المستخدمين… (محتاج نت)')}</div>`;
+function backupPanel(){
+  const auto=ls.get(RK+'autobak')==='1';
+  return `<h3>نسخة احتياطية على الجهاز</h3><p class="hint">كل البيانات في ملف على الجهاز ده. شغّل الحفظ اليومي على اللاب توب علشان يبقى عندك نسخة كل يوم في فولدر التنزيلات.</p>
+  <div class="panel"><label class="check"><input type="checkbox" id="autoBak" ${auto?'checked':''}> احفظ نسخة لوحدها كل يوم على الجهاز ده</label>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" id="bakNow">نزّل نسخة دلوقتي</button><button class="btn" id="csvNow">نزّل ملف Excel</button>${isMgr()?'<label class="btn" for="restoreFile">رجّع من نسخة</label><input type="file" id="restoreFile" accept=".json,application/json" hidden>':''}</div>
+  <div id="restoreMsg" class="hint"></div></div>`;
+}
+const accountPanel=()=>`<h3>حسابي</h3><div class="panel"><div>${esc(me().name)} · ${me().role} · اسم الدخول <span class="num">${esc(SESSION.username)}</span></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-open="passwd">غيّر الباسورد</button>${isMgr()?'<button class="btn" id="showCode">كود الاسترجاع</button>':''}<button class="btn danger" id="logoutBtn">خروج من الجهاز ده</button></div><div id="codeBox"></div></div>`;
 
 function stockPill(i){
   if(i.rent){const r=S.rentals.find(x=>x.itemId===i.id&&x.status==='out');return r?'<span class="pill warn">برّه</span>':'<span class="pill good">موجود</span>'}
@@ -437,6 +470,12 @@ const FORMS={
     save:v=>{S.suppliers.push({id:uid(),name:v.name,phone:v.phone});return [`مورد جديد: ${v.name}`,'suppliers']}},
   users:{title:'مستخدم جديد',fields:[{k:'name',l:'الاسم',t:'text'},{k:'role',l:'الصلاحية',t:'select',o:()=>[['بياع','بياع'],['مدير','مدير']]}],
     save:v=>{S.users.push({id:uid(),name:v.name,role:v.role});return [`ضاف مستخدم: ${v.name} (${v.role})`,'settings']}},
+  member:{title:'مستخدم جديد',fields:[{k:'name',l:'الاسم',t:'text'},{k:'username',l:'اسم الدخول (بالإنجليزي أو العربي)',t:'text'},{k:'pw',l:'الباسورد (6 على الأقل)',t:'text'},{k:'role',l:'الصلاحية',t:'select',o:()=>[['seller','بياع'],['manager','مدير']]}],
+    check:v=>v.pw.length<6?'الباسورد لازم 6 حروف أو أرقام على الأقل':MEM.some(m=>m.username.toLowerCase()===v.username.toLowerCase())?'اسم الدخول ده متاخد':'',
+    save:v=>SYNC.addMember(v.name,v.username,v.pw,v.role).then(()=>{logA(`ضاف مستخدم: ${v.name} (${v.role==='manager'?'مدير':'بياع'})`);save();return [`اتضاف ${v.name}. ادّيله اسم الدخول "${v.username}" والباسورد`,'settings']}).catch(e=>{throw new Error(fbErr(e))})},
+  passwd:{title:'تغيير الباسورد',fields:[{k:'old',l:'الباسورد الحالي',t:'password'},{k:'pw',l:'الباسورد الجديد',t:'password'},{k:'pw2',l:'الجديد تاني',t:'password'}],
+    check:v=>v.pw.length<6?'الباسورد لازم 6 حروف أو أرقام على الأقل':v.pw!==v.pw2?'الباسورد الجديد مش زي بعضه':'',
+    save:v=>SYNC.changePw(v.old,v.pw).then(()=>['الباسورد اتغيّر','settings']).catch(e=>{throw new Error(fbErr(e))})},
   capital:{title:'رأس المال',fields:[{k:'amount',l:'المبلغ اللي بدأت بيه المحل',t:'number'}],
     save:v=>{S.capital=v.amount;return [`عدّل رأس المال لـ ${money(v.amount)}`,'settings']}},
 };
@@ -469,7 +508,8 @@ function openForm(type,preset={},ctx){
       if(f.t==='number'&&v[f.k]!==''&&(isNaN(v[f.k])||v[f.k]<0))return err.textContent=f.l+': رقم مش مظبوط';
       if(!f.opt&&(v[f.k]===''||(f.t==='number'&&!(v[f.k]>0))))return err.textContent='اكتب '+f.l.replace(/ ?\(.*\)/,'');}
     const c=F.check&&F.check(v,ctx);if(c)return err.textContent=c;
-    const [txt,goTab]=F.save(v,ctx);S.log.push({t:new Date().toISOString(),by:me().name,txt});save();closeForm();
+    const res=F.save(v,ctx);if(res&&res.then){err.textContent='لحظة…';res.then(([txt,goTab])=>{closeForm();tab=goTab||tab;render();toast(txt)}).catch(x=>{err.textContent=x.message||String(x)});return}
+    const [txt,goTab]=res;logA(txt);save();closeForm();
     tab=tabsFor().some(([k])=>k===goTab)?goTab:tab;render();toast('اتسجل: '+txt);
   };
   setTimeout(()=>{const first=frm.querySelector('input:not([type=date]),select');first&&first.focus()},50);
@@ -521,16 +561,222 @@ function openVoice(){
   const go=()=>{const r=parseCmd($('#vtext').value);if(r.err)return $('#verr').textContent=r.err;openForm(r.type,r.preset)};
   $('#vgo').onclick=go;
   document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{$('#vtext').value=b.dataset.ex;go()});
-  $('#vmic').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;const no=()=>$('#verr').textContent='المايك مش متاح في نسخة التجربة دي. اكتب الأمر أو جرّب مثال. في التطبيق الحقيقي هيشتغل بالصوت.';
+  $('#vmic').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;const no=()=>$('#verr').textContent='المايك مش متاح على الجهاز أو المتصفح ده. اكتب الأمر أو جرّب مثال. (الصوت بيشتغل في Chrome ومحتاج نت)';
     if(!SR)return no();try{const rec=new SR();rec.lang='ar-EG';rec.interimResults=false;rec.onresult=e=>{$('#vtext').value=e.results[0][0].transcript;go()};rec.onerror=no;rec.start();$('#verr').textContent='بسمعك…'}catch(e){no()}};
   setTimeout(()=>$('#vtext').focus(),50);
+}
+
+/* ---------- crypto: shop data is locked with a shop key; each user's copy of the key is locked with their own password ---------- */
+const CR={
+  b64:b=>{let s='';new Uint8Array(b).forEach(x=>s+=String.fromCharCode(x));return btoa(s)},
+  unb64:s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),
+  async derive(pw,uid){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+    return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode('atelier-logy:'+uid),iterations:210000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])},
+  imp:raw=>crypto.subtle.importKey('raw',raw,{name:'AES-GCM'},true,['encrypt','decrypt']),
+  async newKey(){return CR.imp(crypto.getRandomValues(new Uint8Array(32)))},
+  async exp(key){return CR.b64(await crypto.subtle.exportKey('raw',key))},
+  async enc(key,text){const iv=crypto.getRandomValues(new Uint8Array(12));const c=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(text));return {iv:CR.b64(iv),e:CR.b64(c)}},
+  async dec(key,d){const t=await crypto.subtle.decrypt({name:'AES-GCM',iv:CR.unb64(d.iv)},key,CR.unb64(d.e));return new TextDecoder().decode(t)},
+};
+const CHECK='atelier-logy-ok';
+const DOMAIN='atelierlogy.app';
+const toEmail=u=>{u=u.trim().toLowerCase();if(u.includes('@'))return u;return (/^[a-z0-9._-]{1,40}$/.test(u)?u:'x'+[...new TextEncoder().encode(u)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,60))+'@'+DOMAIN};
+const hashStr=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)};
+const COLLS=['suppliers','items','purchases','sales','rentals','expenses','log'];
+const fbErr=e=>{const c=(e&&e.code)||'';return ({'auth/invalid-credential':'اسم الدخول أو الباسورد غلط','auth/wrong-password':'الباسورد غلط','auth/user-not-found':'اسم الدخول مش موجود','auth/invalid-login-credentials':'اسم الدخول أو الباسورد غلط',
+  'auth/email-already-in-use':'اسم الدخول ده متاخد، اختار اسم تاني','auth/weak-password':'الباسورد لازم 6 حروف أو أرقام على الأقل','auth/network-request-failed':'مفيش نت. لازم نت أول مرة',
+  'auth/too-many-requests':'محاولات كتير، استنى شوية وجرّب تاني','auth/invalid-email':'اسم الدخول فيه حروف مش مسموحة','permission-denied':'مش مسموح (الحساب مقفول أو مش متجهّز)'})[c]||((e&&e.message)||String(e))};
+let MEM=[];
+const SYNC={
+  ready:false,live:false,pending:false,key:null,db:null,auth:null,unsubs:[],synced:{},chain:Promise.resolve(),firstServer:false,
+  sdk(){if(window.firebase&&firebase.firestore)return Promise.resolve();
+    const one=n=>new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=`https://www.gstatic.com/firebasejs/${FB_V}/firebase-${n}-compat.js`;sc.onload=ok;sc.onerror=()=>{sc.remove();no(new Error('مفيش نت'))};document.head.appendChild(sc)});
+    return one('app').then(()=>one('auth')).then(()=>one('firestore'))},
+  async init(){await this.sdk();if(this.db)return;
+    const app=firebase.apps.length?firebase.app():firebase.initializeApp(CFG);this.auth=app.auth();this.db=app.firestore();
+    if(EMU){this.auth.useEmulator('http://127.0.0.1:9099',{disableWarnings:true});this.db.useEmulator('127.0.0.1',8080)}
+    try{await this.db.enablePersistence({synchronizeTabs:true})}catch(e){}
+    await new Promise(ok=>{const u=this.auth.onAuthStateChanged(()=>{u();ok()})})},
+  async loadKey(){const raw=ls.get(RK+'key_'+SESSION.uid);if(!raw)return false;this.key=await CR.imp(CR.unb64(raw));return true},
+  async start(){
+    if(!SESSION)return;if(!this.key&&!(await this.loadKey()))return this.logout();
+    try{this.synced=JSON.parse(ls.get(RK+'synced'))||{}}catch(e){this.synced={}}
+    try{await this.init()}catch(e){syncUI();return}
+    if(!this.auth.currentUser||this.auth.currentUser.uid!==SESSION.uid){showGate('انتهى الدخول على الجهاز ده، ادخل تاني');return}
+    if(this.ready)return;this.ready=true;
+    const db=this.db,uidMe=SESSION.uid;
+    this.unsubs.push(db.doc('members/'+uidMe).onSnapshot(sn=>{
+      if(!sn.exists){if(!sn.metadata.fromCache)this.logout('حسابك مش موجود');return}
+      const m=sn.data();if(!m.active){this.logout('المدير قفل حسابك على التطبيق');return}
+      if(m.role!==SESSION.role||m.name!==SESSION.name){SESSION.role=m.role;SESSION.name=m.name;ls.set(RK+'session',JSON.stringify(SESSION));this.watchMembers();render()}
+    },()=>{}));
+    this.watchMembers();
+    this.unsubs.push(db.collection('recs').onSnapshot({includeMetadataChanges:true},sn=>{this.chain=this.chain.then(()=>this.onSnap(sn)).catch(e=>console.error(e))},e=>{toast('مشكلة في المزامنة: '+fbErr(e));this.live=false;syncUI()}));
+  },
+  watchMembers(){if(this.memUnsub){this.memUnsub();this.memUnsub=null}MEM=[];
+    if(SESSION.role!=='manager')return;
+    this.memUnsub=this.db.collection('members').onSnapshot(sn=>{MEM=sn.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.role>b.role?1:-1)||a.name.localeCompare(b.name));if(tab==='settings')render()},()=>{})},
+  async onSnap(sn){
+    const fresh=[];let changed=false;
+    for(const ch of sn.docChanges()){
+      const id=ch.doc.id;
+      if(ch.type==='removed'){this.remove(id);delete this.synced[id];changed=true;continue}
+      let rec;try{rec=JSON.parse(await CR.dec(this.key,ch.doc.data()))}catch(e){continue}
+      const h=hashStr(JSON.stringify(rec));if(this.synced[id]===h&&ch.type!=='added')continue;
+      this.put(rec);this.synced[id]=h;changed=true;
+      if(this.firstServer&&rec.c==='log'&&rec.uid!==SESSION.uid&&!ch.doc.metadata.hasPendingWrites)fresh.push(rec);
+    }
+    if(!sn.metadata.fromCache&&!this.firstServer){
+      const ids=new Set(sn.docs.map(d=>d.id));
+      Object.keys(this.synced).forEach(id=>{if(!ids.has(id)){this.remove(id);delete this.synced[id];changed=true}});
+      this.firstServer=true;this.live=true;autoBackup();
+    }
+    if(!sn.metadata.fromCache)this.live=true;
+    this.pending=sn.metadata.hasPendingWrites;
+    if(changed){ls.set(RK+'cache',JSON.stringify(S));ls.set(RK+'synced',JSON.stringify(this.synced));if(!document.querySelector('#sheetRoot .sheet'))render()}
+    syncUI();
+    if(fresh.length)toast(fresh.length===1?`${fresh[0].by}: ${fresh[0].txt}`:`${fresh.length} حاجات جديدة اتسجلت، آخرها من ${fresh[fresh.length-1].by}`);
+    this.push();
+  },
+  put(rec){const {c,...r}=rec;
+    if(c==='settings'){S.capital=r.capital;return}
+    if(!S[c])return;const ex=S[c].find(x=>x.id===r.id);
+    if(ex){Object.keys(ex).forEach(k=>{if(!(k in r))delete ex[k]});Object.assign(ex,r)}else S[c].push(r)},
+  remove(id){COLLS.forEach(c=>{const i=S[c].findIndex(x=>x.id===id);if(i>=0)S[c].splice(i,1)})},
+  all(){const out=[['settings',{c:'settings',id:'settings',capital:S.capital||0}]];COLLS.forEach(c=>S[c].forEach(r=>out.push([r.id,{c,...r}])));return out},
+  pushT:null,
+  push(){if(!this.ready||!this.key)return;clearTimeout(this.pushT);this.pushT=setTimeout(()=>this.pushNow(),30)},
+  async pushNow(){
+    const col=this.db.collection('recs'),cur=new Set();let n=0;
+    for(const [id,rec] of this.all()){cur.add(id);const h=hashStr(JSON.stringify(rec));if(this.synced[id]===h)continue;
+      if(id==='settings'&&SESSION.role!=='manager'&&!this.synced[id]){this.synced[id]=h;continue}
+      this.synced[id]=h;n++;
+      const d=await CR.enc(this.key,JSON.stringify(rec));
+      col.doc(id).set({...d,t:Date.now(),by:SESSION.uid}).catch(e=>{delete this.synced[id];toast('ما اتحفظش على السحابة: '+fbErr(e))})}
+    if(SESSION.role==='manager')Object.keys(this.synced).forEach(id=>{if(!cur.has(id)){delete this.synced[id];n++;col.doc(id).delete().catch(e=>toast('ما اتمسحش: '+fbErr(e)))}});
+    if(n){this.pending=true;ls.set(RK+'synced',JSON.stringify(this.synced));syncUI()}
+  },
+  async login(user,pw){
+    await this.init();
+    const cred=await this.auth.signInWithEmailAndPassword(toEmail(user),pw);const uidMe=cred.user.uid;
+    const [ms,ks]=await Promise.all([this.db.doc('members/'+uidMe).get(),this.db.doc('keys/'+uidMe).get()]).catch(e=>{this.auth.signOut();throw e});
+    if(!ms.exists||!ks.exists){await this.auth.signOut();throw new Error('الحساب ده مش متضاف للمحل')}
+    const m=ms.data();if(!m.active){await this.auth.signOut();throw new Error('الحساب ده مقفول، كلّم المدير')}
+    let raw;try{raw=await CR.dec(await CR.derive(pw,uidMe),ks.data())}catch(e){return {needCode:true,uid:uidMe,m,pw}}
+    return this.finishLogin(uidMe,m,raw);
+  },
+  async finishLogin(uidMe,m,rawB64){
+    SESSION={uid:uidMe,name:m.name,role:m.role,username:m.username};
+    ls.set(RK+'key_'+uidMe,rawB64);ls.set(RK+'session',JSON.stringify(SESSION));
+    S=blankShop();this.synced={};ls.set(RK+'synced','{}');ls.set(RK+'cache',JSON.stringify(S));
+    this.key=await CR.imp(CR.unb64(rawB64));return true},
+  async useCode(info,code){ // manager reset their password by email: unlock with the recovery code and re-lock with the new password
+    let key;try{key=await CR.imp(CR.unb64(code.trim()))}catch(e){throw new Error('الكود مش مظبوط')}
+    const meta=await this.db.doc('meta/shop').get();try{if(await CR.dec(key,meta.data().check)!==CHECK)throw 0}catch(e){throw new Error('الكود ده مش بتاع المحل')}
+    await this.db.doc('keys/'+info.uid).set(await CR.enc(await CR.derive(info.pw,info.uid),code.trim()));
+    return this.finishLogin(info.uid,info.m,code.trim())},
+  async setup(name,user,pw){
+    await this.init();
+    const cred=await this.auth.createUserWithEmailAndPassword(toEmail(user),pw);const uidMe=cred.user.uid;
+    const key=await CR.newKey(),raw=await CR.exp(key);
+    const b=this.db.batch();
+    b.set(this.db.doc('meta/shop'),{owner:uidMe,name:'أتيليه لوجي',created:Date.now(),check:await CR.enc(key,CHECK)});
+    b.set(this.db.doc('members/'+uidMe),{name,username:user.trim(),role:'manager',active:true});
+    b.set(this.db.doc('keys/'+uidMe),await CR.enc(await CR.derive(pw,uidMe),raw));
+    try{await b.commit()}catch(e){try{await cred.user.delete()}catch(x){}throw new Error('المحل متجهّز قبل كده. ادخل باسم المستخدم بتاعك، أو اطلب من المدير يعملك حساب.')}
+    await this.finishLogin(uidMe,{name,role:'manager',username:user.trim()},raw);return raw},
+  async addMember(name,user,pw,role){
+    if(!navigator.onLine)throw new Error('لازم نت علشان تضيف مستخدم');
+    const sec=firebase.apps.find(a=>a.name==='adder')||firebase.initializeApp(CFG,'adder');const sa=sec.auth();if(EMU&&!sa.emulatorConfig)sa.useEmulator('http://127.0.0.1:9099',{disableWarnings:true});
+    const cred=await sa.createUserWithEmailAndPassword(toEmail(user),pw);const nu=cred.user.uid;await sa.signOut();
+    const b=this.db.batch();
+    b.set(this.db.doc('members/'+nu),{name,username:user.trim(),role,active:true});
+    b.set(this.db.doc('keys/'+nu),await CR.enc(await CR.derive(pw,nu),await CR.exp(this.key)));
+    await b.commit()},
+  setActive(id,on){this.db.doc('members/'+id).update({active:on}).then(()=>{toast(on?'الحساب اتفتح':'الحساب اتقفل، مش هيقدر يدخل أو يشوف حاجة');logA((on?'فتح':'قفل')+' حساب '+(MEM.find(m=>m.id===id)||{}).name);save()}).catch(e=>toast(fbErr(e)))},
+  async changePw(oldPw,newPw){
+    const u=this.auth.currentUser;if(!u)throw new Error('لازم نت');
+    await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,oldPw));
+    await u.updatePassword(newPw);
+    await this.db.doc('keys/'+u.uid).set(await CR.enc(await CR.derive(newPw,u.uid),await CR.exp(this.key)))},
+  async recoveryCode(){return CR.exp(this.key)},
+  logout(msg){
+    this.unsubs.forEach(f=>f());this.unsubs=[];if(this.memUnsub)this.memUnsub();
+    if(SESSION)ls.set(RK+'key_'+SESSION.uid,'');['session','cache','synced'].forEach(k=>ls.set(RK+k,''));
+    const done=()=>{if(msg)ls.set(RK+'msg',msg);location.reload()};
+    if(this.auth)this.auth.signOut().then(done,done);else done()},
+};
+
+/* ---------- login / first-time setup screen ---------- */
+function showGate(msg){
+  let g=$('#gate');if(!g){g=document.createElement('div');g.id='gate';document.body.appendChild(g)}
+  const mode=g.dataset.mode||'login';
+  g.innerHTML=`<form class="box" id="gateForm"><img src="logo.jpg" alt="Atelier Logy" width="150" height="150"><h2>${mode==='setup'?'تجهيز المحل لأول مرة':'تسجيل الدخول'}</h2>
+  ${mode==='setup'?`<p class="hint">للمدير بس، ومرة واحدة. بعدها المدير يضيف البياعين من الإعدادات.</p>
+    <div class="field"><label for="g_name">اسمك</label><input id="g_name" autocomplete="name"></div>`:''}
+  <div class="field"><label for="g_user">اسم الدخول${mode==='setup'?' (ممكن إيميلك، علشان لو نسيت الباسورد)':''}</label><input id="g_user" autocomplete="username" autocapitalize="off" spellcheck="false"></div>
+  <div class="field"><label for="g_pw">الباسورد</label><input id="g_pw" type="password" autocomplete="${mode==='setup'?'new-password':'current-password'}"></div>
+  ${mode==='setup'?'<div class="field"><label for="g_pw2">اكتب الباسورد تاني</label><input id="g_pw2" type="password" autocomplete="new-password"></div>':''}
+  <div id="g_extra"></div><p class="err" id="g_err">${esc(msg||'')}</p>
+  <button class="btn pri" type="submit" style="padding:11px;font-size:16px">${mode==='setup'?'جهّز المحل':'دخول'}</button>
+  ${mode==='setup'?'<button class="link" type="button" id="g_switch">عندي حساب، رجّعني للدخول</button>':`<button class="link" type="button" id="g_switch">أول مرة؟ جهّز المحل (للمدير)</button><button class="link" type="button" id="g_forgot">نسيت الباسورد</button>`}</form>`;
+  $('#g_switch').onclick=()=>{g.dataset.mode=mode==='setup'?'login':'setup';showGate()};
+  const err=$('#g_err');
+  const fg=$('#g_forgot');if(fg)fg.onclick=async()=>{const u=$('#g_user').value.trim();
+    if(!u.includes('@')){err.textContent='البياع: كلّم المدير يعملك حساب جديد. المدير: اكتب إيميلك في اسم الدخول ودوس تاني.';return}
+    try{await SYNC.init();SYNC.auth.languageCode='ar';await SYNC.auth.sendPasswordResetEmail(u);err.textContent='اتبعتلك لينك على الإيميل. بعد ما تغيّر الباسورد، ادخل وهيطلب منك كود الاسترجاع.'}catch(e){err.textContent=fbErr(e)}};
+  $('#gateForm').onsubmit=async e=>{e.preventDefault();err.textContent='لحظة…';
+    const user=$('#g_user').value.trim(),pw=$('#g_pw').value;
+    try{
+      if(g.dataset.code){const info=JSON.parse(g.dataset.code);info.pw=pw;await SYNC.useCode(info,$('#g_code').value);delete g.dataset.code;return enterApp()}
+      if(!user||!pw)throw new Error('اكتب اسم الدخول والباسورد');
+      if(mode==='setup'){const name=$('#g_name').value.trim();if(!name)throw new Error('اكتب اسمك');if(pw.length<6)throw new Error('الباسورد لازم 6 حروف أو أرقام على الأقل');if(pw!==$('#g_pw2').value)throw new Error('الباسورد مش زي بعضه');
+        const raw=await SYNC.setup(name,user,pw);
+        g.innerHTML=`<div class="box"><img src="logo.jpg" alt="" width="150" height="150"><h2>المحل اتجهّز</h2><p class="hint">ده <b>كود الاسترجاع</b>. لو نسيت الباسورد في يوم، الكود ده هو اللي هيفتح بيانات المحل. اكتبه في ورقة وشيله في مكان أمان، وما تبعتهوش لحد.</p><div class="code">${esc(raw)}</div><button class="btn" id="g_copy">انسخ الكود</button><button class="btn pri" id="g_go" style="padding:11px;font-size:16px">كتبته، ادخل على التطبيق</button></div>`;
+        $('#g_copy').onclick=()=>navigator.clipboard.writeText(raw).then(()=>toast('اتنسخ'),()=>{});$('#g_go').onclick=enterApp;return}
+      const r=await SYNC.login(user,pw);
+      if(r&&r.needCode){g.dataset.code=JSON.stringify({uid:r.uid,m:r.m});$('#g_extra').innerHTML='<div class="field"><label for="g_code">الباسورد اتغيّر. اكتب كود الاسترجاع علشان تفتح بيانات المحل</label><input id="g_code" autocapitalize="off" spellcheck="false" dir="ltr"></div>';err.textContent='';return}
+      enterApp();
+    }catch(x){err.textContent=fbErr(x)}};
+}
+function enterApp(){const g=$('#gate');if(g)g.remove();tab='home';render();SYNC.start()}
+
+/* ---------- backups on this device ---------- */
+function saveFile(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
+function downloadBackup(auto){saveFile(`atelier-logy-${today()}.json`,new Blob([JSON.stringify({app:'atelier-logy',v:1,at:new Date().toISOString(),data:S},null,1)],{type:'application/json'}));ls.set(RK+'lastbak',today());if(!auto)toast('اتحفظت النسخة في فولدر التنزيلات')}
+function autoBackup(force){if(ls.get(RK+'autobak')!=='1')return;if(!force&&ls.get(RK+'lastbak')===today())return;downloadBackup(true);toast('اتحفظت نسخة النهارده على الجهاز ده (فولدر التنزيلات)')}
+function downloadCSV(){
+  const rows=[['النوع','التاريخ','الاسم','الصنف','العدد','الإجمالي','المدفوع','الباقي','طريقة الدفع','سجّلها']];
+  S.sales.forEach(x=>rows.push(['بيع',x.date,x.customer,item(x.itemId).name,x.qty,totalOf('sales',x),paidOf(x),restOf('sales',x),'',x.by]));
+  S.rentals.forEach(x=>rows.push(['إيجار',x.from,x.customer,item(x.itemId).name,1,x.price,paidOf(x),restOf('rentals',x),'تأمين '+(x.depIn||0),x.by]));
+  S.purchases.forEach(x=>rows.push(['وارد',x.date,sup(x.supplierId).name,item(x.itemId).name,x.qty,totalOf('purchases',x),paidOf(x),restOf('purchases',x),MODES[x.mode],x.by]));
+  S.expenses.forEach(x=>rows.push(['مصروف',x.date,x.type,x.note||'','',x.amount,x.amount,0,'',x.by]));
+  const csv='﻿'+rows.map(r=>r.map(v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n');
+  saveFile(`atelier-logy-${today()}.csv`,new Blob([csv],{type:'text/csv'}));toast('اتحفظ ملف Excel في التنزيلات')}
+function restoreFrom(file){if(!file)return;const msg=$('#restoreMsg');const fr=new FileReader();
+  fr.onload=()=>{let j;try{j=JSON.parse(fr.result)}catch(e){msg.textContent='الملف ده مش نسخة من التطبيق';return}
+    const d=j&&j.data;if(!d||!Array.isArray(d.sales)){msg.textContent='الملف ده مش نسخة من التطبيق';return}
+    const n=COLLS.reduce((a,c)=>a+(d[c]||[]).length,0);
+    msg.innerHTML=`النسخة دي من ${esc((j.at||'').slice(0,10))} وفيها ${n} عملية. اللي ناقص بس هيتضاف، ومفيش حاجة هتتمسح. <button class="btn pri" id="doRestore">رجّعها</button>`;
+    $('#doRestore').onclick=()=>{let added=0;COLLS.forEach(c=>(d[c]||[]).forEach(r=>{if(!r.id)r.id=uid();if(!S[c].some(x=>x.id===r.id)){S[c].push(r);added++}}));logA(`رجّع ${added} عملية من نسخة احتياطية`);save();render();toast(`اترجّعت ${added} عملية`)}};
+  fr.readAsText(file)}
+
+/* ---------- start ---------- */
+function boot(){
+  if(REAL){$('#footNote').textContent='بيانات المحل متشفّرة ومتزامنة بين كل الأجهزة.';
+    const m=ls.get(RK+'msg');if(m)ls.set(RK+'msg','');
+    if(!SESSION||!ls.get(RK+'key_'+SESSION.uid)){SESSION=null;render();showGate(m);return}
+    render();SYNC.start();
+  }else{render();setTimeout(autoBackup,2500)}
+  syncUI();
 }
 
 /* ---------- render & events ---------- */
 function render(){
   if(!tabsFor().some(([k])=>k===tab))tab=tabsFor()[0][0];
   ls.set(KEY+'_tab',tab);
-  $('#meSel').innerHTML=S.users.map(u=>`<option value="${u.id}" ${u.id===me().id?'selected':''}>${esc(u.name)} (${u.role})</option>`).join('');
+  $('#demoWho').hidden=REAL;$('#realWho').hidden=!REAL;if(REAL&&SESSION)$('#realWho').textContent=me().name+' · '+me().role;
+  if(!REAL)$('#meSel').innerHTML=S.users.map(u=>`<option value="${u.id}" ${u.id===me().id?'selected':''}>${esc(u.name)} (${u.role})</option>`).join('');
   $('#tabs').innerHTML=tabsFor().map(([k,l])=>`<button class="tab" data-tab="${k}" aria-current="${k===tab}">${l}</button>`).join('');
   $('#view').innerHTML=VIEWS[tab]();
   const labels={home:'+ بيع',customers:'+ بيع',items:'+ صنف',purchases:'+ وارد',sales:'+ بيع',rentals:'+ حجز فستان',expenses:'+ مصروف',suppliers:'+ مورد'};
@@ -539,6 +785,10 @@ function render(){
   const rb=$('#resetBtn');if(rb){rb.onclick=()=>{if(!rb.classList.contains('armed')){rb.classList.add('armed');rb.textContent='متأكد؟ كل حاجة هتتمسح. دوس تاني';return}
     const u=me();S={v:2,demo:false,capital:0,users:[{...u,role:'مدير'}],suppliers:[],items:[],purchases:[],sales:[],rentals:[],expenses:[],log:[]};meId=u.id;ls.set(KEY+'_me',meId);save();tab='suppliers';render();toast('اتمسحت الأمثلة. ابدأ بإضافة مورد.')};
     $('#sampleBtn').onclick=()=>{S=seed();meId='u1';ls.set(KEY+'_me',meId);save();tab='home';render()}}
+  const ab=$('#autoBak');if(ab){ab.onchange=()=>{ls.set(RK+'autobak',ab.checked?'1':'0');if(ab.checked)autoBackup(true)};$('#bakNow').onclick=()=>downloadBackup();$('#csvNow').onclick=downloadCSV;
+    const rf=$('#restoreFile');if(rf)rf.onchange=()=>restoreFrom(rf.files[0])}
+  const lo=$('#logoutBtn');if(lo)lo.onclick=()=>{if(!lo.classList.contains('armed')){lo.classList.add('armed');lo.textContent=SYNC.pending?'فيه حاجات لسه ما اترفعتش! دوس تاني للخروج':'متأكد؟ دوس تاني';return}SYNC.logout()};
+  const sc=$('#showCode');if(sc)sc.onclick=async()=>{$('#codeBox').innerHTML=`<p class="hint">الكود ده بيفتح بيانات المحل لو المدير نسي الباسورد. اكتبه في ورقة وشيله في مكان أمان، وما تبعتهوش لحد.</p><div class="code">${esc(await SYNC.recoveryCode())}</div>`};
 }
 document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const d=b.dataset;
@@ -551,6 +801,7 @@ document.addEventListener('click',e=>{
   if(d.suppay){const rest=sum(S.purchases.filter(p=>p.supplierId===d.suppay),p=>restOf('purchases',p));openForm('suppay',{amount:rest},d.suppay);return}
   if(d.hand){const r=S.rentals.find(x=>x.id===d.hand);openForm('hand',{amount:restOf('rentals',r),dep:r.deposit},r);return}
   if(d.back){const r=S.rentals.find(x=>x.id===d.back);openForm('back',{dep:r.depIn},r);return}
+  if(d.active){const[id,on]=d.active.split(':');SYNC.setActive(id,on==='1');return}
   if(d.deluser){S.users=S.users.filter(u=>u.id!==d.deluser);save();render();return}
   if(d.del){
     if(!b.classList.contains('armed')){b.classList.add('armed');b.textContent='متأكد؟ دوس تاني';setTimeout(()=>{if(b.isConnected){b.classList.remove('armed');b.textContent='حذف'}},3000);return}
@@ -559,13 +810,18 @@ document.addEventListener('click',e=>{
     if(coll==='suppliers'&&(S.items.some(p=>p.supplierId===id)||S.purchases.some(p=>p.supplierId===id))){b.textContent='المورد ليه أصناف';return}
     S[coll]=S[coll].filter(x=>x.id!==id);logA('حذف من '+(ALL_TABS.find(t=>t[0]===coll)||['',coll])[1]);save();render();return}
 });
-$('#meSel').onchange=e=>{meId=e.target.value;ls.set(KEY+'_me',meId);render();toast('دخلت باسم '+me().name)};
+if(!REAL)$('#meSel').onchange=e=>{meId=e.target.value;ls.set(KEY+'_me',meId);render();toast('دخلت باسم '+me().name)};
 $('#fab').onclick=()=>openForm(['home','customers'].includes(tab)?'sales':tab);
 $('#voiceBtn').onclick=openVoice;
-const syncUI=()=>{const on=navigator.onLine;const s=$('#sync');s.className='sync'+(on?'':' off');s.textContent=on?'أونلاين · متزامن':'أوفلاين · هيتبعت لما النت يرجع'};
-addEventListener('online',syncUI);addEventListener('offline',syncUI);syncUI();
+function syncUI(){const on=navigator.onLine,s=$('#sync');let t,off=false;
+  if(!on){t='أوفلاين · هيتبعت لما النت يرجع';off=true}
+  else if(REAL&&!SYNC.live){t='بيتصل…';off=true}
+  else if(REAL&&SYNC.pending){t='بيرفع…';off=true}
+  else t=REAL?'متزامن مع كل الأجهزة':'أونلاين';
+  s.className='sync'+(off?' off':'');s.textContent=t}
+addEventListener('online',()=>{syncUI();if(REAL&&SESSION&&!SYNC.ready)SYNC.start()});addEventListener('offline',syncUI);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeForm()});
-render();
+boot();
 (()=>{const sp=document.getElementById('splash');const bye=()=>{sp.classList.add('bye');setTimeout(()=>sp.remove(),600)};sp.onclick=bye;setTimeout(bye,1800)})();
 </script>
 
