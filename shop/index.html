@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>بوتيك الأناقة</title>
+<title>تطبيق حور</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Reem+Kufi:wght@500;700&family=Lalezar&family=Amiri:wght@700&family=Marcellus&display=swap">
 <style>
@@ -339,10 +339,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 <body>
 
 
-<div id="splash" role="img" aria-label="بوتيك الأناقة"><img src="logo.svg" alt="Elegance" width="340" height="340"><p>بوتيك الأناقة · لكل المناسبات</p></div>
+<div id="splash" role="img" aria-label="حور"><img src="logo.svg" alt="Hoor" width="340" height="340"><p>حور · لكل المناسبات</p></div>
 <div class="wrap">
   <header class="top">
-    <div class="brand-row"><img class="mark" src="logo.svg" alt="" width="52" height="52"><div class="brand"><span class="latin">Elegance</span><span class="ar">بوتيك الأناقة · فساتين · عبايات · حريمي · أطفال</span></div></div>
+    <div class="brand-row"><img class="mark" src="logo.svg" alt="" width="52" height="52"><div class="brand"><span class="latin">Hoor</span><span class="ar">حور · فساتين · عبايات · حريمي · أطفال</span></div></div>
     <div class="who"><button class="icon-btn" id="searchBtn" type="button" aria-label="بحث"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"/></svg>بحث <kbd>Ctrl K</kbd></button><button class="btn share-btn" id="shareBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>مشاركة</button><span id="sync" class="sync">أونلاين</span><span id="demoWho"><label for="meSel">شغال دلوقتي:</label><select id="meSel"></select></span><span id="realWho" hidden></span></div>
   </header>
   <nav class="tabs" id="tabs"></nav>
@@ -522,9 +522,9 @@ function todoHtml(){
   const sev=d=>d<t0?'bad':d===t0?'warn':'';
   if(can('rentals'))S.rentals.forEach(r=>{const nm=item(r.itemId).name;
     if(r.status==='booked'&&r.from<=t1)L.push({d:r.from,k:sev(r.from),i:'hand',t:`تسليم ${nm}`,s:`${esc(r.customer)} · ${when(r.from)} · الباقي ${money(restOf('rentals',r))} + تأمين ${money(r.deposit)}`,
-      a:`<button class="btn pri" data-hand="${r.id}">سلّمت</button>${waBtn(r.phone,`أهلاً ${r.customer} 🌸\nمعاد استلام ${nm} من بوتيك الأناقة ${r.from<t0?'كان يوم '+fmtFull(r.from):r.from===t0?'النهارده':'بكرة'}.\nمستنيينك ✨`,'فكّرها')}`});
+      a:`<button class="btn pri" data-hand="${r.id}">سلّمت</button>${waBtn(r.phone,`أهلاً ${r.customer} 🌸\nمعاد استلام ${nm} من حور ${r.from<t0?'كان يوم '+fmtFull(r.from):r.from===t0?'النهارده':'بكرة'}.\nمستنيينك ✨`,'فكّرها')}`});
     if(r.status==='out'&&r.to<=t1)L.push({d:r.to,k:sev(r.to),i:'back',t:`رجوع ${nm}`,s:`${esc(r.customer)} · ${when(r.to)} · تأمين معاك ${money(r.depIn)}`,
-      a:`<button class="btn pri" data-back="${r.id}">رجع</button>${waBtn(r.phone,`أهلاً ${r.customer} 🌸\nبنفكّرك إن معاد رجوع ${nm} ${r.to<t0?'كان يوم '+fmtFull(r.to):r.to===t0?'النهارده':'بكرة'}.\nشكراً لاختيارك بوتيك الأناقة ✨`,'فكّرها')}`});
+      a:`<button class="btn pri" data-back="${r.id}">رجع</button>${waBtn(r.phone,`أهلاً ${r.customer} 🌸\nبنفكّرك إن معاد رجوع ${nm} ${r.to<t0?'كان يوم '+fmtFull(r.to):r.to===t0?'النهارده':'بكرة'}.\nشكراً لاختيارك حور ✨`,'فكّرها')}`});
   });
   if(can('purchases'))S.purchases.forEach(p=>{if(p.mode!=='inst'||!p.n||restOf('purchases',p)<=0)return;const per=totalOf('purchases',p)/p.n,done=Math.floor(paidOf(p)/per+0.001);if(done>=p.n)return;
     const due=addMonths(p.date,done+1);if(due>dayOff(3))return;
@@ -542,7 +542,7 @@ home(){
   const types=Object.entries(byType).sort((a,b)=>b[1]-a[1]);const mx=Math.max(1,...types.map(x=>x[1]));
   const d=new Date(),nm=(me().name||'').split(' ')[0];
   return `<div class="hello"><div><small>${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}</small><h2>${d.getHours()<12?'صباح الخير':'مساء الخير'}${nm?' يا '+esc(nm):''}</h2></div>${periodSeg()}</div>
-  <div class="banner fake" role="img" aria-label="بوتيك الأناقة"><div><span class="bl">Elegance</span><span class="ba">بوتيك الأناقة · فساتين زفاف وخطوبة وسهرة · عبايات · حريمي · أطفال</span></div><img src="logo.svg" alt="" width="120" height="120"></div>
+  <div class="banner fake" role="img" aria-label="حور"><div><span class="bl">Hoor</span><span class="ba">حور · فساتين زفاف وخطوبة وسهرة · عبايات · حريمي · أطفال</span></div><img src="logo.svg" alt="" width="120" height="120"></div>
   <div class="kpis" style="margin-top:14px">
     <div class="kpi hero"><div><div class="l">المتبقي في الخزنة</div><small>رأس المال ${money(S.capital)} + كل اللي اتقبض − اللي اتدفع للموردين − المصروفات</small></div><div class="v num">${money(t.cash)}</div></div>
     ${kpi('المبيعات',money(t.salesRev),'sales')}${kpi('مكسب البيع',money(t.grossSales),'trend','pos')}${kpi('إيراد التأجير',money(t.rentRev),'rentals','pos')}
@@ -597,7 +597,7 @@ customers(){
   <div class="filters"><div class="sbox" style="flex:1 1 220px">${ic('search')}<input id="custQ" placeholder="دوّر باسم العميل أو التليفون…" value="${esc(custQ)}" autocomplete="off"></div></div>
   <div class="list">${list.length?list.map(c=>`<div class="row${c.rest>0?' st-bad':''}"><div><div class="t">${esc(c.name)}</div><div class="s num">${esc(c.phone)}${c.phone?' · ':''}${c.lines.length} عملية · إجمالي ${money(c.total)}</div></div>
   <div class="a">${restPill(c.rest)}</div>
-  ${waNum(c.phone)?`<div class="acts">${waBtn(c.phone,c.rest>0?`أهلاً ${c.name} 🌸\nبنفكّرك إن الباقي من حسابك في بوتيك الأناقة ${moneyT(c.rest)}.\nشكراً لاختيارك بوتيك الأناقة ✨`:`أهلاً ${c.name} 🌸\nشكراً لاختيارك بوتيك الأناقة ✨`,c.rest>0?'فكّره بالباقي':'واتساب')}</div>`:''}
+  ${waNum(c.phone)?`<div class="acts">${waBtn(c.phone,c.rest>0?`أهلاً ${c.name} 🌸\nبنفكّرك إن الباقي من حسابك في حور ${moneyT(c.rest)}.\nشكراً لاختيارك حور ✨`:`أهلاً ${c.name} 🌸\nشكراً لاختيارك حور ✨`,c.rest>0?'فكّره بالباقي':'واتساب')}</div>`:''}
   <div class="lines">${c.lines.map(l=>`<div class="line"><span>${esc(l.label)} · ${money(l.total)}</span><span>${l.rest>0?`<span class="neg num">باقي ${money(l.rest)}</span> ${payBtn(l.coll,l.r)}`:'<span class="pill good">تمام</span>'} ${rcptBtn(l.coll,l.r.id)}</span></div>`).join('')}</div></div>`).join(''):empty(custQ?'مفيش عميل بالاسم ده':'لسه مفيش عملاء')}</div>`;
 },
 sales(){
@@ -817,20 +817,20 @@ function receiptHtml(coll,r){
   const line=coll==='sales'?`<tr><td>${esc(it.name)}</td><td class="n">${r.qty}</td><td class="n">${moneyT(r.price)}</td><td class="n">${moneyT(total)}</td></tr>`
     :`<tr><td>إيجار ${esc(it.name)}<br><small>من ${fmtFull(r.from)} لـ ${fmtFull(r.to)}</small></td><td class="n">1</td><td class="n">${moneyT(r.price)}</td><td class="n">${moneyT(total)}</td></tr>`;
   const dep=coll!=='rentals'?'':r.status==='booked'?`التأمين المطلوب عند الاستلام ${moneyT(r.deposit)}`:r.status==='out'?`تأمين مدفوع ${moneyT(r.depIn)} (بيرجع لما الفستان يرجع)`:`التأمين اللي رجع ${moneyT(r.depOut)}`;
-  return `<div class="receipt"><div class="rh"><img src="logo.svg" alt="" width="58" height="58"><div><div class="nm">Elegance</div><small>بوتيك الأناقة · فساتين · عبايات · حريمي · أطفال</small></div></div>
+  return `<div class="receipt"><div class="rh"><img src="logo.svg" alt="" width="58" height="58"><div><div class="nm">Hoor</div><small>حور · فساتين · عبايات · حريمي · أطفال</small></div></div>
   <div class="meta"><span>إيصال رقم <b dir="ltr">#${no}</b></span><span>التاريخ: ${fmtFull(coll==='sales'?r.date:r.from)}</span><span>العميل: <b>${esc(r.customer||'زبون')}</b></span><span>${r.phone?'تليفون: <span dir="ltr">'+esc(r.phone)+'</span>':''}</span></div>
   <table><thead><tr><th>الصنف</th><th class="n">العدد</th><th class="n">السعر</th><th class="n">الإجمالي</th></tr></thead><tbody>${line}</tbody></table>
   <div class="tot"><div><span>الإجمالي</span><span class="n">${moneyT(total)}</span></div>${(r.pays||[]).map(p=>`<div><span>دفعة ${fmtFull(p.d)}</span><span class="n">− ${moneyT(p.a)}</span></div>`).join('')}
   <div class="big"><span>الباقي</span><span class="n">${moneyT(Math.max(0,rest))}</span></div>${dep?`<div style="font-size:12.5px;color:#7a6a55">${dep}</div>`:''}</div>
   <span class="stamp ${rest>0?'no':'ok'}">${rest>0?'باقي '+moneyT(rest):'مدفوع بالكامل'}</span>
-  <div class="thanks">شكراً لاختياركم بوتيك الأناقة ✨<br>لكل المناسبات</div></div>`;
+  <div class="thanks">شكراً لاختياركم حور ✨<br>لكل المناسبات</div></div>`;
 }
 function receiptText(coll,r){
   const it=item(r.itemId),total=totalOf(coll,r),rest=total-paidOf(r);
-  return ['✨ بوتيك الأناقة ✨',`إيصال #${String(r.id).slice(0,6).toUpperCase()} · ${fmtFull(coll==='sales'?r.date:r.from)}`,`العميل: ${r.customer||'زبون'}`,'',
+  return ['✨ حور ✨',`إيصال #${String(r.id).slice(0,6).toUpperCase()} · ${fmtFull(coll==='sales'?r.date:r.from)}`,`العميل: ${r.customer||'زبون'}`,'',
     coll==='sales'?`${it.name} × ${r.qty} = ${moneyT(total)}`:`إيجار ${it.name}\nمن ${fmtFull(r.from)} لـ ${fmtFull(r.to)} = ${moneyT(total)}`,
     `المدفوع: ${moneyT(paidOf(r))}`,rest>0?`الباقي: ${moneyT(rest)}`:'✅ مدفوع بالكامل',
-    coll==='rentals'&&r.status==='booked'&&r.deposit?`التأمين عند الاستلام: ${moneyT(r.deposit)}`:'','','شكراً لاختيارك بوتيك الأناقة 🌸'].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n');
+    coll==='rentals'&&r.status==='booked'&&r.deposit?`التأمين عند الاستلام: ${moneyT(r.deposit)}`:'','','شكراً لاختيارك حور 🌸'].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n');
 }
 function printOne(html){let pa=$('#printArea');if(!pa){pa=document.createElement('div');pa.id='printArea';document.body.appendChild(pa)}pa.innerHTML=html;document.body.classList.add('print-one');
   const done=()=>{document.body.classList.remove('print-one');removeEventListener('afterprint',done)};addEventListener('afterprint',done);setTimeout(()=>window.print(),60)}
@@ -841,7 +841,7 @@ function openReceipt(coll,id){
   $('#cancel').onclick=closeForm;$('#bg').onclick=e=>{if(e.target.id==='bg')closeForm()};
   $('#rcPrint').onclick=()=>printOne(receiptHtml(coll,r));
   $('#rcCopy').onclick=()=>navigator.clipboard.writeText(txt).then(()=>toast('اتنسخت الفاتورة'),()=>toast('ما قدرتش أنسخ'));
-  const sh=$('#rcShare');if(sh)sh.onclick=()=>navigator.share({title:'فاتورة بوتيك الأناقة',text:txt}).catch(()=>{});
+  const sh=$('#rcShare');if(sh)sh.onclick=()=>navigator.share({title:'فاتورة حور',text:txt}).catch(()=>{});
 }
 let searchQ='';
 function searchResults(raw){
@@ -896,7 +896,7 @@ function parseCmd(raw){
   return {type,preset:{itemId:best.id,qty,cost:total??best.cost,paid:paid??''}};
 }
 const APP_URL='https://ahmed-elbaz84.github.io/shop/';
-const APP_VERSION=1;   // keep equal to the number in sw.js CACHE ('shopdemo-v1')
+const APP_VERSION=2;   // keep equal to the number in sw.js CACHE ('shopdemo-v2')
 function openPerms(id){
   const u=REAL?MEM.find(m=>m.id===id):S.users.find(x=>x.id===id);if(!u)return;const p=normPerms(u.perms);
   $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><form class="sheet" id="frm" aria-label="صلاحيات ${esc(u.name)}"><h2>صلاحيات ${esc(u.name)}</h2>
@@ -930,12 +930,12 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 setInterval(()=>{if(navigator.onLine)checkUpdate(false)},30*60*1000);
 function openShare(){
   $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><div class="sheet" role="dialog" aria-label="مشاركة التطبيق"><h2>مشاركة التطبيق</h2>
-  <div class="qrbox"><img src="qr.png" alt="كود QR لفتح بوتيك الأناقة" width="260" height="260"><p class="hint" style="margin:0">البياع يصوّر الكود بكاميرا الموبايل، أو يفتح اللينك ده:</p><div class="url" id="shareUrl">${APP_URL}</div></div>
-  <div class="btns" style="justify-content:center;margin-top:12px">${navigator.share?'<button class="btn pri" id="shNative">مشاركة…</button>':''}<a class="btn pri" id="shWa" href="https://wa.me/?text=${encodeURIComponent('تطبيق بوتيك الأناقة: '+APP_URL)}" target="_blank" rel="noopener">ابعت على واتساب</a><button class="btn" id="shCopy">انسخ اللينك</button><button class="btn" id="cancel">قفل</button></div>
+  <div class="qrbox"><img src="qr.png" alt="كود QR لفتح حور" width="260" height="260"><p class="hint" style="margin:0">البياع يصوّر الكود بكاميرا الموبايل، أو يفتح اللينك ده:</p><div class="url" id="shareUrl">${APP_URL}</div></div>
+  <div class="btns" style="justify-content:center;margin-top:12px">${navigator.share?'<button class="btn pri" id="shNative">مشاركة…</button>':''}<a class="btn pri" id="shWa" href="https://wa.me/?text=${encodeURIComponent('تطبيق حور: '+APP_URL)}" target="_blank" rel="noopener">ابعت على واتساب</a><button class="btn" id="shCopy">انسخ اللينك</button><button class="btn" id="cancel">قفل</button></div>
   <p class="hint" style="text-align:center;margin-top:10px">البياع بيدخل باسم الدخول والباسورد اللي المدير عمله له من الإعدادات.</p></div></div>`;
   $('#cancel').onclick=closeForm;$('#bg').onclick=e=>{if(e.target.id==='bg')closeForm()};
   $('#shCopy').onclick=()=>navigator.clipboard.writeText(APP_URL).then(()=>toast('اتنسخ اللينك'),()=>{const r=document.createRange();r.selectNodeContents($('#shareUrl'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);toast('اللينك متحدد، اعمل نسخ')});
-  const sn=$('#shNative');if(sn)sn.onclick=()=>navigator.share({title:'بوتيك الأناقة',text:'تطبيق بوتيك الأناقة',url:APP_URL}).catch(()=>{});
+  const sn=$('#shNative');if(sn)sn.onclick=()=>navigator.share({title:'حور',text:'تطبيق حور',url:APP_URL}).catch(()=>{});
 }
 function openVoice(){
   const ex=['تم إيجار فستان سهرة ستان لمدام دعاء بـ 800 دفعت 300 والباقي 500','بعت 2 عباية كريب للعميلة هبة بـ 750 دفعت 1000','مصروف كهرباء 450','حجز فستان زفاف ملكي للعروسة سلمى بـ 4500 عربون 1500'];
@@ -1068,7 +1068,7 @@ const SYNC={
     const cred=await this.auth.createUserWithEmailAndPassword(toEmail(user),pw);const uidMe=cred.user.uid;
     const key=await CR.newKey(),raw=await CR.exp(key);
     const b=this.db.batch();
-    b.set(this.db.doc('meta/shop'),{owner:uidMe,name:'بوتيك الأناقة',created:Date.now(),check:await CR.enc(key,CHECK)});
+    b.set(this.db.doc('meta/shop'),{owner:uidMe,name:'حور',created:Date.now(),check:await CR.enc(key,CHECK)});
     b.set(this.db.doc('members/'+uidMe),{name,username:user.trim(),role:'manager',active:true});
     b.set(this.db.doc('keys/'+uidMe),await CR.enc(await CR.derive(pw,uidMe),raw));
     try{await b.commit()}catch(e){try{await cred.user.delete()}catch(x){}throw new Error('المحل متجهّز قبل كده. ادخل باسم المستخدم بتاعك، أو اطلب من المدير يعملك حساب.')}
@@ -1099,7 +1099,7 @@ const SYNC={
 function showGate(msg){
   let g=$('#gate');if(!g){g=document.createElement('div');g.id='gate';document.body.appendChild(g)}
   const mode=g.dataset.mode||'login';
-  g.innerHTML=`<form class="box" id="gateForm"><img src="logo.svg" alt="Elegance" width="150" height="150"><h2>${mode==='setup'?'تجهيز المحل لأول مرة':'تسجيل الدخول'}</h2>
+  g.innerHTML=`<form class="box" id="gateForm"><img src="logo.svg" alt="Hoor" width="150" height="150"><h2>${mode==='setup'?'تجهيز المحل لأول مرة':'تسجيل الدخول'}</h2>
   ${mode==='setup'?`<p class="hint">للمدير بس، ومرة واحدة. بعدها المدير يضيف البياعين من الإعدادات.</p>
     <div class="field"><label for="g_name">اسمك</label><input id="g_name" autocomplete="name"></div>`:''}
   <div class="field"><label for="g_user">اسم الدخول${mode==='setup'?' (ممكن إيميلك، علشان لو نسيت الباسورد)':''}</label><input id="g_user" autocomplete="username" autocapitalize="off" spellcheck="false"></div>
