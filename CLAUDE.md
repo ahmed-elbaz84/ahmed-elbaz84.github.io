@@ -16,5 +16,5 @@ Read `HANDOVER.md` first. It has the full status, the data model, the sync and e
 - Test over http://localhost with Playwright at phone size. Don't create accounts on the real Firebase while testing.
 
 ## Other app in this repo
-- `logy/` is a separate app (Atelier Logy, the owner's brother's clothing and dress-rental shop). Preview only here; it will move to the brother's own GitHub and Firebase. Read `logy/HANDOVER.md` before touching it, and bump `CACHE` in `logy/sw.js` on every change.
+- `logy/` only redirects to Atelier Logy's new home, https://maltaha91115.github.io (repo `maltaha91115/maltaha91115.github.io`). Work on that app there.
 - `superclean/` is a separate app (Super Clean, the owner's wife's cleaning-products shop). Read `superclean/HANDOVER.md` before touching it, and bump `CACHE` in `superclean/sw.js` on every change there.
