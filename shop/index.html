@@ -310,6 +310,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .receipt .stamp.ok{color:#2f7d55}.receipt .stamp.no{color:#b3412f}
 .receipt .thanks{text-align:center;color:#7a6a55;font-size:12.5px;margin-top:14px;border-top:1px dashed #d9c9a6;padding-top:10px}
 #printArea{display:none}
+.phpick.big img{width:100%;max-width:340px;height:auto;aspect-ratio:auto;object-fit:contain}
+.idimg{width:100%;height:auto;border-radius:14px;border:1px solid var(--line);background:#fff}
 .srow{display:flex;gap:8px;align-items:stretch}.srow .sbox{flex:1}
 .scam{display:inline-flex;align-items:center;gap:6px;border-radius:14px;padding:0 14px;font-size:15px}.scam svg{width:20px;height:20px}
 .pcard.noimg{grid-template-columns:1fr}
@@ -534,7 +536,8 @@ let S;
 if(REAL){try{S=JSON.parse(ls.get(RK+'cache'))}catch(e){S=null}if(!S||S.v!==2)S=blankShop()}
 else{try{S=JSON.parse(ls.get(KEY))}catch(e){S=null}if(!S||S.v!==2)S=seed()}
 S.log.forEach(l=>{if(!l.id)l.id=uid()});
-function save(){if(REAL){ls.set(RK+'cache',JSON.stringify(S));SYNC.push()}else ls.set(KEY,JSON.stringify(S))}
+const cacheJSON=()=>JSON.stringify(S,(k,v)=>k==='idPhoto'?undefined:v);   // ID card photos live in Firebase only (too big for this cache)
+function save(){if(REAL){ls.set(RK+'cache',cacheJSON());SYNC.push()}else ls.set(KEY,JSON.stringify(S))}
 let meId=ls.get(KEY+'_me')||'u1';
 const me=()=>REAL?(SESSION?{id:SESSION.uid,name:SESSION.name,role:SESSION.role==='manager'?'مدير':'بياع'}:{id:'',name:'',role:'بياع'}):(S.users.find(u=>u.id===meId)||S.users[0]);
 const isMgr=()=>me().role==='مدير';
@@ -784,7 +787,7 @@ function rentRow(r){
   <div class="s">${esc(r.customer)}${r.phone?' · <span class="num">'+esc(r.phone)+'</span>':''}${byWho(r)}</div>
   <div class="s num">من ${fmtDate(r.from)} لـ ${fmtDate(r.to)} · دفعت ${money(paidOf(r))} · ${dep}</div></div>
   <div class="a"><span>${money(r.price)}</span>${restPill(rest)}</div>
-  <div class="acts">${r.status==='booked'?`<button class="btn pri" data-hand="${r.id}">سلّمت الفستان</button>`:''}${r.status==='out'?`<button class="btn pri" data-back="${r.id}">الفستان رجع</button>`:''}${r.status!=='booked'?payBtn('rentals',r):''}${rcptBtn('rentals',r.id)}${delBtn('rentals',r.id)}</div></div>`;
+  <div class="acts">${r.status==='booked'?`<button class="btn pri" data-hand="${r.id}">سلّمت الفستان</button>`:''}${r.status==='out'?`<button class="btn pri" data-back="${r.id}">الفستان رجع</button>`:''}${r.status!=='booked'?payBtn('rentals',r):''}${rcptBtn('rentals',r.id)}${okImg(r.idPhoto)?`<button class="btn" data-idph="${r.id}">${ic('receipt',ID_PATH)} البطاقة</button>`:''}${delBtn('rentals',r.id)}</div></div>`;
 }
 const logRow=l=>`<div class="row"><div><div class="t" style="font-weight:500">${esc(l.txt)}</div><div class="s num">${fmtTime(l.t)}</div></div><div class="a"><span class="pill">${esc(l.by)}</span></div></div>`;
 
@@ -806,15 +809,15 @@ const FORMS={
       return [`بيع ${item(v.itemId).name} × ${v.qty} لـ ${v.customer} بـ ${money(t)}، ${p>=t?'دفع كامل':'دفع '+money(p)+' والباقي '+money(t-p)}`,'sales']}},
   rentals:{title:'حجز فستان',fields:[
     {k:'itemId',l:'الفستان',t:'select',o:()=>itemOpts(i=>i.rent>0)},
-    {k:'customer',l:'اسم العميلة',t:'text',half:1,list:1},{k:'phone',l:'التليفون',t:'tel',opt:1,half:1},
+    {k:'customer',l:'اسم العميلة',t:'text',half:1,list:1},{k:'phone',l:'التليفون',t:'tel',half:1},
     {k:'from',l:'تستلمه يوم',t:'date',half:1},{k:'to',l:'ترجعه يوم',t:'date',half:1},
-    {k:'price',l:'الإيجار',t:'number',half:1},{k:'deposit',l:'التأمين المطلوب',t:'number',opt:1,half:1},
-    {k:'paid',l:'العربون المدفوع في الحجز',t:'number',opt:1}],
+    {k:'price',l:'الإيجار',t:'number',half:1},{k:'deposit',l:'التأمين المطلوب',t:'number',half:1},
+    {k:'paid',l:'العربون المدفوع في الحجز',t:'number',opt:1},{k:'idPhoto',l:'صورة بطاقة العميلة',t:'photo',big:1}],
     need:()=>S.items.some(i=>i.rent>0)?'':'ضيف فستان بسعر إيجار من الأصناف.',
     onItem:(i,set)=>{set('price',i.rent);set('deposit',i.rent)},
-    check:v=>{if(v.to<v.from)return'تاريخ الرجوع قبل الاستلام';if(n0(v.paid)>v.price)return'العربون أكبر من الإيجار';const c=S.rentals.find(r=>r.itemId===v.itemId&&r.status!=='back'&&!(v.to<r.from||v.from>r.to));return c?`الفستان محجوز لـ ${c.customer} من ${fmtDate(c.from)} لـ ${fmtDate(c.to)}`:''},
+    check:v=>{if(String(v.phone||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'').length<10)return'اكتب رقم تليفون العميلة صح (11 رقم)';if(!okImg(v.idPhoto))return'صوّر بطاقة العميلة';if(v.to<v.from)return'تاريخ الرجوع قبل الاستلام';if(n0(v.paid)>v.price)return'العربون أكبر من الإيجار';const c=S.rentals.find(r=>r.itemId===v.itemId&&r.status!=='back'&&!(v.to<r.from||v.from>r.to));return c?`الفستان محجوز لـ ${c.customer} من ${fmtDate(c.from)} لـ ${fmtDate(c.to)}`:''},
     preview:v=>v.price?`الباقي من الإيجار عند التسليم ${money(v.price-n0(v.paid))} + تأمين ${money(n0(v.deposit))}`:'',
-    save:v=>{const p=n0(v.paid);S.rentals.push({id:uid(),itemId:v.itemId,customer:v.customer,phone:v.phone,from:v.from,to:v.to,price:v.price,deposit:n0(v.deposit),pays:p?[{d:today(),a:p,by:me().name}]:[],depIn:0,depOut:0,status:'booked',by:me().name});
+    save:v=>{const p=n0(v.paid);const rr={id:uid(),itemId:v.itemId,customer:v.customer,phone:v.phone,from:v.from,to:v.to,price:v.price,deposit:n0(v.deposit),pays:p?[{d:today(),a:p,by:me().name}]:[],depIn:0,depOut:0,status:'booked',by:me().name};if(okImg(v.idPhoto))rr.idPhoto=v.idPhoto;S.rentals.push(rr);
       return [`حجز ${item(v.itemId).name} لـ ${v.customer} من ${fmtDate(v.from)} لـ ${fmtDate(v.to)} بـ ${money(v.price)}، عربون ${money(p)} والباقي ${money(v.price-p)}`,'rentals']}},
   hand:{title:'تسليم الفستان',fields:[{k:'amount',l:'باقي الإيجار اللي اتقبض',t:'number',opt:1,half:1},{k:'dep',l:'التأمين اللي اتقبض',t:'number',opt:1,half:1}],
     save:(v,r)=>{const a=n0(v.amount);if(a)r.pays.push({d:today(),a,by:me().name});r.depIn=n0(v.dep);r.status='out';
@@ -865,7 +868,7 @@ function openForm(type,preset={},ctx){
   const F=FORMS[type];const need=F.need&&F.need();
   const names=[...new Set([...S.sales,...S.rentals].map(r=>r.customer).filter(Boolean))];
   const fld=f=>{const id='f_'+f.k;let inp;
-    if(f.t==='photo')return `<div class="field"><label>${f.l}</label><div class="phpick"><img id="php" alt="" hidden><input type="hidden" id="${id}" name="${f.k}"><button type="button" class="btn" id="phbtn">${ic('camera')} صوّر أو اختار صورة</button></div></div>`;
+    if(f.t==='photo')return `<div class="field"><label>${f.l}</label><div class="phpick${f.big?' big':''}"><img id="php_${f.k}" alt="" hidden><input type="hidden" id="${id}" name="${f.k}"><button type="button" class="btn${f.opt?'':' pri'}" data-phk="${f.k}" data-phbig="${f.big?1:''}">${ic('camera')}<span> ${f.big?'صوّر البطاقة':'صوّر أو اختار صورة'}</span></button></div></div>`;
     if(f.t==='select')inp=`<select id="${id}" name="${f.k}">${f.o().map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>`;
     else inp=`<input id="${id}" name="${f.k}" type="${f.t==='number'?'text':f.t}" ${f.t==='number'?'inputmode="decimal"':''} ${f.list?'list="custNames"':''} autocomplete="off">`;
     return `<div class="field"><label for="${id}">${f.l}</label>${inp}</div>`};
@@ -880,7 +883,7 @@ function openForm(type,preset={},ctx){
   if(need)return;
   F.fields.forEach(f=>{if(f.t==='date')set(f.k,today())});
   if(type==='rentals')set('to',dayOff(2));
-  const phb=$('#phbtn');if(phb)phb.onclick=()=>pickImage(false,async f=>{try{const u=await shrinkImage(f);frm.elements.photo.value=u;const im=$('#php');im.src=u;im.hidden=false;phb.lastChild.textContent=' غيّر الصورة'}catch(x){$('#err').textContent=x.message}});
+  frm.querySelectorAll('[data-phk]').forEach(phb=>phb.onclick=()=>pickImage(!!phb.dataset.phbig,async f=>{try{const k=phb.dataset.phk,u=phb.dataset.phbig?await shrinkImage(f,1000,.7):await shrinkImage(f);frm.elements[k].value=u;const im=$('#php_'+k);im.src=u;im.hidden=false;phb.lastChild.textContent=' غيّر الصورة';upd()}catch(x){$('#err').textContent=x.message}}));
   if(F.onItem&&frm.elements.itemId){if(preset.itemId)set('itemId',preset.itemId);F.onItem(item(frm.elements.itemId.value),set);
     frm.elements.itemId.addEventListener('change',()=>{F.onItem(item(frm.elements.itemId.value),set);upd()})}
   Object.entries(preset).forEach(([k,v])=>set(k,v));
@@ -890,7 +893,7 @@ function openForm(type,preset={},ctx){
   frm.onsubmit=e=>{e.preventDefault();const v=read();const err=$('#err');
     for(const f of F.fields){
       if(f.t==='number'&&v[f.k]!==''&&(isNaN(v[f.k])||v[f.k]<0))return err.textContent=f.l+': رقم مش مظبوط';
-      if(!f.opt&&(v[f.k]===''||(f.t==='number'&&!(v[f.k]>0))))return err.textContent='اكتب '+f.l.replace(/ ?\(.*\)/,'');}
+      if(!f.opt&&(v[f.k]===''||(f.t==='number'&&!(v[f.k]>0))))return err.textContent=(f.t==='photo'?'صوّر ':'اكتب ')+f.l.replace(/ ?\(.*\)/,'').replace(/^صورة /,'');}
     const c=F.check&&F.check(v,ctx);if(c)return err.textContent=c;
     const res=F.save(v,ctx);if(res&&res.then){err.textContent='لحظة…';res.then(([txt,goTab])=>{closeForm();tab=goTab||tab;render();toast(txt)}).catch(x=>{err.textContent=x.message||String(x)});return}
     const [txt,goTab]=res;logA(txt);save();closeForm();
@@ -974,6 +977,12 @@ function imgSig(src){if(SIGC.has(src))return Promise.resolve(SIGC.get(src));retu
 const simSig=(a,b)=>{let hi=0,c=0;for(let i=0;i<28;i++)hi+=Math.min(a.h[i],b.h[i]);for(let i=0;i<64;i++)c+=a.g[i]*b.g[i];return .75*hi+.25*(c/64+1)/2};
 function setItemPhoto(id){const it=S.items.find(x=>x.id===id);if(!it)return;
   pickImage(false,async f=>{try{it.photo=await shrinkImage(f);logA(`حط صورة لـ ${it.name}`);save();render();toast('اتحفظت صورة '+it.name)}catch(x){toast(x.message)}})}
+const ID_PATH='M3 5h18v14H3zM8 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4M5 16c.5-2 5.5-2 6 0M14 9h4M14 13h4';
+function openIdCard(id){const r=S.rentals.find(x=>x.id===id);if(!r||!okImg(r.idPhoto))return;
+  $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><div class="sheet" role="dialog" aria-label="بطاقة ${esc(r.customer)}"><h2>بطاقة ${esc(r.customer)}</h2>
+  <p class="hint">${esc(item(r.itemId).name)} · من ${fmtDate(r.from)} لـ ${fmtDate(r.to)} · <span class="num" dir="ltr">${esc(r.phone||'')}</span></p>
+  <img class="idimg" src="${r.idPhoto}" alt="صورة البطاقة"><div class="btns"><button class="btn" id="cancel" type="button">قفل</button></div></div></div>`;
+  $('#cancel').onclick=closeForm;$('#bg').onclick=e=>{if(e.target.id==='bg')closeForm()}}
 function priceCard(i){
   const rs=S.rentals.filter(r=>r.itemId===i.id&&r.status!=='back').sort((a,b)=>a.from.localeCompare(b.from));
   const out=rs.find(r=>r.status==='out'),q=i.rent?0:stock(i.id);
@@ -1090,7 +1099,7 @@ function parseCmd(raw){
   return {type,preset:{itemId:best.id,qty,cost:total??best.cost,paid:paid??''}};
 }
 const APP_URL='https://ahmed-elbaz84.github.io/shop/';
-const APP_VERSION=8;   // keep equal to the number in sw.js CACHE ('shopdemo-v8')
+const APP_VERSION=9;   // keep equal to the number in sw.js CACHE ('shopdemo-v9')
 function openPerms(id){
   const u=REAL?MEM.find(m=>m.id===id):S.users.find(x=>x.id===id);if(!u)return;const p=normPerms(u.perms);
   $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><form class="sheet" id="frm" aria-label="صلاحيات ${esc(u.name)}"><h2>صلاحيات ${esc(u.name)}</h2>
@@ -1270,9 +1279,10 @@ const SYNC={
     }
     if(!sn.metadata.fromCache)this.live=true;
     this.pending=sn.metadata.hasPendingWrites;
-    if(changed){ls.set(RK+'cache',JSON.stringify(S));ls.set(RK+'synced',JSON.stringify(this.synced));if(!document.querySelector('#sheetRoot .sheet'))render()}
+    if(changed){ls.set(RK+'cache',cacheJSON());ls.set(RK+'synced',JSON.stringify(this.synced));if(!document.querySelector('#sheetRoot .sheet'))render()}
     syncUI();
     if(fresh.length)toast(fresh.length===1?`${fresh[0].by}: ${fresh[0].txt}`:`${fresh.length} حاجات جديدة اتسجلت، آخرها من ${fresh[fresh.length-1].by}`);
+    this.gotSnap=true;   // only upload after Firebase handed us its copy, so nothing kept only there (ID photos) gets overwritten
     this.push();
   },
   put(rec){const {c,...r}=rec;
@@ -1284,6 +1294,7 @@ const SYNC={
   pushT:null,
   push(){if(!this.ready||!this.key)return;clearTimeout(this.pushT);this.pushT=setTimeout(()=>this.pushNow(),30)},
   async pushNow(){
+    if(!this.gotSnap)return;
     const col=this.db.collection('recs'),cur=new Set();let n=0;
     for(const [id,rec] of this.all()){cur.add(id);const h=hashStr(JSON.stringify(rec));if(this.synced[id]===h)continue;
       if(id==='settings'&&SESSION.role!=='manager'&&!this.synced[id]){this.synced[id]=h;continue}
@@ -1434,6 +1445,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const d=b.dataset;
   if(d.tab){goTab(d.tab);return}
   if(d.install){doInstall();return}
+  if(d.idph){openIdCard(d.idph);return}
   if(d.pname){const a=b.closest('.pcard').querySelector('.pacts'),t=b.closest('.pcard').querySelector('.ptap');a.hidden=!a.hidden;if(t)t.hidden=!a.hidden;return}
   if(d.photoprice){openPhotoPrice();return}
   if(d.itemph){setItemPhoto(d.itemph);return}
