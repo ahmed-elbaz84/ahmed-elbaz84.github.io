@@ -310,6 +310,22 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .receipt .stamp.ok{color:#2f7d55}.receipt .stamp.no{color:#b3412f}
 .receipt .thanks{text-align:center;color:#7a6a55;font-size:12.5px;margin-top:14px;border-top:1px dashed #d9c9a6;padding-top:10px}
 #printArea{display:none}
+.vmicwrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin:6px 0 14px}
+.vmic{width:96px;height:96px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;color:var(--accent-ink);background:linear-gradient(135deg,var(--accent),var(--hero2));box-shadow:0 14px 30px -10px color-mix(in srgb,var(--accent) 80%,transparent);position:relative;transition:transform .15s}
+.vmic svg{width:42px;height:42px}
+.vmic:active{transform:scale(.95)}
+.vmic.on{background:linear-gradient(135deg,#d9534f,#a83232);color:#fff}
+.vmic.on::before,.vmic.on::after{content:"";position:absolute;inset:-8px;border-radius:50%;border:3px solid #d9534f;opacity:.6;animation:vpulse 1.4s ease-out infinite}
+.vmic.on::after{animation-delay:.7s}
+@keyframes vpulse{from{transform:scale(.9);opacity:.7}to{transform:scale(1.45);opacity:0}}
+.vstat{font-weight:700;color:var(--accent)}
+.vops{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.vop{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+.vop .vi{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--good-soft);color:var(--good)}
+.vop.bad .vi{background:var(--bad-soft);color:var(--bad)}
+.vop.done{opacity:.7}
+.vop .t{font-size:14px;font-weight:500}.vop .s{font-size:12.5px;color:var(--bad)}
+.vex summary{cursor:pointer;color:var(--muted);font-size:13px;margin-top:10px}
 html.sheet-open{overscroll-behavior-y:none}
 .sheet{overscroll-behavior:contain}
 .icon-btn.inst{background:linear-gradient(135deg,var(--accent),var(--hero2));color:var(--accent-ink);border-color:transparent;font-weight:700}
@@ -974,7 +990,7 @@ function parseCmd(raw){
   S.items.forEach(i=>{const ws=norm(i.name).split(' ').filter(w=>w.length>2);const s=ws.filter(w=>t.includes(w)).length/ws.length+(ws.filter(w=>t.includes(w)).length?0.01*ws.length:0);if(s>score){score=s;best=i}});
   const expHit=EXP_WORDS.find(([w])=>t.includes(w));
   let type=null;
-  if(/(اجر|ايجار|حجز|حجزت)/.test(t)&&!/ايجار المحل/.test(t))type='rentals';
+  if(/(اجر|ايجار|تاجير|حجز|حجزت)/.test(t)&&!/ايجار المحل/.test(t))type='rentals';
   else if(/(بعت|بيع|اتباع|باع)/.test(t))type='sales';
   else if(/(وارد|اشتريت|استلمت بضاعه|جالي من)/.test(t))type='purchases';
   else if(expHit||/(مصروف|صرفت)/.test(t))type='expenses';
@@ -996,7 +1012,7 @@ function parseCmd(raw){
   return {type,preset:{itemId:best.id,qty,cost:total??best.cost,paid:paid??''}};
 }
 const APP_URL='https://ahmed-elbaz84.github.io/shop/';
-const APP_VERSION=5;   // keep equal to the number in sw.js CACHE ('shopdemo-v5')
+const APP_VERSION=6;   // keep equal to the number in sw.js CACHE ('shopdemo-v6')
 function openPerms(id){
   const u=REAL?MEM.find(m=>m.id===id):S.users.find(x=>x.id===id);if(!u)return;const p=normPerms(u.perms);
   $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><form class="sheet" id="frm" aria-label="صلاحيات ${esc(u.name)}"><h2>صلاحيات ${esc(u.name)}</h2>
@@ -1034,23 +1050,81 @@ function openShare(){
   <div class="btns" style="justify-content:center;margin-top:12px"><button class="btn" id="cancel">قفل</button></div></div></div>`;
   $('#cancel').onclick=closeForm;$('#bg').onclick=e=>{if(e.target.id==='bg')closeForm()};
 }
-function openVoice(){
-  const ex=['تم إيجار فستان سهرة ستان لمدام دعاء بـ 800 دفعت 300 والباقي 500','بعت 2 عباية كريب للعميلة هبة بـ 750 دفعت 1000','مصروف كهرباء 450','حجز فستان زفاف ملكي للعروسة سلمى بـ 4500 عربون 1500'];
-  $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><div class="sheet" aria-label="أمر بالصوت"><h2>أمر بالصوت</h2>
-  <p class="hint">قول أو اكتب العملية زي ما بتحكيها، والتطبيق يفهمها ويفتحلك الفورمة متعبية. تراجعها وتدوس حفظ.</p>
-  <div class="field"><label for="vtext">الأمر</label><textarea id="vtext" rows="3"></textarea></div>
-  <p class="err" id="verr"></p>
-  <div class="btns"><button class="btn pri" id="vmic">اتكلم</button><button class="btn pri" id="vgo">افهم الأمر</button><button class="btn" id="cancel">إلغاء</button></div>
-  <h3>جرّب مثال</h3><div class="list">${ex.map(e=>`<button class="btn ex" data-ex="${esc(e)}">${esc(e)}</button>`).join('')}</div></div></div>`;
-  $('#cancel').onclick=closeForm;$('#bg').onclick=e=>{if(e.target.id==='bg')closeForm()};
-  const go=()=>{const r=parseCmd($('#vtext').value);if(r.err)return $('#verr').textContent=r.err;openForm(r.type,r.preset)};
-  $('#vgo').onclick=go;
-  document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{$('#vtext').value=b.dataset.ex;go()});
-  $('#vmic').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;const no=()=>$('#verr').textContent='المايك مش متاح على الجهاز أو المتصفح ده. اكتب الأمر أو جرّب مثال. (الصوت بيشتغل في Chrome ومحتاج نت)';
-    if(!SR)return no();try{const rec=new SR();rec.lang='ar-EG';rec.interimResults=false;rec.onresult=e=>{$('#vtext').value=e.results[0][0].transcript;go()};rec.onerror=no;rec.start();$('#verr').textContent='بسمعك…'}catch(e){no()}};
-  setTimeout(()=>$('#vtext').focus(),50);
+/* voice: speak one or more operations; each one is understood, shown, then saved in its own section */
+function splitCmds(raw){
+  const KW='(?:بعت|بعنا|بيع|باع|اتباع|[أاإ]جّ?رت|ت[أا]جير|[إا]يجار|حجزت?|مصروف|صرفت|وارد|اشتريت)';
+  return raw.replace(new RegExp('(^|\\s)و\\s*(?='+KW+')','g'),'\n').replace(new RegExp('(\\d)\\s+(?='+KW+')','g'),'$1\n').replace(/\s+(?:وكمان|كمان|وبعدين|بعدين)\s+/g,'\n')
+    .split(/\n|[؛]|(?<!\d)[،,.](?!\d)/).map(x=>x.trim()).filter(x=>x.length>2);
 }
-
+function opText(type,v){const it=v.itemId?item(v.itemId).name:'';
+  if(type==='sales'){const t=v.qty*v.price,p=v.paid===''?t:v.paid;return `بيع ${it} × ${v.qty} لـ ${v.customer} بـ ${money(t)} · ${p>=t?'دفع كامل':'دفع '+money(p)+' والباقي '+money(t-p)}`}
+  if(type==='rentals')return `حجز ${it} لـ ${v.customer} بـ ${money(v.price)} · من ${fmtDate(v.from)} لـ ${fmtDate(v.to)}${n0(v.paid)?' · عربون '+money(v.paid):''}`;
+  if(type==='purchases')return `وارد ${it} × ${v.qty} بـ ${money(v.qty*v.cost)} (${MODES[v.mode]})`;
+  return `مصروف ${v.type} ${money(v.amount)}${v.note?'':''}`}
+function buildOp(raw){
+  const r=parseCmd(raw);if(r.err)return {raw,err:r.err};
+  const type=r.type,F=FORMS[type];
+  if(!can(type))return {raw,type,err:'مش مسموحلك تسجّل في '+((ALL_TABS.find(t=>t[0]===type)||[])[1]||type)};
+  const need=F.need&&F.need();if(need)return {raw,type,err:need};
+  const v={};F.fields.forEach(f=>{v[f.k]=f.t==='date'?today():f.t==='select'?((f.o()[0]||[''])[0]):''});
+  if(type==='rentals')v.to=dayOff(2);
+  const set=(k,x)=>{if(x!=null&&k in v)v[k]=x};
+  if(F.onItem&&r.preset.itemId){v.itemId=r.preset.itemId;F.onItem(item(v.itemId),set)}
+  Object.entries(r.preset).forEach(([k,x])=>{if(x!==''&&x!=null&&k in v)v[k]=x});
+  if(type==='sales'&&!v.customer)v.customer='زبون';
+  if(type==='rentals'&&!v.customer)v.customer='عميلة';
+  F.fields.forEach(f=>{if(f.t==='number'&&v[f.k]!=='')v[f.k]=+v[f.k]});
+  for(const f of F.fields)if(!f.opt&&(v[f.k]===''||(f.t==='number'&&!(v[f.k]>0))))return {raw,type,preset:r.preset,err:'ناقص: '+f.l.replace(/ ?\(.*\)/,'')};
+  const c=F.check&&F.check(v);if(c)return {raw,type,preset:r.preset,err:c};
+  return {raw,type,v,preset:r.preset,txt:opText(type,v)};
+}
+const MIC_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+function openVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const ex=['بعت عباية كريب بـ 750 وأجرت فستان سهرة ستان لمدام دعاء بـ 800 عربون 300','مصروف كهرباء 450','حجز فستان زفاف ملكي للعروسة سلمى بـ 4500 عربون 1500'];
+  $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><div class="sheet" aria-label="أمر بالصوت"><h2>أمر بالصوت</h2>
+  <div class="vmicwrap"><button class="vmic" id="vmic" type="button" aria-label="اتكلم">${MIC_SVG}</button><div class="vstat" id="vstat">${SR?'دوس على المايك واتكلم':'المايك مش متاح هنا، اكتب الأمر'}</div>
+  <p class="hint" style="margin:0;text-align:center">تقدر تقول أكتر من عملية مرة واحدة، زي: «بعت عباية بـ 500 وأجرت فستان سهرة بـ 1300». كل عملية هتروح مكانها.</p></div>
+  <div class="field"><label for="vtext">اللي اتقال (تقدر تكتب أو تعدّل)</label><textarea id="vtext" rows="2"></textarea></div>
+  <p class="err" id="verr"></p><div id="vops" class="vops"></div>
+  <div class="btns" id="vbtns"><button class="btn pri" id="vgo" type="button">افهم وسجّل</button><button class="btn" id="cancel" type="button">إلغاء</button></div>
+  <details class="vex"><summary>أمثلة</summary><div class="list" style="margin-top:8px">${ex.map(e=>`<button class="btn ex" type="button" data-ex="${esc(e)}">${esc(e)}</button>`).join('')}</div></details></div></div>`;
+  let ops=[],cd=null,rec=null,on=false,base='';
+  const stopCd=()=>{clearInterval(cd);cd=null};
+  const close=()=>{stopCd();try{rec&&rec.abort()}catch(e){}closeForm()};
+  $('#cancel').onclick=close;$('#bg').onclick=e=>{if(e.target.id==='bg')close()};
+  const setMic=()=>{const m=$('#vmic');if(!m)return;m.classList.toggle('on',on);$('#vstat').textContent=on?'بسمعك… اتكلم وأنا هفهم لما تسكت':'دوس على المايك واتكلم'};
+  const commit=()=>{stopCd();let n=0;const done=[];
+    ops.forEach(o=>{if(!o.v||o.saved)return;const F=FORMS[o.type];const c=F.check&&F.check(o.v);if(c){o.err=c;delete o.v;return}
+      const [txt,goTab]=F.save(o.v);logA(txt);o.saved=true;n++;done.push(goTab)});
+    if(n){save();if(done.length===1&&tabsFor().some(([k])=>k===done[0]))tab=done[0];render();toast(n===1?'اتسجلت العملية':`اتسجلت ${n} عمليات، كل واحدة في مكانها`)}
+    if(ops.every(o=>o.saved)){closeForm();return}
+    show(true)};
+  const show=after=>{
+    $('#vops').innerHTML=ops.map((o,i)=>`<div class="vop ${o.saved?'done':o.v?'ok':'bad'}"><span class="vi">${o.saved||o.v?'✓':'!'}</span><div><div class="t">${o.saved?'اتسجلت: ':''}${o.txt?o.txt:esc(o.raw)}</div>${o.err?`<div class="s">${esc(o.err)}</div>`:''}</div>${!o.saved&&o.type&&o.err?`<button class="btn" type="button" data-vfix="${i}">افتح الفورمة</button>`:''}</div>`).join('');
+    $('#vops').querySelectorAll('[data-vfix]').forEach(b=>b.onclick=()=>{const o=ops[+b.dataset.vfix];stopCd();openForm(o.type,o.preset||{})});
+    const ok=ops.filter(o=>o.v&&!o.saved).length;
+    $('#vbtns').innerHTML=ok?`<button class="btn pri" id="vsave" type="button">سجّل دلوقتي</button><button class="btn" id="vstop" type="button">استنى، هعدّل</button><button class="btn" id="cancel" type="button">إلغاء</button>`
+      :`<button class="btn pri" id="vgo" type="button">افهم وسجّل</button><button class="btn" id="cancel" type="button">${after?'تمام':'إلغاء'}</button>`;
+    $('#cancel').onclick=close;const g=$('#vgo');if(g)g.onclick=go;
+    if(ok){$('#vsave').onclick=commit;$('#vstop').onclick=()=>{stopCd();$('#vsave').textContent='سجّل';$('#vstop').remove()};
+      let n=4;const tick=()=>{const b=$('#vsave');if(!b||!cd)return stopCd();if(n<=0)return commit();b.textContent=`سجّل دلوقتي (${n--})`};cd=setInterval(tick,1000);tick()}};
+  const go=()=>{stopCd();$('#verr').textContent='';const txt=$('#vtext').value.trim();if(!txt){$('#verr').textContent='قول أو اكتب العملية الأول';return}
+    const parts=splitCmds(txt);ops=(parts.length?parts:[txt]).map(buildOp);show(false)};
+  $('#vgo').onclick=go;
+  $('#vtext').addEventListener('input',stopCd);
+  document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{$('#vtext').value=b.dataset.ex;go()});
+  const no=m=>{on=false;setMic();$('#verr').textContent=m||'المايك مش متاح على الجهاز أو المتصفح ده. اكتب الأمر. (الصوت بيشتغل في Chrome ومحتاج نت)'};
+  const start=()=>{if(!SR)return no();if(on){try{rec.stop()}catch(e){}return}
+    stopCd();base=$('#vtext').value.trim();base=base?base+' و ':'';let heard='';
+    try{rec=new SR();rec.lang='ar-EG';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1}catch(e){return no()}
+    rec.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;heard=t;const x=$('#vtext');if(x)x.value=base+t};
+    rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')no('المايك مقفول للموقع ده. اسمحله من إعدادات المتصفح (القفل اللي جنب العنوان ← الأذونات ← الميكروفون).');else if(e.error==='no-speech')$('#verr').textContent='ما سمعتش حاجة. دوس على المايك واتكلم تاني.';else if(e.error!=='aborted')no()};
+    rec.onend=()=>{on=false;setMic();if($('#vtext')&&heard.trim())go()};
+    try{rec.start();on=true;setMic();$('#verr').textContent=''}catch(e){no()}};
+  $('#vmic').onclick=start;
+  if(SR)start();else setTimeout(()=>$('#vtext').focus(),50);
+}
 /* ---------- crypto: shop data is locked with a shop key; each user's copy of the key is locked with their own password ---------- */
 const CR={
   b64:b=>{let s='';new Uint8Array(b).forEach(x=>s+=String.fromCharCode(x));return btoa(s)},
