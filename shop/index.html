@@ -310,6 +310,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .receipt .stamp.ok{color:#2f7d55}.receipt .stamp.no{color:#b3412f}
 .receipt .thanks{text-align:center;color:#7a6a55;font-size:12.5px;margin-top:14px;border-top:1px dashed #d9c9a6;padding-top:10px}
 #printArea{display:none}
+html.sheet-open{overscroll-behavior-y:none}
+.sheet{overscroll-behavior:contain}
 .icon-btn.inst{background:linear-gradient(135deg,var(--accent),var(--hero2));color:var(--accent-ink);border-color:transparent;font-weight:700}
 .steps{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:6px}.steps b{color:var(--accent)}
 /* dark mode: black and gold */
@@ -500,7 +502,7 @@ function save(){if(REAL){ls.set(RK+'cache',JSON.stringify(S));SYNC.push()}else l
 let meId=ls.get(KEY+'_me')||'u1';
 const me=()=>REAL?(SESSION?{id:SESSION.uid,name:SESSION.name,role:SESSION.role==='manager'?'مدير':'بياع'}:{id:'',name:'',role:'بياع'}):(S.users.find(u=>u.id===meId)||S.users[0]);
 const isMgr=()=>me().role==='مدير';
-let tab=ls.get(KEY+'_tab')||'home',period='month',itemQ='',itemCat='',logUser='',custQ='',repMonth=today().slice(0,7),lastTab='';
+let tab=((h)=>ALL_TABS.some(t=>t[0]===h)?h:null)(location.hash.slice(1))||ls.get(KEY+'_tab')||'home',period='month',itemQ='',itemCat='',logUser='',custQ='',repMonth=today().slice(0,7),lastTab='';
 const look=Object.assign({skin:'champagne',shape:'soft',font:'kufi',mode:'auto'},(()=>{try{return JSON.parse(ls.get(LOOK_KEY))||{}}catch(e){return{}}})());
 function applyLook(){const r=document.documentElement;r.dataset.skin=look.skin;r.dataset.shape=look.shape;r.dataset.font=look.font;if(look.mode==='auto')delete r.dataset.mode;else r.dataset.mode=look.mode;ls.set(LOOK_KEY,JSON.stringify(look))}
 applyLook();
@@ -856,7 +858,8 @@ function openForm(type,preset={},ctx){
   };
   setTimeout(()=>{const first=frm.querySelector('input:not([type=date]),select');first&&first.focus()},50);
 }
-function closeForm(){$('#sheetRoot').innerHTML=''}
+function closeForm(fromBack){const r=$('#sheetRoot');const had=!!r.firstChild;r.innerHTML='';
+  if(had&&!fromBack&&history.state&&history.state.sheet){skipPop=true;history.back()}}
 let toastT;function toast(t){let el=$('#toast');if(!el){el=document.createElement('div');el.id='toast';el.setAttribute('role','status');document.body.appendChild(el)}
   el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,3500)}
 
@@ -877,6 +880,36 @@ function doInstall(){
   <div class="btns" style="margin-top:12px"><button class="btn" id="cancel">تمام</button></div></div></div>`;
   $('#cancel').onclick=closeForm;$('#bg').onclick=e=>{if(e.target.id==='bg')closeForm()};
 }
+
+/* ---------- back button, refresh and swipe-down ----------
+   Each section and each open window is a step in the browser history, so the phone's back gesture
+   closes the open window first, then goes back section by section to the home page. */
+let skipPop=false;
+const hs=()=>history.state||{};
+function goTab(k){
+  const open=!!$('#sheetRoot').firstChild;
+  if(open){closeForm(true);history.replaceState({tab:k,d:(hs().d||0)+(k===tab?0:1)},'','#'+k)}
+  else if(k!==tab){if(k==='home'&&hs().d>0){history.go(-hs().d);return}history.pushState({tab:k,d:(hs().d||0)+1},'','#'+k)}
+  tab=k;render();scrollTo(0,0)}
+function initHistory(){
+  if(hs().tab)return;   // reload: the browser kept our steps
+  history.replaceState({tab:'home',d:0},'','#home');
+  if(tab!=='home')history.pushState({tab,d:1},'','#'+tab)}
+addEventListener('popstate',e=>{
+  if(skipPop){skipPop=false;if(hs().tab!==tab)history.replaceState({...hs(),tab},'','#'+tab);return}
+  if($('#sheetRoot').firstChild){closeForm(true);return}
+  const st=e.state||{};if(st.sheet||!st.tab)return;
+  if(st.tab!==tab){tab=st.tab;render();scrollTo(0,0)}});
+new MutationObserver(()=>{const open=!!$('#sheetRoot').firstChild;document.documentElement.classList.toggle('sheet-open',open);
+  if(open&&!hs().sheet)history.pushState({sheet:1,tab,d:hs().d||0},'',location.hash)}).observe($('#sheetRoot'),{childList:true});
+(()=>{let st=null;   // drag a window down to close it
+  document.addEventListener('touchstart',e=>{const sh=e.target.closest&&e.target.closest('.sheet');st=sh&&sh.scrollTop<=0?{sh,y:e.touches[0].clientY,x:e.touches[0].clientX,dy:0,on:false}:null},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!st)return;const t=e.touches[0],dy=t.clientY-st.y,dx=t.clientX-st.x;
+    if(!st.on){if(dy>8&&dy>Math.abs(dx)&&st.sh.scrollTop<=0)st.on=true;else{if(dy<-4||Math.abs(dx)>10)st=null;return}}
+    st.dy=Math.max(0,dy);st.sh.style.transition='none';st.sh.style.transform=`translateY(${st.dy}px)`;st.sh.parentElement.style.background=`rgba(18,10,4,${Math.max(.05,.42-st.dy/900)})`;if(e.cancelable)e.preventDefault()},{passive:false});
+  document.addEventListener('touchend',()=>{if(!st)return;const{sh,dy,on}=st;st=null;if(!on)return;sh.style.transition='transform .2s ease';
+    if(dy>100){sh.style.transform='translateY(110%)';setTimeout(()=>closeForm(),170)}else{sh.style.transform='';sh.parentElement.style.background=''}});
+})();
 
 /* ---------- receipts, printing, search ---------- */
 function receiptHtml(coll,r){
@@ -963,7 +996,7 @@ function parseCmd(raw){
   return {type,preset:{itemId:best.id,qty,cost:total??best.cost,paid:paid??''}};
 }
 const APP_URL='https://ahmed-elbaz84.github.io/shop/';
-const APP_VERSION=4;   // keep equal to the number in sw.js CACHE ('shopdemo-v4')
+const APP_VERSION=5;   // keep equal to the number in sw.js CACHE ('shopdemo-v5')
 function openPerms(id){
   const u=REAL?MEM.find(m=>m.id===id):S.users.find(x=>x.id===id);if(!u)return;const p=normPerms(u.perms);
   $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><form class="sheet" id="frm" aria-label="صلاحيات ${esc(u.name)}"><h2>صلاحيات ${esc(u.name)}</h2>
@@ -1247,7 +1280,7 @@ function render(){
 }
 document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const d=b.dataset;
-  if(d.tab){closeForm();tab=d.tab;render();scrollTo(0,0);return}
+  if(d.tab){goTab(d.tab);return}
   if(d.install){doInstall();return}
   if(d.receipt){const[coll,id]=d.receipt.split(':');openReceipt(coll,id);return}
   if(d.month){repMonth=shiftMonth(repMonth,+d.month);if(repMonth>today().slice(0,7))repMonth=today().slice(0,7);render();return}
@@ -1289,8 +1322,10 @@ function syncUI(){const on=navigator.onLine,s=$('#sync');let t,off=false;
 addEventListener('online',()=>{syncUI();if(REAL&&SESSION&&!SYNC.ready)SYNC.start()});addEventListener('offline',syncUI);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeForm();
   else if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K'||e.key==='ن')){e.preventDefault();openSearch()}});
+initHistory();
 boot();
-(()=>{const sp=document.getElementById('splash');const bye=()=>{sp.classList.add('bye');setTimeout(()=>sp.remove(),600)};sp.onclick=bye;setTimeout(bye,1800)})();
+(()=>{const sp=document.getElementById('splash');let seen=false;try{seen=!!sessionStorage.getItem('splash_seen');sessionStorage.setItem('splash_seen','1')}catch(e){}
+  if(seen){sp.remove();return}const bye=()=>{sp.classList.add('bye');setTimeout(()=>sp.remove(),600)};sp.onclick=bye;setTimeout(bye,1800)})();
 </script>
 
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update();let reloaded=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloaded)return;reloaded=true;location.reload()})}).catch(()=>{});</script>
