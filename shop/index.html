@@ -310,6 +310,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .receipt .stamp.ok{color:#2f7d55}.receipt .stamp.no{color:#b3412f}
 .receipt .thanks{text-align:center;color:#7a6a55;font-size:12.5px;margin-top:14px;border-top:1px dashed #d9c9a6;padding-top:10px}
 #printArea{display:none}
+.icon-btn.inst{background:linear-gradient(135deg,var(--accent),var(--hero2));color:var(--accent-ink);border-color:transparent;font-weight:700}
+.steps{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:6px}.steps b{color:var(--accent)}
 /* dark mode: black and gold */
 :root{--hero-bg:linear-gradient(135deg,var(--accent),var(--hero2));--hero-ink:var(--accent-ink);color-scheme:light}
 .kpi.hero{background:var(--hero-bg);color:var(--hero-ink)}
@@ -390,7 +392,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 <div class="wrap">
   <header class="top">
     <div class="brand-row"><img class="mark" src="logo.svg" alt="" width="52" height="52"><div class="brand"><span class="latin">Hoor</span><span class="ar">حور · فساتين · عبايات · حريمي · أطفال</span></div></div>
-    <div class="who"><button class="icon-btn" id="searchBtn" type="button" aria-label="بحث"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"/></svg>بحث <kbd>Ctrl K</kbd></button><button class="btn share-btn" id="shareBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>مشاركة</button><span id="sync" class="sync">أونلاين</span><span id="demoWho"><label for="meSel">شغال دلوقتي:</label><select id="meSel"></select></span><span id="realWho" hidden></span></div>
+    <div class="who"><button class="icon-btn inst" id="installBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>ثبّت التطبيق</button><button class="icon-btn" id="searchBtn" type="button" aria-label="بحث"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"/></svg>بحث <kbd>Ctrl K</kbd></button><button class="btn share-btn" id="shareBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>مشاركة</button><span id="sync" class="sync">أونلاين</span><span id="demoWho"><label for="meSel">شغال دلوقتي:</label><select id="meSel"></select></span><span id="realWho" hidden></span></div>
   </header>
   <nav class="tabs" id="tabs"></nav>
   <main id="view"></main>
@@ -858,6 +860,24 @@ function closeForm(){$('#sheetRoot').innerHTML=''}
 let toastT;function toast(t){let el=$('#toast');if(!el){el=document.createElement('div');el.id='toast';el.setAttribute('role','status');document.body.appendChild(el)}
   el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,3500)}
 
+/* ---------- install as an app on the phone ---------- */
+let installEvt=null;
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;const b=$('#installBtn');if(b)b.hidden=false});
+addEventListener('appinstalled',()=>{installEvt=null;const b=$('#installBtn');if(b)b.hidden=true;toast('التطبيق اتثبّت. هتلاقيه على الشاشة الرئيسية');if(tab==='settings')render()});
+function doInstall(){
+  if(installEvt){const e=installEvt;e.prompt();e.userChoice.then(c=>{if(c&&c.outcome==='accepted'){installEvt=null;$('#installBtn').hidden=true}}).catch(()=>{});return}
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),sam=/SamsungBrowser/i.test(navigator.userAgent);
+  $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><div class="sheet" role="dialog" aria-label="تثبيت التطبيق"><h2>ثبّت التطبيق على الموبايل</h2>
+  <p class="hint">بعد التثبيت هيبقى ليه أيقونة على الشاشة الرئيسية ويفتح زي أي تطبيق، ويشتغل من غير نت.</p>
+  ${ios?`<div class="panel"><b>على الآيفون (Safari):</b><ol class="steps"><li>دوس زرار <b>المشاركة</b> (المربع اللي طالع منه سهم) تحت.</li><li>انزل واختار <b>«إضافة إلى الشاشة الرئيسية»</b>.</li><li>دوس <b>«إضافة»</b>.</li></ol></div>`
+  :sam?`<div class="panel"><b>على Samsung Internet:</b><ol class="steps"><li>دوس <b>☰</b> تحت.</li><li>اختار <b>«إضافة الصفحة إلى»</b> ثم <b>«الشاشة الرئيسية»</b>.</li></ol></div>`
+  :`<div class="panel"><b>على Chrome:</b><ol class="steps"><li>دوس <b>⋮</b> (التلات نقط فوق).</li><li>اختار <b>«تثبيت التطبيق»</b> أو <b>«إضافة إلى الشاشة الرئيسية»</b>.</li><li>لو مش لاقيها في القايمة: دوس <b>«مشاركة…»</b> واختار منها <b>«إضافة إلى الشاشة الرئيسية»</b>.</li></ol></div>
+  <p class="hint" style="margin-top:10px">لو لسه مش ظاهرة: اقفل الصفحة وافتحها تاني وفيه نت، واستنى ثواني، وهيظهر فوق زرار <b>«ثبّت التطبيق»</b>.</p>`}
+  <div class="btns" style="margin-top:12px"><button class="btn" id="cancel">تمام</button></div></div></div>`;
+  $('#cancel').onclick=closeForm;$('#bg').onclick=e=>{if(e.target.id==='bg')closeForm()};
+}
+
 /* ---------- receipts, printing, search ---------- */
 function receiptHtml(coll,r){
   const it=item(r.itemId),total=totalOf(coll,r),paid=paidOf(r),rest=total-paid,no=String(r.id).slice(0,6).toUpperCase();
@@ -943,7 +963,7 @@ function parseCmd(raw){
   return {type,preset:{itemId:best.id,qty,cost:total??best.cost,paid:paid??''}};
 }
 const APP_URL='https://ahmed-elbaz84.github.io/shop/';
-const APP_VERSION=3;   // keep equal to the number in sw.js CACHE ('shopdemo-v3')
+const APP_VERSION=4;   // keep equal to the number in sw.js CACHE ('shopdemo-v4')
 function openPerms(id){
   const u=REAL?MEM.find(m=>m.id===id):S.users.find(x=>x.id===id);if(!u)return;const p=normPerms(u.perms);
   $('#sheetRoot').innerHTML=`<div class="sheet-bg" id="bg"><form class="sheet" id="frm" aria-label="صلاحيات ${esc(u.name)}"><h2>صلاحيات ${esc(u.name)}</h2>
@@ -960,7 +980,7 @@ function openPerms(id){
     if(REAL){$('#err').textContent='لحظة…';SYNC.db.doc('members/'+id).update({perms}).then(()=>{u.perms=perms;done()}).catch(x=>{$('#err').textContent=fbErr(x)})}
     else{u.perms=perms;done()}};
 }
-const appPanel=()=>`<h3>التطبيق</h3><div class="panel"><div>إنت على الإصدار <b class="num">${APP_VERSION}</b>. التحديثات بتنزل لوحدها أول ما التطبيق يتفتح وفيه نت.</div>
+const appPanel=()=>`<h3>التطبيق</h3><div class="panel">${isStandalone()?'<div><span class="pill good">متثبّت على الجهاز ده</span></div>':'<div><button class="btn pri" data-install="1">ثبّت التطبيق على الموبايل</button></div>'}<div>إنت على الإصدار <b class="num">${APP_VERSION}</b>. التحديثات بتنزل لوحدها أول ما التطبيق يتفتح وفيه نت.</div>
   <div><button class="btn pri" id="updBtn">حدّث لآخر إصدار</button></div><div id="updMsg" class="hint" style="margin:0"></div></div>`;
 async function latestVersion(){const t=await (await fetch('sw.js?t='+Date.now(),{cache:'no-store'})).text();const m=t.match(/shopdemo-v(\d+)/);return m?+m[1]:0}
 async function checkUpdate(manual){
@@ -1228,6 +1248,7 @@ function render(){
 document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const d=b.dataset;
   if(d.tab){closeForm();tab=d.tab;render();scrollTo(0,0);return}
+  if(d.install){doInstall();return}
   if(d.receipt){const[coll,id]=d.receipt.split(':');openReceipt(coll,id);return}
   if(d.month){repMonth=shiftMonth(repMonth,+d.month);if(repMonth>today().slice(0,7))repMonth=today().slice(0,7);render();return}
   if(d.print){window.print();return}
@@ -1258,6 +1279,7 @@ $('#fab').onclick=()=>openForm(['home','customers'].includes(tab)?'sales':tab);
 $('#voiceBtn').onclick=openVoice;
 $('#shareBtn').onclick=openShare;
 $('#searchBtn').onclick=openSearch;
+$('#installBtn').onclick=doInstall;
 function syncUI(){const on=navigator.onLine,s=$('#sync');let t,off=false;
   if(!on){t='أوفلاين · هيتبعت لما النت يرجع';off=true}
   else if(REAL&&!SYNC.live){t='بيتصل…';off=true}
