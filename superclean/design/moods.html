@@ -1,0 +1,64 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=El+Messiri:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e9e6e1;font-family:"IBM Plex Sans Arabic";padding:26px}
+.wrap{display:flex;gap:26px;justify-content:center}
+.col{text-align:center}.col h2{font-family:"Reem Kufi";margin:0 0 4px;font-size:24px}.col p{margin:0 0 12px;color:#555;font-size:14px;max-width:360px}
+.ph{width:360px;height:780px;border-radius:44px;overflow:hidden;position:relative;box-shadow:0 30px 60px -30px rgba(0,0,0,.5);border:8px solid #111;text-align:right}
+.in{position:absolute;inset:0;overflow:hidden;padding:18px 16px}
+.hd{display:flex;align-items:center;gap:10px}.hd .lg{width:42px;height:42px;border-radius:50%;display:grid;place-items:center}.hd b{font-family:"Reem Kufi";font-size:19px;display:block;line-height:1.1}.hd small{font-size:11px;opacity:.7}.hd .sp{flex:1}.hd .bell{width:38px;height:38px;border-radius:12px;display:grid;place-items:center}
+.hi{font-family:"Reem Kufi";font-size:24px;margin:16px 0 2px}.dt{font-size:12px;opacity:.7}
+.hero{border-radius:26px;padding:16px;margin-top:12px;position:relative;overflow:hidden}
+.hero .l{font-size:13px;opacity:.85}.hero .v{font-family:"El Messiri";font-size:36px;font-weight:700;line-height:1.2}.hero .s{display:flex;gap:6px;flex-wrap:wrap;font-size:11.5px;margin-top:6px}.hero .s span{padding:2px 9px;border-radius:99px}
+.qa{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.qa div{border-radius:18px;padding:10px 2px;text-align:center;font-size:11.5px;font-weight:600}.qa i{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;margin:0 auto 4px;font-style:normal;font-size:20px}
+.k{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.k div{border-radius:20px;padding:12px}.k span{display:block;font-size:11.5px;opacity:.75}.k b{font-size:18px;font-family:"El Messiri"}
+.ch{border-radius:22px;padding:12px;margin-top:14px}.ch h4{margin:0 0 8px;font-family:"Reem Kufi";font-size:15px}.bars{display:flex;align-items:flex-end;gap:7px;height:64px}.bars i{flex:1;border-radius:7px 7px 3px 3px}
+.nav{position:absolute;bottom:12px;inset-inline:12px;height:62px;border-radius:24px;display:flex;align-items:center;justify-content:space-around;font-size:10.5px;font-weight:600}
+.nav span{display:flex;flex-direction:column;align-items:center;gap:2px}.nav em{font-style:normal;font-size:19px}
+.nav .f{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-size:28px;margin-top:-26px;color:#fff}
+/* A pastel joy */
+.A{background:linear-gradient(170deg,#fdf2f8 0%,#f3efff 45%,#eafaf5 100%);color:#2d2440}
+.A .lg{background:linear-gradient(135deg,#ff9ac2,#b69cff)}.A .bell{background:#fff}
+.A .hero{background:linear-gradient(130deg,#b69cff,#ff9ac2 60%,#ffc7a0);color:#fff;box-shadow:0 16px 30px -16px #b69cff}.A .hero .s span{background:rgba(255,255,255,.28)}
+.A .qa div{background:#fff}.A .qa div:nth-child(1) i{background:#ffe1ee}.A .qa div:nth-child(2) i{background:#e9e2ff}.A .qa div:nth-child(3) i{background:#dcf7ee}.A .qa div:nth-child(4) i{background:#fff0dc}
+.A .k div{background:#fff}.A .k div:nth-child(1){background:#ffe8f2}.A .k div:nth-child(2){background:#ece6ff}.A .k div:nth-child(3){background:#dff8ef}.A .k div:nth-child(4){background:#fff1de}
+.A .ch{background:#fff}.A .bars i{background:linear-gradient(#b69cff,#ff9ac2)}.A .nav{background:#fff;box-shadow:0 10px 30px -12px rgba(120,80,200,.4)}.A .nav .f{background:linear-gradient(135deg,#b69cff,#ff9ac2)}.A .nav .on{color:#9b6bff}
+/* B glass bubbles */
+.B{background:radial-gradient(circle at 80% 10%,#46e0d4 0,transparent 40%),radial-gradient(circle at 10% 60%,#7b5cff 0,transparent 45%),radial-gradient(circle at 90% 90%,#ff6fb5 0,transparent 40%),#1d1b4b;color:#fff}
+.B .bub{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.7),rgba(255,255,255,.08) 45%,rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.35)}
+.B .lg{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4)}.B .bell{background:rgba(255,255,255,.14)}
+.B .g,.B .hero,.B .qa div,.B .k div,.B .ch,.B .nav{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(14px)}
+.B .hero .s span{background:rgba(255,255,255,.16)}.B .qa i{background:rgba(255,255,255,.18)}.B .bars i{background:linear-gradient(#46e0d4,#7b5cff)}
+.B .nav .f{background:linear-gradient(135deg,#46e0d4,#7b5cff);box-shadow:0 8px 20px -6px #46e0d4}.B .nav .on{color:#46e0d4}
+/* C blush & rose gold */
+.C{background:#fbf3ef;color:#4a2b2f}
+.C .lg{background:linear-gradient(135deg,#e8b4a0,#b76e79)}.C .bell{background:#fff}
+.C .hero{background:linear-gradient(135deg,#4a2b2f,#8c4a57);color:#fff}.C .hero .v{color:#f4c9b4}.C .hero .s span{background:rgba(244,201,180,.18);color:#f4c9b4}
+.C .hero:after{content:'';position:absolute;width:180px;height:180px;border-radius:50%;border:1px solid rgba(244,201,180,.35);left:-50px;top:-60px}
+.C .qa div{background:#fff;border:1px solid #f0dcd4}.C .qa i{background:linear-gradient(135deg,#f9e2d8,#f4cdbf)}
+.C .k div{background:#fff;border:1px solid #f0dcd4}.C .k b{color:#8c4a57}
+.C .ch{background:#fff;border:1px solid #f0dcd4}.C .bars i{background:linear-gradient(#e8b4a0,#b76e79)}.C .nav{background:#4a2b2f;color:#e9cfc4}.C .nav .f{background:linear-gradient(135deg,#f4c9b4,#c98b8b);color:#4a2b2f}.C .nav .on{color:#f4c9b4}
+/* D bold bento */
+.D{background:#fffaf0;color:#1b1b1f}
+.D .lg{background:#1b1b1f}.D .bell{background:#ffe066}
+.D .hero{background:#5b4bff;color:#fff;border-radius:28px}.D .hero .s span{background:#ffe066;color:#1b1b1f;font-weight:600}
+.D .hero:before{content:'';position:absolute;width:120px;height:120px;border-radius:50%;background:#ff7a59;left:-30px;bottom:-50px}
+.D .hero:after{content:'';position:absolute;width:60px;height:60px;border-radius:16px;background:#3ddc97;left:60px;top:-20px;transform:rotate(20deg)}
+.D .qa div{background:#fff;border:2px solid #1b1b1f;box-shadow:3px 3px 0 #1b1b1f}.D .qa div:nth-child(1) i{background:#ff7a59}.D .qa div:nth-child(2) i{background:#3ddc97}.D .qa div:nth-child(3) i{background:#ffe066}.D .qa div:nth-child(4) i{background:#a79bff}
+.D .k div{border:2px solid #1b1b1f;box-shadow:3px 3px 0 #1b1b1f}.D .k div:nth-child(1){background:#ff7a59}.D .k div:nth-child(2){background:#3ddc97}.D .k div:nth-child(3){background:#ffe066}.D .k div:nth-child(4){background:#a79bff}
+.D .ch{background:#fff;border:2px solid #1b1b1f;box-shadow:3px 3px 0 #1b1b1f}.D .bars i{background:#5b4bff}.D .bars i:nth-child(odd){background:#ff7a59}.D .nav{background:#1b1b1f;color:#fff}.D .nav .f{background:#ffe066;color:#1b1b1f}.D .nav .on{color:#ffe066}
+</style></head><body><div class="wrap" id="w"></div>
+<script>
+const drop=c=>`<svg width="24" height="24" viewBox="0 0 48 48"><path d="M24 5S10 20.5 10 30a14 14 0 0 0 28 0C38 20.5 24 5 24 5z" fill="${c}"/><path d="M17.5 30.5a6.5 6.5 0 0 0 6.5 6.5" stroke="rgba(0,0,0,.25)" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+const M=[['A','باستيل مبهج','ألوان وردي وبنفسجي ونعناعي هادية وفرحانة. كل زرار ليه لون.'],['B','فقاعات وزجاج','خلفية ألوان نيون وفقاعات صابون، والكروت زي الزجاج. شكل عصري ولافت.'],['C','وردي ودهبي روز','بني محروق وروز جولد. شيك وأنثوي وراقي.'],['D','ألوان جريئة','بلوكات ألوان قوية (برتقالي، أخضر، أصفر، بنفسجي) بحدود سودا. شبابي ومختلف.']];
+const bars=[30,55,40,70,48,85,62];
+w.innerHTML=M.map(([k,n,d],ix)=>`<div class="col"><h2>${ix+1}. ${n}</h2><p>${d}</p><div class="ph ${k}"><div class="in">
+${k==='B'?[[300,40,70],[-20,300,90],[250,520,50],[40,640,30]].map(([x,y,r])=>`<i class="bub" style="left:${x}px;top:${y}px;width:${r}px;height:${r}px"></i>`).join(''):''}
+<div class="hd"><span class="lg">${drop(k==='D'?'#ffe066':'#fff')}</span><div><b>Super Clean</b><small>منظفات وأدوات نظافة</small></div><span class="sp"></span><span class="bell">🔔</span></div>
+<div class="hi">صباح الفل يا ست الكل ✨</div><div class="dt">السبت 28 نوفمبر · عندك 3 حاجات النهارده</div>
+<div class="hero"><div class="l">صافي المكسب — الشهر ده</div><div class="v">8,450 ج</div><div class="s"><span>المبيعات 32,600</span><span>المصروفات 1,250</span><span>12 فاتورة</span></div></div>
+<div class="qa"><div><i>🧾</i>فاتورة</div><div><i>📝</i>عرض سعر</div><div><i>📦</i>صنف</div><div><i>💸</i>مصروف</div></div>
+<div class="k"><div><span>عند العملاء</span><b>4,200 ج</b></div><div><span>اتحصّل</span><b>28,400 ج</b></div><div><span>قيمة المخزن</span><b>55,200 ج</b></div><div><span>نواقص</span><b>3 أصناف</b></div></div>
+<div class="ch"><h4>مبيعات آخر 7 أيام</h4><div class="bars">${bars.map(h=>`<i style="height:${h}%"></i>`).join('')}</div></div>
+</div><div class="nav"><span class="on"><em>🏠</em>الرئيسية</span><span><em>📦</em>المخزن</span><span class="f">+</span><span><em>🧾</em>الفواتير</span><span><em>☰</em>المزيد</span></div></div></div>`).join('');
+</script></body></html>
