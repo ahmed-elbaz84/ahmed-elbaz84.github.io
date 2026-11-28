@@ -14,7 +14,7 @@
 <title>Super Clean</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: a tidy shop-counter app, calm and quick to use with one hand.
    IDEA: the cleaning-shop sales book: stock shelf, receipt pad, cash drawer.
@@ -335,6 +335,90 @@ body.kb .stick{bottom:0}
 .paper .kp b{font-size:16px}
 .paper .kp small{display:block;font-size:11px;color:#7b8a90}
 .paper h4{margin:18px 0 8px;font-size:15px;color:var(--pd)}
+/* ---- v23: luxe. Ivory paper, deep petrol ink, champagne gold; El Messiri for titles, IBM Plex Sans Arabic for text. Floating profit card + floating tab bar. ---- */
+:root,:root[data-skin=luxe]{--bg:light-dark(#f4f1ea,#0c1114);--card:light-dark(#ffffff,#151c20);--ink:light-dark(#17232a,#ecebe6);--mut:light-dark(#6b7479,#9aa3a6);--line:light-dark(#e7e1d4,#263035);--pri:light-dark(#0e4a5a,#2f8ea3);--pri2:light-dark(#0b3440,#e4c98f);--top:light-dark(#0b2a33,#071a20);--hero2:light-dark(#15596a,#12404b);--acc:#c6a15b;--soft:light-dark(#efe9dc,#1d2629);--warn:light-dark(#f8efd9,#2e2817)}
+body{font-family:"IBM Plex Sans Arabic",Cairo,Tahoma,sans-serif;padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+h1,h2,h3,.sec,.sheet h3,.tile b,.hero .lbl,.ptitle{font-family:"El Messiri","IBM Plex Sans Arabic",Georgia,serif}
+.top{background:color-mix(in srgb,var(--bg) 84%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);color:var(--ink);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);padding:calc(10px + env(safe-area-inset-top)) max(4vw,16px) 10px}
+.top .logo{width:38px;height:38px;padding:6px;border-radius:12px;background:linear-gradient(150deg,var(--top),var(--hero2));box-shadow:0 6px 14px -8px var(--top)}
+.top img.logo{background:#fff;padding:3px;border:1px solid var(--line)}
+.top h1{font-size:19px;font-weight:700}
+.top small{color:var(--mut);font-size:11.5px}
+.ib{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;width:40px;height:40px}
+.band{padding:14px max(4vw,16px)}
+.hero{margin:14px max(4vw,16px) 0;padding:18px 18px 20px;border-radius:28px;color:#fff;
+  background:radial-gradient(110% 80% at 100% 0%,rgba(198,161,91,.38),transparent 55%),radial-gradient(90% 70% at 0% 100%,rgba(255,255,255,.10),transparent 60%),linear-gradient(155deg,var(--top),var(--hero2));
+  box-shadow:0 22px 44px -26px var(--top),inset 0 1px 0 rgba(255,255,255,.12)}
+.hero .bub{opacity:.3}
+.top h1{font-family:"IBM Plex Sans Arabic",Cairo,sans-serif}
+.hero .hello{font-size:12px;opacity:.75;margin-bottom:10px}
+.hero .lbl{color:var(--acc);font-size:14px;font-weight:600;opacity:1}
+.hero .big{font-size:clamp(32px,9.5vw,42px);font-weight:700;margin:2px 0 12px}
+.hero .sub{gap:6px}
+.hero .sub span{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);padding:3px 10px;border-radius:99px;font-size:12px}
+.hero .chip{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);min-height:30px}
+.hero .chip.on{background:var(--acc);border-color:var(--acc);color:#241a05}
+.chip{border-radius:99px;background:var(--card)}
+.chip.on{background:var(--top);border-color:var(--top);color:#fff}
+.kpis{gap:10px}
+.kpi{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:10px;align-items:center;border-radius:18px;padding:12px;border:1px solid color-mix(in srgb,var(--line) 75%,transparent)}
+.kpi:before{display:none}
+.kpi .ki{grid-row:span 2;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--pri)}
+.kpi .ki svg{width:20px;height:20px}
+.kpi span{font-size:11.5px}.kpi b{font-size:16px;font-weight:700}
+.kpi.gold .ki{background:color-mix(in srgb,var(--acc) 22%,transparent);color:color-mix(in srgb,var(--acc) 70%,var(--ink))}
+.kpi.bad .ki{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.kpi.good .ki{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.card{border-radius:22px;padding:16px;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);box-shadow:0 1px 0 rgba(0,0,0,.02),0 14px 32px -22px rgba(15,30,35,.3)}
+.card h2,.sec{font-size:17px;font-weight:700}
+.card h2:before{content:'';flex:none;width:4px;height:18px;border-radius:3px;background:var(--acc)}
+.btn{border-radius:14px}
+.btn.p{background:linear-gradient(160deg,var(--top),var(--pri));border-color:transparent;color:#fff;box-shadow:0 8px 18px -10px var(--top)}
+.btn.a{background:linear-gradient(160deg,#dcc089,var(--acc));border-color:transparent;color:#241a05}
+.seg{border-radius:14px}.seg button.on{background:var(--top);color:#fff}
+.search,.fld input,.fld select,.fld textarea,.in{border-radius:14px}
+.search{background:var(--card)}
+.scroll{border-radius:18px}
+.tbl th{background:var(--soft);color:var(--ink)}
+.bars .t i{background:linear-gradient(90deg,var(--pri),var(--acc))}
+.list .it{padding:11px 2px}
+.av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--pri);font-weight:700;font-family:"El Messiri",serif;font-size:16px}
+.tile{border-radius:22px;padding:16px 14px}
+.tile svg{background:linear-gradient(150deg,var(--top),var(--hero2));color:var(--acc)}
+.tabs{inset-inline:12px;bottom:calc(10px + env(safe-area-inset-bottom));border-radius:26px;border:1px solid color-mix(in srgb,var(--line) 80%,transparent);padding:4px 6px;background:color-mix(in srgb,var(--card) 88%,transparent);box-shadow:0 18px 40px -16px rgba(0,0,0,.4)}
+.tabs button{min-height:56px;position:relative}
+.tabs button.on{color:var(--pri)}
+.tabs button.on:not(.fab):after{content:'';position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--acc)}
+.tabs .fab span.c{background:linear-gradient(150deg,var(--top),var(--hero2));color:var(--acc);border-color:var(--bg);box-shadow:0 10px 22px -8px var(--top)}
+.stick{bottom:calc(84px + env(safe-area-inset-bottom))}
+body.kb .stick{bottom:0}
+#toast{bottom:calc(100px + env(safe-area-inset-bottom));border-radius:14px}
+.updbar{bottom:calc(92px + env(safe-area-inset-bottom));border-radius:14px}
+.sheet{border-radius:28px 28px 0 0}
+@media(min-width:700px){.sheet{border-radius:28px}}
+.note{border-radius:14px}
+/* printed documents, luxe */
+.paper .ph{background:linear-gradient(135deg,var(--pd),var(--pc));color:#fff;padding:26px 34px;border:0;align-items:center}
+.paper .brand svg,.paper .brand img{background:#fff;padding:8px;border-radius:16px;width:70px;height:70px}
+.paper .brand b{color:#fff;font-size:27px}
+.paper .brand small{color:rgba(255,255,255,.78)}
+.paper .brand small.reg{color:rgba(255,255,255,.6)}
+.paper .ptitle{color:var(--pa);font-size:30px;font-weight:700}
+.paper .pno{background:rgba(255,255,255,.14);color:#fff}
+.paper .pband{height:4px;background:var(--pa)}
+.paper .pbody{padding-top:20px}
+.paper .pinfo>div{border:0;background:var(--ps);border-radius:12px}
+.paper .l{color:#8a8576}
+.paper th{background:none;color:var(--pd);border-bottom:2px solid var(--pa);border-radius:0!important;padding:10px 8px}
+.paper td{border-bottom:1px solid #eee9df}
+.paper tbody tr:nth-child(even) td{background:#fcfbf8}
+.paper .ptot{border:1px solid #eee9df}
+.paper .ptot div{border-bottom-color:#eee9df}
+.paper .ptot .g{background:linear-gradient(135deg,var(--pd),var(--pc));color:var(--pa)}
+.paper .pwords{background:var(--ps);border-inline-start-color:var(--pa)}
+.paper .pfoot{border-top:2px solid var(--pa)}
+.paper .kp div{background:var(--ps);border:0}
+.paper h4{color:var(--pd);border-bottom:1px solid #eee9df;padding-bottom:4px}
 </style>
 </head>
 <body>
@@ -369,9 +453,10 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='22';
+const APP_V='23';
 /* what changed in each version; shown once after an update and from Settings ← «إيه الجديد؟». Add a line here with every new version. */
 const CHANGES=[
+  ['23',['شكل جديد أرقى: ألوان بترولي ودهبي، خطوط أشيك، كارت للمكسب، وأيقونات للأرقام، وشريط التنقل تحت بقى عايم.','الفاتورة والـ PDF بتصميم فخم: رأس غامق بالشعار وعنوان دهبي.','لسه تقدري تغيّري اللون من الإعدادات ← «شكل التطبيق».']],
   ['22',['شكل أرقى للتطبيق كله، وتقدري تختاري لونه من الإعدادات ← «شكل التطبيق» (أزرق، زمردي، كحلي ودهبي، أسود ودهبي، بنفسجي)، وفاتح أو غامق.','فاتورة PDF بتصميم جديد: شعار المحل، المبلغ بالحروف، مكان للتوقيع والختم، وختم «تم التحصيل».','جديد: «عرض سعر» من شاشة الفاتورة. ما بيخصمش من المخزن، ولما العميل يوافق بتحوّليه لفاتورة بضغطة.','جديد: «كشف حساب» PDF لكل عميل (من شباك العميل)، و«تقرير الشهر» PDF من الرئيسية أو المزيد.','زرار «تكرار» في الفاتورة يعمل فاتورة جديدة بنفس الأصناف.','في الإعدادات: شعار المحل، السجل التجاري والبطاقة الضريبية، وبيانات التحويل (انستاباي/محفظة) تظهر على الفاتورة.']],
   ['21',['جديد: «المتعاقد والموردين» من المزيد أو من المخزن. لكل صنف الكمية المتعاقد عليها مع الشركة، والمطلوب الشهر ده، والموجود، والباقي للشراء وفلوسه.','الموردين: كل صنف ليه مورد، وبتسجّلي الفلوس اللي دفعتيها لكل مورد (قبل التوريد أو بعده)، والبرنامج بيحسب اللي ليه عندك أو ليكي عنده.','لكل مورد: الكميات الباقية والفلوس المحتاجة علشان تكمّلي المطلوب، وزرار يبعتله الطلب واتساب.']],
   ['20',['الأرقام بفاصلة الآلاف زي 1,500 بقت بتتقري 1500 صح.','زرار «حفظ الفاتورة» ما بقاش بيقف لو نسيت تكتب المبلغ المدفوع.','حذف مصروف ثم «رجوع» ما بقاش بيعمل مشكلة، وتأمين أكتر لاسترجاع النسخ من ملف.']],
@@ -611,6 +696,9 @@ function initRoute(){loadDraft();const h=location.hash.slice(1);const v=VIEWS.in
   try{history.replaceState({root:1,sid:SID},'','#'+v);history.pushState({v,sid:SID},'','#'+v)}catch(e){}view=v;if(view==='inv'&&!draft)draft=newDraft()}
 
 /* ---------- home ---------- */
+const KI={doc:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',cash:'<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.5"/><path d="M6 9v.01M18 15v.01"/>',bank:'<path d="M3 10l9-6 9 6M5 10v8M19 10v8M9.5 10v8M14.5 10v8M3 20h18"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',truck:'<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',up:'<path d="M4 17l6-6 4 4 6-7"/><path d="M14 8h6v6"/>'};
+const KP=(l,v,ic,cls='',bc='',x='')=>`<div class="kpi ${cls}" ${x}><i class="ki"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${KI[ic]}</svg></i><span>${l}</span><b class="${bc}">${v}</b></div>`;
+const avatar=n=>`<span class="av" aria-hidden="true">${esc(String(n||'؟').trim().replace(/^(عميل|شركة|السادة|مؤسسة)\s+/,'').replace(/^ال(?=\S)/,'').charAt(0)||'؟')}</span>`;
 const inP=d=>period==='all'||(period==='today'?d===today():String(d).slice(0,7)===today().slice(0,7));
 function vHome(){
   const iv=list('invoices').filter(i=>inP(i.date)),ex=list('expenses').filter(e=>inP(e.date));
@@ -631,13 +719,13 @@ function vHome(){
   ${!user?`<section class="band" style="padding-bottom:0"><div class="note" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="flex:1">البيانات على الموبايل ده بس. ادخل بحساب عشان تتزامن مع موبايل تاني.</span><button class="btn sm" data-act="go:settings">دخول</button></div></section>`:''}
   <section class="band">
   <div class="kpis">
-    <div class="kpi"><span>عدد الفواتير</span><b>${iv.length}</b></div>
-    <div class="kpi"><span>اتحصّل نقدي</span><b>${egp(sum(iv.filter(i=>(i.pay||'نقدي')==='نقدي'),i=>i.paid))}</b></div>
-    <div class="kpi"><span>اتحصّل تحويل</span><b>${egp(sum(iv.filter(i=>i.pay==='تحويل'),i=>i.paid))}</b></div>
-    <div class="kpi"><span>فلوس عند العملاء</span><b class="${debts>0?'neg':''}">${egp(debts)}</b></div>
-    <div class="kpi"><span>قيمة المخزن (تكلفة)</span><b>${egp(sv)}</b></div>
-    ${supTracked().length?`<div class="kpi" data-act="go:supply" style="cursor:pointer"><span>محتاجة للشراء (المتعاقد) ←</span><b class="${supTotals().need>0?'neg':'pos'}">${egp(supTotals().need)}</b></div>`:''}
-    <div class="kpi pf"><span>مكسب متوقع من المخزن</span><b class="pos">${egp(ssv-sv)}</b></div>
+    ${KP('عدد الفواتير',iv.length,'doc')}
+    ${KP('اتحصّل نقدي',egp(sum(iv.filter(i=>(i.pay||'نقدي')==='نقدي'),i=>i.paid)),'cash','gold')}
+    ${KP('اتحصّل تحويل',egp(sum(iv.filter(i=>i.pay==='تحويل'),i=>i.paid)),'bank','gold')}
+    ${KP('فلوس عند العملاء',egp(debts),'clock',debts>0?'bad':'',debts>0?'neg':'')}
+    ${KP('قيمة المخزن (تكلفة)',egp(sv),'box')}
+    ${supTracked().length?KP('محتاجة للشراء (المتعاقد) ←',egp(supTotals().need),'truck',supTotals().need>0?'bad':'good',supTotals().need>0?'neg':'pos','data-act="go:supply" style="cursor:pointer"'):''}
+    ${KP('مكسب متوقع من المخزن',egp(ssv-sv),'up','good pf','pos')}
   </div>
   <div class="acts" style="margin-top:10px"><button class="btn sm grow" data-act="report">تقرير الشهر PDF</button><button class="btn sm grow" data-act="newquote">+ عرض سعر</button></div>
   </section>
@@ -650,7 +738,7 @@ function vHome(){
   ${invs().slice(0,5).map(invItem).join('')||'<div class="empty">لا توجد فواتير بعد. اضغط زر «فاتورة» بالأسفل</div>'}</div>
   </section>`;
 }
-const invItem=i=>`<div class="list"><div class="it" data-act="invoice:${esc(i.id)}"><div class="grow"><b>#${esc(i.no)} — ${esc(i.custName)}</b><small>${esc(i.date)} · <span class="tag">${esc(i.pay||'نقدي')}</span> · ${(i.lines||[]).length} صنف ${due(i)>0?`· <span class="tag bad">باقي ${egp(due(i))}</span>`:''}</small></div><div class="amt">${egp(i.total)}<br><small class="pos pf">+${fmt(i.profit)}</small></div></div></div>`;
+const invItem=i=>`<div class="list"><div class="it" data-act="invoice:${esc(i.id)}">${avatar(i.custName)}<div class="grow"><b>#${esc(i.no)} — ${esc(i.custName)}</b><small>${esc(i.date)} · <span class="tag">${esc(i.pay||'نقدي')}</span> · ${(i.lines||[]).length} صنف ${due(i)>0?`· <span class="tag bad">باقي ${egp(due(i))}</span>`:''}</small></div><div class="amt">${egp(i.total)}<br><small class="pos pf">+${fmt(i.profit)}</small></div></div></div>`;
 
 /* ---------- stock ---------- */
 function vStock(){
@@ -725,7 +813,7 @@ function custStats(id){const iv=list('invoices').filter(i=>i.cust===id);return{n
 function custRows(){
   const q=custQ.trim();const r=custs().filter(c=>!q||String(c.name).includes(q)||String(c.phone).includes(q));
   if(!r.length)return `<div class="empty">${list('customers').length?'لا توجد نتائج':'لا يوجد عملاء بعد'}</div>`;
-  return r.map(c=>{const s=custStats(c.id);return `<div class="it" data-act="cust:${esc(c.id)}"><div class="grow"><b>${esc(c.name)}</b><small>${esc(c.phone||'بدون رقم')} · ${s.n} فاتورة</small></div><div class="amt">${egp(s.total)}${s.due>0?`<br><small class="neg">باقي ${fmt(s.due)}</small>`:''}</div></div>`}).join('');
+  return r.map(c=>{const s=custStats(c.id);return `<div class="it" data-act="cust:${esc(c.id)}">${avatar(c.name)}<div class="grow"><b>${esc(c.name)}</b><small>${esc(c.phone||'بدون رقم')} · ${s.n} فاتورة</small></div><div class="amt">${egp(s.total)}${s.due>0?`<br><small class="neg">باقي ${fmt(s.due)}</small>`:''}</div></div>`}).join('');
 }
 function custModal(id,after){
   const o=id?S.customers[id]:{name:'',phone:'',address:'',notes:''};if(!o)return;
@@ -901,15 +989,15 @@ function makePdf(id,btn,share){const i=S.invoices[id];if(i)return pdfOut(invDoc(
 function saveBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},5000)}
 
 /* ---------- v22: skins, printed documents (invoice / quote / customer statement / monthly report) ---------- */
-const SKINS={sea:{n:'أزرق Super Clean',p:'#0a7d99',d:'#075a70',a:'#d9a520'},emerald:{n:'زمردي',p:'#0d7a5c',d:'#08503d',a:'#c9a227'},royal:{n:'كحلي ودهبي',p:'#22427c',d:'#132650',a:'#c9a24a'},noir:{n:'أسود ودهبي',p:'#2b2a27',d:'#151412',a:'#c9a24a'},plum:{n:'بنفسجي',p:'#6d2e6b',d:'#481b47',a:'#d4a84a'}};
-const skin=()=>SKINS[st().skin]?st().skin:'sea';
+const SKINS={luxe:{n:'بترولي ودهبي',p:'#15596a',d:'#0b2a33',a:'#c6a15b',s:'#f5f1e8'},sea:{n:'أزرق Super Clean',p:'#0a7d99',d:'#075a70',a:'#d9a520',s:'#eef6f9'},emerald:{n:'زمردي',p:'#0d7a5c',d:'#08503d',a:'#c9a227',s:'#edf6f1'},royal:{n:'كحلي ودهبي',p:'#22427c',d:'#132650',a:'#c9a24a',s:'#eef1f8'},noir:{n:'أسود ودهبي',p:'#3d3424',d:'#151412',a:'#c9a24a',s:'#f5f2ea'},plum:{n:'بنفسجي',p:'#6d2e6b',d:'#481b47',a:'#d4a84a',s:'#f7eef6'}};
+const skin=()=>SKINS[st().skin]?st().skin:'luxe';
 const modeOf=()=>{try{return localStorage.getItem('sc-mode')||'auto'}catch(e){return 'auto'}};
-const TOPLOGO=()=>LOGO('#fff').replace('stroke="#fff"',`stroke="${SKINS[skin()].p}"`).replace('<svg ','<svg class="logo" aria-hidden="true" ');
+const TOPLOGO=()=>LOGO('#fff').replace('stroke="#fff"',`stroke="${SKINS[skin()].d}"`).replace('<svg ','<svg class="logo" aria-hidden="true" ');
 const logoSrc=()=>{const l=st().logo;return typeof l==='string'&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(l)?l:''};
 let themeKey='';
 function applyTheme(){const k=skin(),m=modeOf(),r=document.documentElement,s=st(),key=k+m+(s.shop||'')+logoSrc().length;if(key===themeKey)return;themeKey=key;
   r.dataset.skin=k;if(m==='auto')delete r.dataset.theme;else r.dataset.theme=m;
-  const mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content=SKINS[k].d;
+  const mt=document.querySelector('meta[name=theme-color]');if(mt)requestAnimationFrame(()=>{try{mt.content=getComputedStyle(document.body).backgroundColor}catch(e){}});
   const t=$('#tname');if(t)t.textContent=s.shop||'Super Clean';
   const l=$('#tlogo');if(l)l.innerHTML=logoSrc()?`<img class="logo" src="${logoSrc()}" alt="">`:TOPLOGO()}
 const greet=()=>{const h=new Date().getHours();return h<12?'صباح الخير':h<17?'نهارك سعيد':'مساء الخير'};
@@ -924,9 +1012,9 @@ function words(v){const n=Math.round(Math.max(0,num(v))*100),L=Math.floor(n/100)
   return 'فقط '+w(L)+' جنيه'+(P?' و'+w(P)+' قرش':'')+' لا غير'}
 const brandMark=()=>logoSrc()?`<img src="${logoSrc()}" alt="">`:LOGO(SKINS[skin()].p);
 function paper(title,no,body){const s=st(),k=SKINS[skin()],ph=[s.phone,s.phone2].filter(Boolean),reg=[s.crn?'سجل تجاري: '+s.crn:'',s.taxid?'بطاقة ضريبية: '+s.taxid:''].filter(Boolean).join('  ·  ');
-  return `<div class="paper" style="--pc:${k.p};--pd:${k.d};--pa:${k.a}"><div class="pband"></div>
+  return `<div class="paper" style="--pc:${k.p};--pd:${k.d};--pa:${k.a};--ps:${k.s}">
   <div class="ph"><div class="brand">${brandMark()}<div><b>${esc(s.shop||'Super Clean')}</b>${s.tag?`<small>${esc(s.tag)}</small>`:''}${reg?`<small class="reg">${esc(reg)}</small>`:''}</div></div>
-  <div class="pmeta"><div class="ptitle">${title}</div>${no?`<div class="pno">${no}</div>`:''}</div></div>
+  <div class="pmeta"><div class="ptitle">${title}</div>${no?`<div class="pno">${no}</div>`:''}</div></div><div class="pband"></div>
   <div class="pbody">${body}</div>
   <div class="pfoot">${esc(s.footer)}${ph.length?`<br>للتواصل والطلبات: <b dir="ltr">${ph.map(esc).join('  |  ')}</b>`:''}${s.address?`<br>${esc(s.address)}`:''}</div></div>`}
 function invDoc(i,q){
@@ -969,7 +1057,7 @@ function reportModal(){repYm=repYm||today().slice(0,7);
 /* quotes (عروض الأسعار): quotes/{id} = same shape as an invoice minus paid, plus valid (days) and inv/invNo once turned into an invoice. They never touch stock or sales. */
 const nextQNo=()=>Math.max(0,...list('quotes').map(i=>num(i.no)))+1;
 const quotes=()=>list('quotes').sort((a,b)=>String(b.date).localeCompare(a.date)||num(b.no)-num(a.no));
-const qItem=i=>`<div class="it" data-act="quote:${esc(i.id)}"><div class="grow"><b>#${esc(i.no)} — ${esc(i.custName)}</b><small>${esc(dmy(i.date))} · ${(i.lines||[]).length} صنف ${i.inv?`· <span class="tag ok">اتحولت لفاتورة #${esc(i.invNo||'')}</span>`:''}</small></div><div class="amt">${egp(i.total)}</div></div>`;
+const qItem=i=>`<div class="it" data-act="quote:${esc(i.id)}">${avatar(i.custName)}<div class="grow"><b>#${esc(i.no)} — ${esc(i.custName)}</b><small>${esc(dmy(i.date))} · ${(i.lines||[]).length} صنف ${i.inv?`· <span class="tag ok">اتحولت لفاتورة #${esc(i.invNo||'')}</span>`:''}</small></div><div class="amt">${egp(i.total)}</div></div>`;
 function qWa(i){const s=st();return `*${s.shop||'Super Clean'}* — عرض سعر رقم ${i.no}\nالتاريخ: ${dmy(i.date)}\nمقدم إلى: ${i.custName}\n\n${(i.lines||[]).map(l=>`• ${l.name}: ${fmt(l.qty)} ${l.unit} × ${fmt(l.price)} = ${fmt(num(l.qty)*num(l.price))}`).join('\n')}\n\n${num(i.discount)?`خصم: ${egp(i.discount)}\n`:''}*الإجمالي: ${egp(i.total)}*\nصالح لمدة ${fmt(num(i.valid)||num(s.qvalid)||7)} يوم\n\n${s.footer}${s.phone?`\nللتواصل: ${s.phone}`:''}`}
 function quoteModal(id){const i=S.quotes[id];if(!i)return;
   openModal(`<h3>عرض سعر #${esc(i.no)}<span class="sp"></span>${i.inv?`<span class="tag ok">اتحولت لفاتورة #${esc(i.invNo||'')}</span>`:''}</h3>
