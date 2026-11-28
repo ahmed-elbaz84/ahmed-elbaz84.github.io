@@ -457,6 +457,12 @@ body.kb .stick{bottom:0}
 :root[data-skin=sc] .btn.p,:root:not([data-skin]) .btn.p{background:linear-gradient(160deg,#17414d,#0b2a33)}
 .paper .brand svg{padding:0;background:none;border-radius:50%;box-shadow:0 0 0 3px rgba(198,161,91,.5)}
 .paper .brand b{font-family:Marcellus,"IBM Plex Sans Arabic",serif;font-weight:400;letter-spacing:1.5px;color:#e8cf95}
+/* v25: no green with the SC brand — "paid" stamp and positive marks in warm brown/beige like the background (owner's ask) */
+.paper .pstamp{border-color:#b08d57;color:#8a6a35;background:#f7f3ea}
+:root:not([data-skin]),:root[data-skin=sc]{--ok:light-dark(#8a6a35,#d9b877)}
+:root:not([data-skin]) .tag.ok,:root[data-skin=sc] .tag.ok{background:#efe5d0;color:#7a5c2c}
+:root:not([data-skin]) .kpi.good .ki,:root[data-skin=sc] .kpi.good .ki{background:#efe5d0;color:#8a6a35}
+.btn.wa{background:#f3ead8;border-color:#e2d2b0;color:#6e5226}
 </style>
 </head>
 <body>
@@ -491,9 +497,10 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='24';
+const APP_V='25';
 /* what changed in each version; shown once after an update and from Settings ← «إيه الجديد؟». Add a line here with every new version. */
 const CHANGES=[
+  ['25',['ختم «تم التحصيل» على الفاتورة بقى بني فاتح بدل الأخضر، وكمان العلامات الخضرا في التطبيق بقت بني على ألوان الشعار.']],
   ['24',['شعار جديد للتطبيق: SC بالكحلي والدهبي.','شكل جديد للرئيسية: كارت المحل بالشعار، وزراير سريعة (فاتورة، عرض سعر، صنف، مصروف)، و«مطلوب منك النهارده» (مين عليه فلوس مع زرار «فكّريه» على الواتساب، والأصناف اللي قرّبت تخلص)، ورسم لمبيعات آخر 7 أيام.','خطوط جديدة زي أتيليه لوجي.']],
   ['23',['شكل جديد أرقى: ألوان بترولي ودهبي، خطوط أشيك، كارت للمكسب، وأيقونات للأرقام، وشريط التنقل تحت بقى عايم.','الفاتورة والـ PDF بتصميم فخم: رأس غامق بالشعار وعنوان دهبي.','لسه تقدري تغيّري اللون من الإعدادات ← «شكل التطبيق».']],
   ['22',['شكل أرقى للتطبيق كله، وتقدري تختاري لونه من الإعدادات ← «شكل التطبيق» (أزرق، زمردي، كحلي ودهبي، أسود ودهبي، بنفسجي)، وفاتح أو غامق.','فاتورة PDF بتصميم جديد: شعار المحل، المبلغ بالحروف، مكان للتوقيع والختم، وختم «تم التحصيل».','جديد: «عرض سعر» من شاشة الفاتورة. ما بيخصمش من المخزن، ولما العميل يوافق بتحوّليه لفاتورة بضغطة.','جديد: «كشف حساب» PDF لكل عميل (من شباك العميل)، و«تقرير الشهر» PDF من الرئيسية أو المزيد.','زرار «تكرار» في الفاتورة يعمل فاتورة جديدة بنفس الأصناف.','في الإعدادات: شعار المحل، السجل التجاري والبطاقة الضريبية، وبيانات التحويل (انستاباي/محفظة) تظهر على الفاتورة.']],
