@@ -8,7 +8,7 @@
   "start_url": "/superclean/",
   "scope": "/superclean/",
   "display": "standalone",
-  "background_color": "#f4f1ea",
+  "background_color": "#f7f3ea",
   "theme_color": "#0b2a33",
   "icons": [
     {

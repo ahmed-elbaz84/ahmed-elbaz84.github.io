@@ -14,7 +14,7 @@
 <title>Super Clean</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;600;700&family=Marcellus&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* VOICE: a tidy shop-counter app, calm and quick to use with one hand.
    IDEA: the cleaning-shop sales book: stock shelf, receipt pad, cash drawer.
@@ -335,10 +335,10 @@ body.kb .stick{bottom:0}
 .paper .kp b{font-size:16px}
 .paper .kp small{display:block;font-size:11px;color:#7b8a90}
 .paper h4{margin:18px 0 8px;font-size:15px;color:var(--pd)}
-/* ---- v23: luxe. Ivory paper, deep petrol ink, champagne gold; El Messiri for titles, IBM Plex Sans Arabic for text. Floating profit card + floating tab bar. ---- */
+/* ---- v23: luxe. Ivory paper, deep petrol ink, champagne gold; Reem Kufi for titles, IBM Plex Sans Arabic for text. Floating profit card + floating tab bar. ---- */
 :root,:root[data-skin=luxe]{--bg:light-dark(#f4f1ea,#0c1114);--card:light-dark(#ffffff,#151c20);--ink:light-dark(#17232a,#ecebe6);--mut:light-dark(#6b7479,#9aa3a6);--line:light-dark(#e7e1d4,#263035);--pri:light-dark(#0e4a5a,#2f8ea3);--pri2:light-dark(#0b3440,#e4c98f);--top:light-dark(#0b2a33,#071a20);--hero2:light-dark(#15596a,#12404b);--acc:#c6a15b;--soft:light-dark(#efe9dc,#1d2629);--warn:light-dark(#f8efd9,#2e2817)}
 body{font-family:"IBM Plex Sans Arabic",Cairo,Tahoma,sans-serif;padding-bottom:calc(100px + env(safe-area-inset-bottom))}
-h1,h2,h3,.sec,.sheet h3,.tile b,.hero .lbl,.ptitle{font-family:"El Messiri","IBM Plex Sans Arabic",Georgia,serif}
+h1,h2,h3,.sec,.sheet h3,.tile b,.hero .lbl,.ptitle{font-family:"Reem Kufi","IBM Plex Sans Arabic",sans-serif}
 .top{background:color-mix(in srgb,var(--bg) 84%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);color:var(--ink);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);padding:calc(10px + env(safe-area-inset-top)) max(4vw,16px) 10px}
 .top .logo{width:38px;height:38px;padding:6px;border-radius:12px;background:linear-gradient(150deg,var(--top),var(--hero2));box-shadow:0 6px 14px -8px var(--top)}
 .top img.logo{background:#fff;padding:3px;border:1px solid var(--line)}
@@ -382,7 +382,7 @@ h1,h2,h3,.sec,.sheet h3,.tile b,.hero .lbl,.ptitle{font-family:"El Messiri","IBM
 .tbl th{background:var(--soft);color:var(--ink)}
 .bars .t i{background:linear-gradient(90deg,var(--pri),var(--acc))}
 .list .it{padding:11px 2px}
-.av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--pri);font-weight:700;font-family:"El Messiri",serif;font-size:16px}
+.av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--pri);font-weight:700;font-family:"Reem Kufi",sans-serif;font-size:16px}
 .tile{border-radius:22px;padding:16px 14px}
 .tile svg{background:linear-gradient(150deg,var(--top),var(--hero2));color:var(--acc)}
 .tabs{inset-inline:12px;bottom:calc(10px + env(safe-area-inset-bottom));border-radius:26px;border:1px solid color-mix(in srgb,var(--line) 80%,transparent);padding:4px 6px;background:color-mix(in srgb,var(--card) 88%,transparent);box-shadow:0 18px 40px -16px rgba(0,0,0,.4)}
@@ -419,11 +419,49 @@ body.kb .stick{bottom:0}
 .paper .pfoot{border-top:2px solid var(--pa)}
 .paper .kp div{background:var(--ps);border:0}
 .paper h4{color:var(--pd);border-bottom:1px solid #eee9df;padding-bottom:4px}
+/* ---- v24: SC brand. Ivory, navy ink, gold; Reem Kufi titles, Marcellus for the latin name; Atelier-Logy-style home (brand card, quick actions, today list, 7-day chart). ---- */
+:root,:root[data-skin=sc]{--bg:light-dark(#f7f3ea,#0d1417);--card:light-dark(#fffdf8,#162024);--ink:light-dark(#0b2a33,#f1ece1);--mut:light-dark(#6e7a7c,#9ea8a8);--line:light-dark(#e9e0cd,#27343a);--pri:light-dark(#0b2a33,#2b6070);--pri2:light-dark(#0b2a33,#e8cf95);--top:light-dark(#0b2a33,#081c22);--hero2:light-dark(#17414d,#123843);--acc:#c6a15b;--soft:light-dark(#f0e8d6,#1f2b30);--warn:light-dark(#f8eed6,#2e2817)}
+.top h1{font-family:Marcellus,"IBM Plex Sans Arabic",serif;font-weight:400;font-size:21px;letter-spacing:.5px}
+.top .logo{width:44px;height:44px;padding:0;border-radius:50%;background:none;box-shadow:0 6px 16px -8px rgba(11,42,51,.6)}
+.top img.logo{border-radius:50%}
+.hellob{padding-bottom:6px}
+.hi{font-family:"Reem Kufi",sans-serif;font-size:26px;font-weight:600;line-height:1.3}
+.dt{color:var(--mut);font-size:13px}.dt b{color:var(--acc)}
+.brandcard{display:flex;align-items:center;gap:14px;border-radius:26px;padding:18px 18px;color:#f7f3ea;background:radial-gradient(90% 120% at 0% 0%,rgba(198,161,91,.35),transparent 55%),linear-gradient(150deg,#0b2a33,#17414d);box-shadow:0 18px 36px -22px #0b2a33;position:relative;overflow:hidden}
+.brandcard:after{content:'';position:absolute;width:220px;height:220px;border-radius:50%;border:1px solid rgba(198,161,91,.35);left:-70px;top:-90px}
+.bc-t{flex:1}.bc-t b{display:block;font-family:Marcellus,serif;font-weight:400;font-size:30px;letter-spacing:2px;color:#e8cf95;line-height:1.2}.bc-t small{opacity:.8;font-size:13px}
+.bc-l svg,.bc-l img{display:block;width:78px;height:78px;border-radius:50%;box-shadow:0 0 0 3px rgba(198,161,91,.45)}
+.hero{margin:12px 0 0;border-radius:24px;padding:16px 18px;color:#0b2a33;background:linear-gradient(135deg,#f3e2b8,#d9b877 60%,#c6a15b);box-shadow:0 16px 30px -20px #a8843f}
+.hero .lbl{color:#4b3a16;font-family:"Reem Kufi",sans-serif;font-size:15px}
+.hero .big{font-family:"IBM Plex Sans Arabic",sans-serif;font-weight:700;font-size:clamp(32px,10vw,42px);color:#0b2a33}
+.hero .sub span{background:rgba(255,255,255,.45);border:0;color:#0b2a33}
+.qa{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+.qa button{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:10px 2px 8px;font-weight:600;font-size:12px;cursor:pointer;color:var(--ink)}
+.qa i{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;margin:0 auto 4px;font-style:normal;font-size:21px;background:var(--soft)}
+.qa button:nth-child(1) i{background:#f5e6c4}.qa button:nth-child(2) i{background:#e2ecef}.qa button:nth-child(3) i{background:#eee4d2}.qa button:nth-child(4) i{background:#f6dfd8}
+.h{font-family:"Reem Kufi",sans-serif;font-size:18px;font-weight:600;margin:18px 2px 8px;display:flex;align-items:center;gap:8px}
+.h:before{content:'';width:4px;height:18px;border-radius:3px;background:var(--acc)}
+.h .btn{margin-inline-start:auto}
+.card h2{font-family:"Reem Kufi",sans-serif;font-weight:600}
+.ti{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;background:var(--soft)}
+.ti.bad{background:color-mix(in srgb,var(--bad) 13%,transparent)}.ti.warn{background:color-mix(in srgb,var(--acc) 22%,transparent)}
+.btn.wa{background:#e3f6ea;border-color:#bfe8cd;color:#137a3c}
+.chart{display:flex;align-items:flex-end;gap:8px;height:130px;padding-top:16px}
+.chart .cb{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;font-size:11px;color:var(--mut)}
+.chart .cb i{width:100%;max-width:34px;border-radius:9px 9px 4px 4px;background:linear-gradient(180deg,#d9b877,#c6a15b)}
+.chart .cb em{font-style:normal;font-size:9.5px;white-space:nowrap}
+.chart .cb.on i{background:linear-gradient(180deg,#17414d,#0b2a33)}.chart .cb.on span{color:var(--ink);font-weight:700}
+.kpi b,.big{font-family:"IBM Plex Sans Arabic",sans-serif}
+.tabs .fab span.c{background:linear-gradient(150deg,#17414d,#0b2a33);color:#e8cf95}
+.tabs button.on{color:var(--ink)}
+:root[data-skin=sc] .btn.p,:root:not([data-skin]) .btn.p{background:linear-gradient(160deg,#17414d,#0b2a33)}
+.paper .brand svg{padding:0;background:none;border-radius:50%;box-shadow:0 0 0 3px rgba(198,161,91,.5)}
+.paper .brand b{font-family:Marcellus,"IBM Plex Sans Arabic",serif;font-weight:400;letter-spacing:1.5px;color:#e8cf95}
 </style>
 </head>
 <body>
 <header class="top">
-  <span id="tlogo" style="display:contents"><svg class="logo" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5S10 20.5 10 30a14 14 0 0 0 28 0C38 20.5 24 5 24 5z" fill="#fff"/><path d="M17.5 30.5a6.5 6.5 0 0 0 6.5 6.5" stroke="#0089b0" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M38.5 4l1.5 3.3 3.3 1.5-3.3 1.5-1.5 3.3-1.5-3.3-3.3-1.5 3.3-1.5z" fill="#ffd23f"/></svg></span>
+  <span id="tlogo" style="display:contents"></span>
   <div><h1 id="tname">Super Clean</h1><small><i class="sync" id="syncdot"></i><span id="synctxt">جاري التحميل…</span></small></div>
   <div class="sp"></div>
   <button class="ib" data-act="hp" id="hpbtn" aria-label="إخفاء المكسب" title="إخفاء/إظهار المكسب"></button>
@@ -453,9 +491,10 @@ const egp=v=>fmt(v)+' ج.م';
 const today=()=>new Date().toLocaleDateString('en-CA');
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const sum=(a,f)=>a.reduce((s,x)=>s+num(f(x)),0);
-const APP_V='23';
+const APP_V='24';
 /* what changed in each version; shown once after an update and from Settings ← «إيه الجديد؟». Add a line here with every new version. */
 const CHANGES=[
+  ['24',['شعار جديد للتطبيق: SC بالكحلي والدهبي.','شكل جديد للرئيسية: كارت المحل بالشعار، وزراير سريعة (فاتورة، عرض سعر، صنف، مصروف)، و«مطلوب منك النهارده» (مين عليه فلوس مع زرار «فكّريه» على الواتساب، والأصناف اللي قرّبت تخلص)، ورسم لمبيعات آخر 7 أيام.','خطوط جديدة زي أتيليه لوجي.']],
   ['23',['شكل جديد أرقى: ألوان بترولي ودهبي، خطوط أشيك، كارت للمكسب، وأيقونات للأرقام، وشريط التنقل تحت بقى عايم.','الفاتورة والـ PDF بتصميم فخم: رأس غامق بالشعار وعنوان دهبي.','لسه تقدري تغيّري اللون من الإعدادات ← «شكل التطبيق».']],
   ['22',['شكل أرقى للتطبيق كله، وتقدري تختاري لونه من الإعدادات ← «شكل التطبيق» (أزرق، زمردي، كحلي ودهبي، أسود ودهبي، بنفسجي)، وفاتح أو غامق.','فاتورة PDF بتصميم جديد: شعار المحل، المبلغ بالحروف، مكان للتوقيع والختم، وختم «تم التحصيل».','جديد: «عرض سعر» من شاشة الفاتورة. ما بيخصمش من المخزن، ولما العميل يوافق بتحوّليه لفاتورة بضغطة.','جديد: «كشف حساب» PDF لكل عميل (من شباك العميل)، و«تقرير الشهر» PDF من الرئيسية أو المزيد.','زرار «تكرار» في الفاتورة يعمل فاتورة جديدة بنفس الأصناف.','في الإعدادات: شعار المحل، السجل التجاري والبطاقة الضريبية، وبيانات التحويل (انستاباي/محفظة) تظهر على الفاتورة.']],
   ['21',['جديد: «المتعاقد والموردين» من المزيد أو من المخزن. لكل صنف الكمية المتعاقد عليها مع الشركة، والمطلوب الشهر ده، والموجود، والباقي للشراء وفلوسه.','الموردين: كل صنف ليه مورد، وبتسجّلي الفلوس اللي دفعتيها لكل مورد (قبل التوريد أو بعده)، والبرنامج بيحسب اللي ليه عندك أو ليكي عنده.','لكل مورد: الكميات الباقية والفلوس المحتاجة علشان تكمّلي المطلوب، وزرار يبعتله الطلب واتساب.']],
@@ -481,6 +520,9 @@ const S={};COLS.forEach(c=>S[c]={});
 const LS='superclean-v1';
 let invTab='inv',repYm='',supF='all',view='home',draft=null,period='month',stockQ='',stockF='all',invQ='',invF='all',custQ='',moveF='';
 const LOGO=c=>`<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M24 5S10 20.5 10 30a14 14 0 0 0 28 0C38 20.5 24 5 24 5z" fill="${c}"/><path d="M17.5 30.5a6.5 6.5 0 0 0 6.5 6.5" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M38.5 4l1.5 3.3 3.3 1.5-3.3 1.5-1.5 3.3-1.5-3.3-3.3-1.5 3.3-1.5z" fill="#ffd23f"/></svg>`;
+/* the brand: SC monogram (chosen by the owner, 28 Nov 2026). Paths are Marcellus glyphs, so it draws the same everywhere, PDF included. logo.svg is the full version. */
+const SC_FULL='<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="100" fill="#f7f3ea"/><circle cx="100" cy="100" r="90" fill="none" stroke="#0b2a33" stroke-width="3"/><circle cx="100" cy="100" r="83" fill="none" stroke="#c6a15b" stroke-width="1.5"/><path d="M85.4 77.4H84.5Q84.2 76.4 83.5 75.2Q82.7 74 81.5 72.9Q80.3 71.8 78.6 71.1Q76.9 70.4 74.6 70.4Q72.6 70.4 71 71Q69.4 71.6 68.3 72.8Q67.2 73.9 66.7 75.5Q66.1 77 66.1 78.9Q66.1 81.9 67.8 84.7Q69.5 87.4 72.1 90.1Q74.7 92.8 77.6 95.5Q80.6 98.2 83.2 101.1Q85.7 104 87.4 107.2Q89.1 110.3 89.1 114Q89.1 116.7 88.2 119.5Q87.3 122.2 85.3 124.4Q83.3 126.6 80.2 127.9Q77.1 129.3 72.8 129.3Q70.4 129.3 68.3 128.9Q66.1 128.4 64.3 127.8Q62.4 127.1 61 126.4Q59.5 125.6 58.6 125L59.6 115.7H60.6Q61.1 117.7 62.1 119.5Q63.2 121.2 64.7 122.6Q66.3 124 68.2 124.8Q70.2 125.6 72.6 125.6Q74.7 125.6 76.4 125Q78.1 124.3 79.3 123.1Q80.5 122 81.2 120.4Q81.8 118.8 81.8 116.9Q81.8 114.3 80.9 112Q79.9 109.8 78.3 107.8Q76.8 105.7 74.8 103.9Q72.8 102 70.7 100.1Q68.6 98.1 66.6 96.1Q64.6 94.1 63 91.8Q61.4 89.5 60.5 86.9Q59.5 84.3 59.5 81.1Q59.5 77.8 60.8 75.2Q62.1 72.5 64.2 70.6Q66.3 68.7 69 67.7Q71.7 66.7 74.5 66.7Q76.6 66.7 78.4 67Q80.2 67.4 81.6 67.8Q83 68.3 84 68.7Q85.1 69.2 85.7 69.5ZM142.2 77 141.8 77.2Q138.5 74.2 133.9 72.4Q129.3 70.6 123.8 70.6Q118.5 70.6 114.1 72.2Q109.7 73.9 106.6 77Q103.4 80.2 101.6 84.7Q99.9 89.3 99.9 95.2Q99.9 101.6 101.5 107.2Q103.2 112.7 106.5 116.8Q109.8 120.9 114.8 123.2Q119.8 125.5 126.4 125.5Q128.8 125.5 131.2 125Q133.6 124.5 135.8 123.5Q138 122.5 140 121.1Q141.9 119.7 143.5 117.9L144 118.2L140.6 126.8Q137.5 128 133.7 128.7Q129.9 129.3 126 129.3Q118.2 129.3 111.8 127.1Q105.4 124.8 100.7 120.7Q96.1 116.6 93.5 110.8Q90.9 105 90.9 98Q90.9 94 91.9 90.1Q93 86.3 94.9 82.8Q96.9 79.3 99.8 76.4Q102.7 73.5 106.4 71.3Q110.1 69.2 114.6 68Q119.1 66.8 124.3 66.8Q132.4 66.8 139.3 69.3Z" fill="#0b2a33"/><path d="M146 46C148.2 55.8 148.2 55.8 158 58C148.2 60.2 148.2 60.2 146 70C143.8 60.2 143.8 60.2 134 58C143.8 55.8 143.8 55.8 146 46z" fill="#c6a15b"/><path d="M47.7 152.9H47.6Q47.6 152.8 47.5 152.6Q47.3 152.5 47.2 152.3Q47 152.2 46.8 152.1Q46.5 152 46.2 152Q45.9 152 45.7 152Q45.5 152.1 45.3 152.3Q45.2 152.5 45.1 152.7Q45 152.9 45 153.2Q45 153.6 45.3 154Q45.5 154.3 45.9 154.7Q46.2 155.1 46.6 155.5Q47.1 155.8 47.4 156.2Q47.8 156.6 48 157.1Q48.2 157.5 48.2 158Q48.2 158.4 48.1 158.8Q48 159.2 47.7 159.5Q47.4 159.8 47 160Q46.6 160.2 46 160.2Q45.6 160.2 45.3 160.1Q45 160.1 44.8 160Q44.5 159.9 44.3 159.8Q44.1 159.7 44 159.6L44.1 158.3H44.3Q44.3 158.6 44.5 158.8Q44.6 159.1 44.8 159.2Q45.1 159.4 45.3 159.6Q45.6 159.7 45.9 159.7Q46.2 159.7 46.5 159.6Q46.7 159.5 46.9 159.3Q47 159.2 47.1 158.9Q47.2 158.7 47.2 158.5Q47.2 158.1 47.1 157.8Q47 157.5 46.7 157.2Q46.5 156.9 46.2 156.6Q46 156.4 45.7 156.1Q45.4 155.8 45.1 155.6Q44.8 155.3 44.6 155Q44.4 154.6 44.2 154.3Q44.1 153.9 44.1 153.5Q44.1 153 44.3 152.6Q44.5 152.3 44.8 152Q45.1 151.7 45.4 151.6Q45.8 151.4 46.2 151.4Q46.5 151.4 46.7 151.5Q47 151.5 47.2 151.6Q47.4 151.7 47.5 151.7Q47.7 151.8 47.8 151.8ZM59.7 153.9Q59.7 153.4 59.7 153Q59.7 152.7 59.7 152.4Q59.6 152.1 59.6 151.9Q59.6 151.7 59.5 151.6V151.6H60.6V151.6Q60.5 151.7 60.5 151.9Q60.5 152.1 60.5 152.4Q60.4 152.7 60.4 153Q60.4 153.4 60.4 153.9V157.1Q60.4 157.9 60.2 158.5Q59.9 159.1 59.5 159.5Q59.1 159.8 58.5 160Q57.9 160.2 57.2 160.2Q56.5 160.2 55.8 160Q55.2 159.9 54.8 159.5Q54.3 159.1 54.1 158.5Q53.8 158 53.8 157.1V153.9Q53.8 153.4 53.8 153Q53.8 152.7 53.8 152.4Q53.7 152.1 53.7 151.9Q53.7 151.7 53.6 151.6V151.6H55V151.6Q55 151.7 55 151.9Q54.9 152.1 54.9 152.4Q54.9 152.7 54.9 153Q54.9 153.4 54.9 153.9V157.2Q54.9 157.9 55.1 158.3Q55.3 158.8 55.6 159.1Q56 159.3 56.4 159.4Q56.8 159.5 57.3 159.5Q57.7 159.5 58.2 159.4Q58.6 159.3 58.9 159.1Q59.3 158.8 59.5 158.3Q59.7 157.9 59.7 157.2ZM67.4 156.3Q68 156.4 68.5 156.3Q69 156.2 69.3 155.9Q69.7 155.7 69.8 155.2Q70 154.7 70 154Q70 153.5 69.9 153.2Q69.8 152.8 69.6 152.5Q69.4 152.2 69.1 152.1Q68.8 151.9 68.5 151.9Q68.2 151.9 68 151.9Q67.8 152 67.7 152Q67.5 152 67.4 152.1ZM66.2 151.6Q66.3 151.6 66.5 151.6Q66.6 151.6 66.7 151.6Q66.8 151.6 67 151.6Q67.2 151.6 67.6 151.6Q68 151.5 68.6 151.5Q69.2 151.5 69.6 151.7Q70.1 151.9 70.5 152.2Q70.8 152.5 71 152.9Q71.2 153.4 71.2 154Q71.2 154.8 70.9 155.3Q70.6 155.9 70.1 156.2Q69.5 156.6 68.9 156.7Q68.2 156.8 67.4 156.7V157.7Q67.4 158.2 67.5 158.6Q67.5 159 67.5 159.2Q67.5 159.5 67.5 159.7Q67.6 159.9 67.6 160V160H66.2V160Q66.2 159.9 66.3 159.7Q66.3 159.5 66.3 159.2Q66.4 159 66.4 158.6Q66.4 158.2 66.4 157.7V153.9Q66.4 153.4 66.4 153Q66.4 152.7 66.3 152.4Q66.3 152.1 66.3 151.9Q66.2 151.7 66.2 151.6ZM76.4 151.6Q77.1 151.6 77.8 151.6Q78.5 151.6 79.1 151.6Q79.7 151.6 80.2 151.6Q80.6 151.5 80.7 151.5L80.5 152.3Q80.3 152.2 80 152.2Q79.8 152.2 79.5 152.1Q79.1 152.1 78.7 152.1Q78.6 152.1 78.4 152.1Q78.2 152.1 78 152.1Q77.8 152.1 77.6 152.1V155.3Q78.2 155.3 78.7 155.3Q79.2 155.3 79.5 155.2Q79.9 155.2 80.2 155.2L80 156Q79.6 156 79.2 155.9Q78.8 155.9 78.4 155.8Q78 155.8 77.6 155.8V159.5Q78.3 159.5 78.9 159.4Q79.4 159.4 79.9 159.3Q80.4 159.2 80.8 159.1L80.6 160Q80.6 160 80.4 160Q80.3 160 80.1 160Q79.9 160 79.7 160Q79.5 160 79.4 160Q79.2 160 79.1 160Q78.9 160 78.9 160H76.4V160Q76.4 159.9 76.4 159.7Q76.5 159.5 76.5 159.2Q76.5 159 76.5 158.6Q76.5 158.2 76.5 157.7V153.9Q76.5 153.4 76.5 153Q76.5 152.7 76.5 152.4Q76.5 152.1 76.4 151.9Q76.4 151.7 76.4 151.6V151.6ZM87.5 157.7Q87.5 158.2 87.5 158.6Q87.5 159 87.5 159.2Q87.5 159.5 87.6 159.7Q87.6 159.9 87.6 160V160H86.2V160Q86.3 159.9 86.3 159.7Q86.3 159.5 86.4 159.2Q86.4 159 86.4 158.6Q86.4 158.2 86.4 157.7V153.9Q86.4 153.4 86.4 153Q86.4 152.7 86.4 152.4Q86.3 152.1 86.3 151.9Q86.3 151.7 86.2 151.6V151.6L86.5 151.6Q86.6 151.6 86.7 151.6Q86.9 151.6 87 151.6Q87.2 151.6 87.6 151.6Q88 151.5 88.6 151.5Q89.2 151.5 89.7 151.7Q90.1 151.8 90.5 152.1Q90.8 152.4 91 152.8Q91.2 153.3 91.2 153.8Q91.2 154.2 91.1 154.6Q91 154.9 90.8 155.2Q90.6 155.5 90.4 155.8Q90.1 156 89.7 156.1L91.8 159Q91.9 159.2 92.1 159.4Q92.2 159.6 92.3 159.7Q92.5 159.8 92.6 159.9Q92.7 159.9 92.8 160V160H91.1Q91.1 159.9 91 159.7Q90.9 159.5 90.8 159.3L88.7 156.4Q88.5 156.4 88.4 156.4Q88.3 156.4 88.1 156.4Q88 156.4 87.8 156.4Q87.6 156.4 87.5 156.4ZM87.5 155.9Q87.6 156 87.8 156Q88 156 88.1 156Q88.5 156 88.9 155.9Q89.3 155.7 89.5 155.5Q89.8 155.2 89.9 154.8Q90.1 154.4 90.1 153.9Q90.1 153.4 90 153.1Q89.9 152.7 89.7 152.5Q89.5 152.2 89.2 152.1Q88.9 151.9 88.5 151.9Q88.1 151.9 87.8 152Q87.6 152 87.5 152.1ZM111.7 152.9 111.7 152.9Q111.2 152.5 110.6 152.2Q109.9 152 109.2 152Q108.4 152 107.8 152.2Q107.2 152.4 106.7 152.9Q106.3 153.3 106.1 154Q105.8 154.6 105.8 155.4Q105.8 156.3 106 157.1Q106.3 157.9 106.7 158.4Q107.2 159 107.9 159.3Q108.6 159.7 109.5 159.7Q109.9 159.7 110.2 159.6Q110.5 159.5 110.8 159.4Q111.1 159.2 111.4 159Q111.7 158.8 111.9 158.6L112 158.6L111.5 159.8Q111.1 160 110.5 160.1Q110 160.2 109.5 160.2Q108.4 160.2 107.5 159.9Q106.6 159.6 105.9 159Q105.3 158.4 104.9 157.6Q104.6 156.8 104.6 155.8Q104.6 155.3 104.7 154.7Q104.9 154.2 105.1 153.7Q105.4 153.2 105.8 152.8Q106.2 152.4 106.7 152.1Q107.2 151.8 107.9 151.6Q108.5 151.5 109.2 151.5Q110.4 151.5 111.3 151.8ZM118.3 159.5Q119 159.5 119.6 159.4Q120.1 159.4 120.6 159.3Q121.1 159.2 121.5 159.1L121.3 160Q121.2 160 121.1 160Q121 160 120.8 160Q120.6 160 120.4 160Q120.2 160 120.1 160Q119.9 160 119.8 160Q119.6 160 119.6 160H117V160Q117.1 159.9 117.1 159.7Q117.1 159.5 117.2 159.2Q117.2 159 117.2 158.6Q117.2 158.2 117.2 157.7V153.9Q117.2 153.4 117.2 153Q117.2 152.7 117.2 152.4Q117.1 152.1 117.1 151.9Q117.1 151.7 117 151.6V151.6H118.5V151.6Q118.4 151.7 118.4 151.9Q118.4 152.1 118.3 152.4Q118.3 152.7 118.3 153Q118.3 153.4 118.3 153.9ZM126.6 151.6Q127.3 151.6 128 151.6Q128.7 151.6 129.3 151.6Q130 151.6 130.4 151.6Q130.8 151.5 131 151.5L130.7 152.3Q130.5 152.2 130.2 152.2Q130 152.2 129.7 152.1Q129.4 152.1 128.9 152.1Q128.8 152.1 128.6 152.1Q128.4 152.1 128.2 152.1Q128 152.1 127.8 152.1V155.3Q128.4 155.3 128.9 155.3Q129.4 155.3 129.7 155.2Q130.1 155.2 130.4 155.2L130.2 156Q129.8 156 129.4 155.9Q129 155.9 128.6 155.8Q128.2 155.8 127.8 155.8V159.5Q128.5 159.5 129.1 159.4Q129.7 159.4 130.1 159.3Q130.6 159.2 131 159.1L130.8 160Q130.8 160 130.6 160Q130.5 160 130.3 160Q130.1 160 129.9 160Q129.8 160 129.6 160Q129.4 160 129.3 160Q129.2 160 129.1 160H126.6V160Q126.6 159.9 126.6 159.7Q126.7 159.5 126.7 159.2Q126.7 159 126.7 158.6Q126.7 158.2 126.7 157.7V153.9Q126.7 153.4 126.7 153Q126.7 152.7 126.7 152.4Q126.7 152.1 126.6 151.9Q126.6 151.7 126.6 151.6V151.6ZM142.3 160V160Q142.3 159.9 142.3 159.9Q142.3 159.8 142.3 159.8Q142.3 159.6 142.2 159.4Q142.2 159.2 142 158.8L141.3 157.2Q141 157.2 140.5 157.2Q139.9 157.2 139.3 157.2Q138.8 157.2 138.4 157.2Q138 157.2 137.6 157.2L136.9 158.8Q136.9 159 136.8 159.3Q136.7 159.5 136.7 159.8Q136.7 159.9 136.7 159.9Q136.7 160 136.7 160V160H135.5V160Q135.6 159.9 135.8 159.6Q135.9 159.3 136.1 158.9L139.5 151.4H139.9L143.1 158.6Q143.2 158.8 143.3 159.1Q143.5 159.3 143.6 159.5Q143.7 159.7 143.8 159.8Q143.8 159.9 143.9 160V160ZM138.5 156.7Q138.8 156.7 139.2 156.7Q139.5 156.7 139.9 156.7Q140.2 156.7 140.5 156.7Q140.8 156.7 141.1 156.7L139.4 153L137.8 156.7ZM148.9 151.6 154.9 158V153.9Q154.9 153.4 154.9 153Q154.9 152.7 154.9 152.4Q154.9 152.1 154.8 151.9Q154.8 151.7 154.8 151.6V151.6H155.8V151.6Q155.8 151.7 155.8 151.9Q155.7 152.1 155.7 152.4Q155.7 152.7 155.7 153Q155.7 153.4 155.7 153.9V160.1H155.5L149.4 153.7V157.7Q149.4 158.2 149.4 158.6Q149.4 159 149.5 159.2Q149.5 159.5 149.5 159.7Q149.5 159.9 149.6 160V160H148.5V160Q148.6 159.9 148.6 159.7Q148.6 159.5 148.7 159.2Q148.7 159 148.7 158.6Q148.7 158.2 148.7 157.7V153.9Q148.7 153.4 148.7 153Q148.7 152.7 148.7 152.4Q148.6 152.1 148.6 151.9Q148.6 151.7 148.5 151.6V151.6Z" fill="#0b2a33"/></svg>';
+const SC_MINI='<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="100" fill="#f7f3ea"/><circle cx="100" cy="100" r="90" fill="none" stroke="#0b2a33" stroke-width="3"/><circle cx="100" cy="100" r="83" fill="none" stroke="#c6a15b" stroke-width="1.5"/><g transform="translate(-14 -6) scale(1.14)"><path d="M85.4 77.4H84.5Q84.2 76.4 83.5 75.2Q82.7 74 81.5 72.9Q80.3 71.8 78.6 71.1Q76.9 70.4 74.6 70.4Q72.6 70.4 71 71Q69.4 71.6 68.3 72.8Q67.2 73.9 66.7 75.5Q66.1 77 66.1 78.9Q66.1 81.9 67.8 84.7Q69.5 87.4 72.1 90.1Q74.7 92.8 77.6 95.5Q80.6 98.2 83.2 101.1Q85.7 104 87.4 107.2Q89.1 110.3 89.1 114Q89.1 116.7 88.2 119.5Q87.3 122.2 85.3 124.4Q83.3 126.6 80.2 127.9Q77.1 129.3 72.8 129.3Q70.4 129.3 68.3 128.9Q66.1 128.4 64.3 127.8Q62.4 127.1 61 126.4Q59.5 125.6 58.6 125L59.6 115.7H60.6Q61.1 117.7 62.1 119.5Q63.2 121.2 64.7 122.6Q66.3 124 68.2 124.8Q70.2 125.6 72.6 125.6Q74.7 125.6 76.4 125Q78.1 124.3 79.3 123.1Q80.5 122 81.2 120.4Q81.8 118.8 81.8 116.9Q81.8 114.3 80.9 112Q79.9 109.8 78.3 107.8Q76.8 105.7 74.8 103.9Q72.8 102 70.7 100.1Q68.6 98.1 66.6 96.1Q64.6 94.1 63 91.8Q61.4 89.5 60.5 86.9Q59.5 84.3 59.5 81.1Q59.5 77.8 60.8 75.2Q62.1 72.5 64.2 70.6Q66.3 68.7 69 67.7Q71.7 66.7 74.5 66.7Q76.6 66.7 78.4 67Q80.2 67.4 81.6 67.8Q83 68.3 84 68.7Q85.1 69.2 85.7 69.5ZM142.2 77 141.8 77.2Q138.5 74.2 133.9 72.4Q129.3 70.6 123.8 70.6Q118.5 70.6 114.1 72.2Q109.7 73.9 106.6 77Q103.4 80.2 101.6 84.7Q99.9 89.3 99.9 95.2Q99.9 101.6 101.5 107.2Q103.2 112.7 106.5 116.8Q109.8 120.9 114.8 123.2Q119.8 125.5 126.4 125.5Q128.8 125.5 131.2 125Q133.6 124.5 135.8 123.5Q138 122.5 140 121.1Q141.9 119.7 143.5 117.9L144 118.2L140.6 126.8Q137.5 128 133.7 128.7Q129.9 129.3 126 129.3Q118.2 129.3 111.8 127.1Q105.4 124.8 100.7 120.7Q96.1 116.6 93.5 110.8Q90.9 105 90.9 98Q90.9 94 91.9 90.1Q93 86.3 94.9 82.8Q96.9 79.3 99.8 76.4Q102.7 73.5 106.4 71.3Q110.1 69.2 114.6 68Q119.1 66.8 124.3 66.8Q132.4 66.8 139.3 69.3Z" fill="#0b2a33"/></g><path d="M146 46C148.2 55.8 148.2 55.8 158 58C148.2 60.2 148.2 60.2 146 70C143.8 60.2 143.8 60.2 134 58C143.8 55.8 143.8 55.8 146 46z" fill="#c6a15b"/></svg>';
 const EYE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 const EYEOFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.3C3.6 8 2 12 2 12s3.6 7 10 7a9.6 9.6 0 0 0 4.3-1"/></svg>';
 const UNITS=['عدد','علبة','لتر','كيلو','عبوة','كرتونة','جركن','دستة','زجاجة','ثمن','ربع'];
@@ -706,36 +748,45 @@ function vHome(){
   const its=items(),low=its.filter(i=>i.active!==false&&num(i.qty)<=num(i.min));
   const debts=sum(list('invoices'),due),sv=sum(its,i=>num(i.qty)*num(i.cost)),ssv=sum(its,i=>num(i.qty)*num(i.sell));
   const agg={};iv.forEach(i=>(i.lines||[]).forEach(l=>{const k=l.name;agg[k]=agg[k]||{q:0,v:0,u:l.unit};agg[k].q+=num(l.qty);agg[k].v+=num(l.qty)*num(l.price)}));
-  const top=Object.entries(agg).sort((a,b)=>b[1].v-a[1].v).slice(0,6),mx=top[0]?top[0][1].v:1;
-  const pl={today:'اليوم',month:'هذا الشهر',all:'كل الفترات'}[period];
-  return `<section class="band hero">
-  <svg class="bub" viewBox="0 0 400 220" preserveAspectRatio="xMinYMid slice" aria-hidden="true">${[[70,40,34],[28,112,22],[100,160,46],[150,58,14],[40,195,18],[180,178,10],[124,96,8]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="rgba(255,255,255,.10)" stroke="rgba(255,255,255,.35)" stroke-width="1.5"/><path d="M${x-r*.5} ${y-r*.2}a${r*.55} ${r*.55} 0 0 1 ${r*.35}-${r*.35}" stroke="rgba(255,255,255,.7)" stroke-width="2" fill="none" stroke-linecap="round"/>`).join('')}</svg>
-  <div class="hello">${greet()} · ${esc(dmy(today()))}</div>
-  <div class="chips">${['today','month','all'].map(p=>`<button class="chip ${p===period?'on':''}" data-act="period:${p}">${{today:'اليوم',month:'الشهر',all:'الكل'}[p]}</button>`).join('')}</div>
-  <div class="lbl">صافي المكسب — ${pl}</div>
-  <div class="big pf">${egp(net)}</div>
-  <div class="sub"><span>المبيعات ${egp(sales)}</span><span class="pf">مكسب الفواتير ${egp(prof)}</span><span>المصروفات ${egp(exp)}</span></div>
+  const top=Object.entries(agg).sort((a,b)=>b[1].v-a[1].v).slice(0,5),mx=top[0]?top[0][1].v:1;
+  const pl={today:'النهارده',month:'الشهر ده',all:'كل الفترة'}[period],s=st();
+  const dueInv=list('invoices').filter(i=>due(i)>0).sort((a,b)=>String(a.date).localeCompare(b.date)),need=supTracked().length?supTotals().need:0;
+  const todo=dueInv.length+low.length,days=[...Array(7)].map((_,k)=>{const d=new Date();d.setDate(d.getDate()-6+k);const ds=d.toLocaleDateString('en-CA');return{d:ds,n:d.getDate(),v:sum(list('invoices').filter(i=>i.date===ds),i=>i.total)}}),dm=Math.max(1,...days.map(d=>d.v));
+  const remind=i=>{const t=`السلام عليكم ${i.custName}، تذكير بفاتورة رقم ${i.no} بتاريخ ${dmy(i.date)}، الباقي ${egp(due(i))}. شكراً لتعاملكم مع ${s.shop||'Super Clean'}.`;return waNum(i.custPhone)?`<a class="btn sm wa" href="https://wa.me/${waNum(i.custPhone)}?text=${encodeURIComponent(t)}" target="_blank" rel="noopener">فكّريه</a>`:''};
+  return `<section class="band hellob">
+  <div class="hi">${greet()} يا ست الكل ✨</div>
+  <div class="dt">${esc(dmy(today()))}${todo?` · عندك <b>${todo}</b> ${todo===1?'حاجة':'حاجات'} النهارده`:' · كله تمام النهارده'}</div>
+  <div class="chips" style="margin:12px 0 0">${['today','month','all'].map(p=>`<button class="chip ${p===period?'on':''}" data-act="period:${p}">${{today:'النهارده',month:'الشهر ده',all:'كل الفترة'}[p]}</button>`).join('')}</div>
   </section>
-  ${!user?`<section class="band" style="padding-bottom:0"><div class="note" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="flex:1">البيانات على الموبايل ده بس. ادخل بحساب عشان تتزامن مع موبايل تاني.</span><button class="btn sm" data-act="go:settings">دخول</button></div></section>`:''}
-  <section class="band">
+  <section class="band" style="padding-top:4px">
+  <div class="brandcard"><div class="bc-t"><b>${esc(s.shop||'Super Clean')}</b><small>${esc(s.tag||'منظفات وأدوات نظافة')}</small></div><span class="bc-l">${logoSrc()?`<img src="${logoSrc()}" alt="">`:SC_FULL}</span></div>
+  <div class="hero"><div class="lbl">صافي المكسب — ${pl}</div><div class="big pf">${egp(net)}</div>
+  <div class="sub"><span>المبيعات ${egp(sales)}</span><span class="pf">مكسب الفواتير ${egp(prof)}</span><span>المصروفات ${egp(exp)}</span></div></div>
+  <div class="qa"><button data-act="go:inv"><i>🧾</i>فاتورة</button><button data-act="newquote"><i>📝</i>عرض سعر</button><button data-act="newitem"><i>📦</i>صنف</button><button data-act="exp:"><i>💸</i>مصروف</button></div>
+  </section>
+  ${!user?`<section class="band" style="padding-top:0"><div class="note" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="flex:1">البيانات على الموبايل ده بس. ادخلي بحساب علشان تتزامن مع موبايل تاني.</span><button class="btn sm" data-act="go:settings">دخول</button></div></section>`:''}
+  <section class="band" style="padding-top:0">
   <div class="kpis">
     ${KP('عدد الفواتير',iv.length,'doc')}
     ${KP('اتحصّل نقدي',egp(sum(iv.filter(i=>(i.pay||'نقدي')==='نقدي'),i=>i.paid)),'cash','gold')}
     ${KP('اتحصّل تحويل',egp(sum(iv.filter(i=>i.pay==='تحويل'),i=>i.paid)),'bank','gold')}
     ${KP('فلوس عند العملاء',egp(debts),'clock',debts>0?'bad':'',debts>0?'neg':'')}
     ${KP('قيمة المخزن (تكلفة)',egp(sv),'box')}
-    ${supTracked().length?KP('محتاجة للشراء (المتعاقد) ←',egp(supTotals().need),'truck',supTotals().need>0?'bad':'good',supTotals().need>0?'neg':'pos','data-act="go:supply" style="cursor:pointer"'):''}
+    ${supTracked().length?KP('محتاجة للشراء (المتعاقد) ←',egp(need),'truck',need>0?'bad':'good',need>0?'neg':'pos','data-act="go:supply" style="cursor:pointer"'):''}
     ${KP('مكسب متوقع من المخزن',egp(ssv-sv),'up','good pf','pos')}
-  </div>
-  <div class="acts" style="margin-top:10px"><button class="btn sm grow" data-act="report">تقرير الشهر PDF</button><button class="btn sm grow" data-act="newquote">+ عرض سعر</button></div>
-  </section>
+  </div></section>
   <section class="band" style="padding-top:0">
-  <div class="card"><h2>الأكثر مبيعاً <span class="mut" style="font-size:13px;font-weight:600">${pl}</span></h2>
-  ${top.length?`<div class="bars">${top.map(([n,v])=>`<div class="r"><span>${esc(n)}</span><div class="t"><i style="width:${Math.max(4,v.v/mx*100)}%"></i></div><b>${egp(v.v)}</b></div>`).join('')}</div>`:'<div class="empty">لا توجد مبيعات في هذه الفترة</div>'}</div>
-  <div class="card"><h2>نواقص المخزن <span class="tag ${low.length?'bad':'ok'}">${low.length}</span></h2>
-  ${low.length?`<div class="list">${low.slice(0,5).map(i=>`<div class="it" data-act="item:${esc(i.id)}"><div class="grow"><b>${esc(i.name)}</b><small>الحد الأدنى ${fmt(i.min)} ${esc(i.unit)}</small></div><div class="amt neg">${fmt(i.qty)} ${esc(i.unit)}</div></div>`).join('')}${low.length>5?`<button class="btn sm" style="width:100%;margin-top:6px" data-act="lowall">عرض كل النواقص (${low.length})</button>`:''}</div>`:'<div class="empty">كل الأصناف فوق الحد الأدنى</div>'}</div>
-  <div class="card"><h2>آخر الفواتير<span class="sp"></span><button class="btn sm" data-act="go:invoices">الكل</button></h2>
-  ${invs().slice(0,5).map(invItem).join('')||'<div class="empty">لا توجد فواتير بعد. اضغط زر «فاتورة» بالأسفل</div>'}</div>
+  <h3 class="h">مطلوب منك النهارده</h3>
+  ${todo?`<div class="card list">${dueInv.slice(0,4).map(i=>`<div class="it"><span class="ti bad">⏳</span><div class="grow" data-act="invoice:${esc(i.id)}"><b>${esc(i.custName)} — باقي ${egp(due(i))}</b><small>فاتورة #${esc(i.no)} · ${esc(dmy(i.date))}</small></div>${remind(i)}</div>`).join('')}
+  ${low.slice(0,4).map(i=>`<div class="it" data-act="item:${esc(i.id)}"><span class="ti warn">📦</span><div class="grow"><b>${esc(i.name)} قرّب يخلص</b><small>فاضل ${fmt(i.qty)} ${esc(i.unit)} · الحد الأدنى ${fmt(i.min)}</small></div></div>`).join('')}
+  ${dueInv.length>4||low.length>4?`<div class="acts">${dueInv.length>4?'<button class="btn sm grow" data-act="duelist">كل الفواتير اللي عليها باقي</button>':''}${low.length>4?`<button class="btn sm grow" data-act="lowall">كل النواقص (${low.length})</button>`:''}</div>`:''}</div>`
+  :'<div class="card empty">مفيش حاجة مستنياكي النهارده 🌿 كل الفلوس اتحصّلت والمخزن تمام.</div>'}
+  <h3 class="h">مبيعات آخر 7 أيام</h3>
+  <div class="card"><div class="chart">${days.map(d=>`<div class="cb ${d.d===today()?'on':''}"><em>${d.v?fmt(d.v):''}</em><i style="height:${Math.max(3,d.v/dm*100)}%"></i><span>${d.n}</span></div>`).join('')}</div></div>
+  <h3 class="h">الأكثر مبيعاً — ${pl}</h3>
+  <div class="card">${top.length?`<div class="bars">${top.map(([n,v])=>`<div class="r"><span>${esc(n)}</span><div class="t"><i style="width:${Math.max(4,v.v/mx*100)}%"></i></div><b>${egp(v.v)}</b></div>`).join('')}</div>`:'<div class="empty">لسه مفيش مبيعات في الفترة دي</div>'}</div>
+  <h3 class="h">آخر الفواتير <button class="btn sm" data-act="go:invoices">الكل</button></h3>
+  <div class="card" style="padding:4px 14px">${invs().slice(0,5).map(invItem).join('')||'<div class="empty">لسه مفيش فواتير. دوسي «فاتورة» تحت.</div>'}</div>
   </section>`;
 }
 const invItem=i=>`<div class="list"><div class="it" data-act="invoice:${esc(i.id)}">${avatar(i.custName)}<div class="grow"><b>#${esc(i.no)} — ${esc(i.custName)}</b><small>${esc(i.date)} · <span class="tag">${esc(i.pay||'نقدي')}</span> · ${(i.lines||[]).length} صنف ${due(i)>0?`· <span class="tag bad">باقي ${egp(due(i))}</span>`:''}</small></div><div class="amt">${egp(i.total)}<br><small class="pos pf">+${fmt(i.profit)}</small></div></div></div>`;
@@ -989,10 +1040,10 @@ function makePdf(id,btn,share){const i=S.invoices[id];if(i)return pdfOut(invDoc(
 function saveBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},5000)}
 
 /* ---------- v22: skins, printed documents (invoice / quote / customer statement / monthly report) ---------- */
-const SKINS={luxe:{n:'بترولي ودهبي',p:'#15596a',d:'#0b2a33',a:'#c6a15b',s:'#f5f1e8'},sea:{n:'أزرق Super Clean',p:'#0a7d99',d:'#075a70',a:'#d9a520',s:'#eef6f9'},emerald:{n:'زمردي',p:'#0d7a5c',d:'#08503d',a:'#c9a227',s:'#edf6f1'},royal:{n:'كحلي ودهبي',p:'#22427c',d:'#132650',a:'#c9a24a',s:'#eef1f8'},noir:{n:'أسود ودهبي',p:'#3d3424',d:'#151412',a:'#c9a24a',s:'#f5f2ea'},plum:{n:'بنفسجي',p:'#6d2e6b',d:'#481b47',a:'#d4a84a',s:'#f7eef6'}};
-const skin=()=>SKINS[st().skin]?st().skin:'luxe';
+const SKINS={sc:{n:'عاجي وكحلي ودهبي (SC)',p:'#17414d',d:'#0b2a33',a:'#c6a15b',s:'#f7f3ea'},luxe:{n:'بترولي ودهبي',p:'#15596a',d:'#0b2a33',a:'#c6a15b',s:'#f5f1e8'},sea:{n:'أزرق Super Clean',p:'#0a7d99',d:'#075a70',a:'#d9a520',s:'#eef6f9'},emerald:{n:'زمردي',p:'#0d7a5c',d:'#08503d',a:'#c9a227',s:'#edf6f1'},royal:{n:'كحلي ودهبي',p:'#22427c',d:'#132650',a:'#c9a24a',s:'#eef1f8'},noir:{n:'أسود ودهبي',p:'#3d3424',d:'#151412',a:'#c9a24a',s:'#f5f2ea'},plum:{n:'بنفسجي',p:'#6d2e6b',d:'#481b47',a:'#d4a84a',s:'#f7eef6'}};
+const skin=()=>SKINS[st().skin]?st().skin:'sc';
 const modeOf=()=>{try{return localStorage.getItem('sc-mode')||'auto'}catch(e){return 'auto'}};
-const TOPLOGO=()=>LOGO('#fff').replace('stroke="#fff"',`stroke="${SKINS[skin()].d}"`).replace('<svg ','<svg class="logo" aria-hidden="true" ');
+const TOPLOGO=()=>SC_MINI.replace('<svg ','<svg class="logo" aria-hidden="true" ');
 const logoSrc=()=>{const l=st().logo;return typeof l==='string'&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(l)?l:''};
 let themeKey='';
 function applyTheme(){const k=skin(),m=modeOf(),r=document.documentElement,s=st(),key=k+m+(s.shop||'')+logoSrc().length;if(key===themeKey)return;themeKey=key;
@@ -1000,7 +1051,7 @@ function applyTheme(){const k=skin(),m=modeOf(),r=document.documentElement,s=st(
   const mt=document.querySelector('meta[name=theme-color]');if(mt)requestAnimationFrame(()=>{try{mt.content=getComputedStyle(document.body).backgroundColor}catch(e){}});
   const t=$('#tname');if(t)t.textContent=s.shop||'Super Clean';
   const l=$('#tlogo');if(l)l.innerHTML=logoSrc()?`<img class="logo" src="${logoSrc()}" alt="">`:TOPLOGO()}
-const greet=()=>{const h=new Date().getHours();return h<12?'صباح الخير':h<17?'نهارك سعيد':'مساء الخير'};
+const greet=()=>{const h=new Date().getHours();return h<12?'صباح الفل':h<17?'نهارك فل':'مساء الفل'};
 /* amount in Arabic words for the printed documents: «فقط ألف وخمسمائة جنيه لا غير» */
 function words(v){const n=Math.round(Math.max(0,num(v))*100),L=Math.floor(n/100),P=n%100;
   const O=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'],
@@ -1010,7 +1061,7 @@ function words(v){const n=Math.round(Math.max(0,num(v))*100),L=Math.floor(n/100)
   const w=x=>{if(!x)return 'صفر';const p=[],b=Math.floor(x/1e9),m=Math.floor(x/1e6)%1000,t=Math.floor(x/1000)%1000,r=x%1000;
     if(b)p.push(g(b,['مليار','ملياران','مليارات']));if(m)p.push(g(m,['مليون','مليونان','ملايين']));if(t)p.push(g(t,['ألف','ألفان','آلاف']));if(r)p.push(u(r));return p.join(' و')};
   return 'فقط '+w(L)+' جنيه'+(P?' و'+w(P)+' قرش':'')+' لا غير'}
-const brandMark=()=>logoSrc()?`<img src="${logoSrc()}" alt="">`:LOGO(SKINS[skin()].p);
+const brandMark=()=>logoSrc()?`<img src="${logoSrc()}" alt="">`:SC_FULL;
 function paper(title,no,body){const s=st(),k=SKINS[skin()],ph=[s.phone,s.phone2].filter(Boolean),reg=[s.crn?'سجل تجاري: '+s.crn:'',s.taxid?'بطاقة ضريبية: '+s.taxid:''].filter(Boolean).join('  ·  ');
   return `<div class="paper" style="--pc:${k.p};--pd:${k.d};--pa:${k.a};--ps:${k.s}">
   <div class="ph"><div class="brand">${brandMark()}<div><b>${esc(s.shop||'Super Clean')}</b>${s.tag?`<small>${esc(s.tag)}</small>`:''}${reg?`<small class="reg">${esc(reg)}</small>`:''}</div></div>
@@ -1232,7 +1283,7 @@ function vSettings(){const s=st();
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="mut" style="font-size:12px;font-weight:600">الإضاءة</span><div class="seg">${[['auto','زي الموبايل'],['light','فاتح'],['dark','غامق']].map(([k,l])=>`<button class="${m===k?'on':''}" data-act="mode:${k}">${l}</button>`).join('')}</div></div>
   <p class="mut" style="font-size:12px;margin:8px 0 0">اللون بيظهر كمان على الفاتورة والـ PDF.</p></div>
   <form class="card" id="sf"><h2>بيانات الفاتورة</h2>
-  <div class="logoprev">${logoSrc()?`<img src="${logoSrc()}" alt="شعار المحل">`:LOGO(SKINS[skin()].p)}<div style="flex:1"><b style="font-size:14px">شعار المحل</b><div class="mut" style="font-size:12px">بيظهر فوق في التطبيق وعلى الفاتورة</div></div><button class="btn sm" type="button" data-act="logo">${logoSrc()?'تغيير':'اختاري صورة'}</button>${logoSrc()?'<button class="btn sm d" type="button" data-act="nologo">شيل</button>':''}</div>
+  <div class="logoprev">${logoSrc()?`<img src="${logoSrc()}" alt="شعار المحل">`:SC_FULL}<div style="flex:1"><b style="font-size:14px">شعار المحل</b><div class="mut" style="font-size:12px">بيظهر فوق في التطبيق وعلى الفاتورة</div></div><button class="btn sm" type="button" data-act="logo">${logoSrc()?'تغيير':'اختاري صورة'}</button>${logoSrc()?'<button class="btn sm d" type="button" data-act="nologo">شيل</button>':''}</div>
   <div class="g2">${f('shop','اسم المحل',s.shop)}${f('tag','الوصف تحت الاسم',s.tag)}</div>
   <div class="g2">${f('phone','رقم التواصل (يظهر أسفل الفاتورة)',s.phone,'tel','dir="ltr"')}${f('phone2','رقم إضافي',s.phone2,'tel','dir="ltr"')}</div>
   ${f('address','العنوان',s.address)}${f('footer','جملة أسفل الفاتورة',s.footer)}
@@ -1305,7 +1356,7 @@ const A={
   collnone:async id=>{const i=S.invoices[id];if(!(await ask('إلغاء التحصيل؟ المدفوع هيتمسح والفاتورة هترجع «لسه ما اتحصّلتش».','إلغاء التحصيل')))return invModal(id);await put('invoices',id,{...S.invoices[id],paid:0,updated:Date.now()});toast('اتلغى التحصيل');render();invModal(id)},
   coll:v=>{draft.coll=v;if(v==='part'){const x=$('#ipaid');setTimeout(()=>x&&x.focus(),50)}recalc()},hide:id=>{const d=draft;delete d.q[id];delete d.p[id];d.hid=[...new Set([...(d.hid||[]),id])];invHidSave(d.hid);$('#ibody').innerHTML=invRowsHtml();recalc()},
   unhide:id=>{const d=draft;d.hid=(d.hid||[]).filter(x=>x!==id);invHidSave(d.hid);$('#ibody').innerHTML=invRowsHtml();recalc();toast('رجع لقايمة الفاتورة')},lowall:()=>{stockF='low';go('stock')},sf:k=>{stockF=k;render()},if:k=>{invF=k;render()},
-  item:id=>itemModal(id),newitem:()=>itemModal(null),
+  item:id=>itemModal(id),duelist:()=>{invTab='inv';invF='due';go('invoices')},newitem:()=>itemModal(null),
   cust:id=>custModal(id),newcust:()=>custModal(null),
   custinv:id=>{closeModal();draft=newDraft(id);go('inv')},
   quickcust:()=>custModal(null,nid=>{draft.cust=nid;render()}),

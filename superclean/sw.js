@@ -1,8 +1,8 @@
 // Super Clean offline support: always try the network first (bypassing the browser cache),
 // fall back to the saved copy when there is no internet.
 // Bump CACHE on every change so phones pick up the new version.
-const CACHE='superclean-v23';
-const FILES=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-180.png'];
+const CACHE='superclean-v24';
+const FILES=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-180.png','./logo.svg'];
 const CDN=['https://www.gstatic.com/firebasejs/','https://cdnjs.cloudflare.com/','https://fonts.googleapis.com/','https://fonts.gstatic.com/'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:'reload'})))));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('superclean-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
